@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Educonta - Sistema Contable Educativo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js" rel="stylesheet">
     <style>
         :root {
@@ -58,10 +60,10 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            background: linear-gradient(135deg, 
-                var(--primary) 0%, 
-                var(--secondary) 50%, 
-                var(--accent) 100%);
+            background: linear-gradient(135deg,
+                    var(--primary) 0%,
+                    var(--secondary) 50%,
+                    var(--accent) 100%);
             opacity: 0.05;
         }
 
@@ -77,10 +79,23 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateX(0px) translateY(0px); }
-            25% { transform: translateX(10px) translateY(-10px); }
-            50% { transform: translateX(-5px) translateY(10px); }
-            75% { transform: translateX(-10px) translateY(-5px); }
+
+            0%,
+            100% {
+                transform: translateX(0px) translateY(0px);
+            }
+
+            25% {
+                transform: translateX(10px) translateY(-10px);
+            }
+
+            50% {
+                transform: translateX(-5px) translateY(10px);
+            }
+
+            75% {
+                transform: translateX(-10px) translateY(-5px);
+            }
         }
 
         /* Header */
@@ -172,24 +187,67 @@
             border-color: var(--primary);
         }
 
-        .theme-toggle {
-            background: var(--bg-card);
-            border: 2px solid var(--border);
-            color: var(--text);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
+        .theme-toggle-container {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .theme-label {
+            color: var(--text-light);
             transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .theme-label.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        [data-theme="dark"] .theme-toggle::before {
+            transform: translateX(30px);
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
         }
 
         .theme-toggle:hover {
-            transform: rotate(180deg);
-            background: var(--primary);
-            color: white;
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .theme-toggle:hover::before {
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        [data-theme="dark"] .theme-toggle:hover::before {
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
         }
 
         /* Main Content */
@@ -358,9 +416,20 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         /* Animations */
@@ -369,6 +438,7 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -380,16 +450,16 @@
             .nav-links {
                 display: none;
             }
-            
+
             .hero {
                 padding: 2rem 1rem;
             }
-            
+
             .hero-buttons {
                 flex-direction: column;
                 align-items: center;
             }
-            
+
             .btn {
                 width: 100%;
                 max-width: 300px;
@@ -402,44 +472,48 @@
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
+            border: 3px solid rgba(255, 255, 255, .3);
             border-radius: 50%;
             border-top-color: #fff;
             animation: spin 1s ease-in-out infinite;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="bg-animation"></div>
-    
+
     <header class="header">
         <nav class="nav">
             <a href="#" class="logo">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2L2 7v10c0 5.55 3.84 9.739 9 11 5.16-1.261 9-5.45 9-11V7l-10-5z"/>
+                    <path d="M12 2L2 7v10c0 5.55 3.84 9.739 9 11 5.16-1.261 9-5.45 9-11V7l-10-5z" />
                 </svg>
                 Educonta
             </a>
-            
+
             <div class="nav-links">
                 <a href="#features" class="nav-link">Características</a>
                 <a href="#" class="nav-link">Documentación</a>
                 <a href="#" class="nav-link">Soporte</a>
                 <a href="/login.html" class="btn btn-primary">
                     <svg width="20" height="20" fill="currentColor">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                     </svg>
                     Iniciar Sesión
                 </a>
-                <button class="theme-toggle" onclick="toggleTheme()">
-                    <svg width="20" height="20" fill="currentColor" class="sun-icon">
-                        <path d="M12 17.5c3.04 0 5.5-2.46 5.5-5.5s-2.46-5.5-5.5-5.5S6.5 8.96 6.5 12s2.46 5.5 5.5 5.5z"/>
-                    </svg>
-                </button>
+                <div class="theme-toggle-container">
+                    <span class="theme-label" id="light-label">CLARO</span>
+                    <button class="theme-toggle" onclick="toggleTheme()"></button>
+                    <span class="theme-label" id="dark-label">OSCURO</span>
+                </div>
             </div>
         </nav>
     </header>
@@ -450,26 +524,27 @@
                 <span class="pulse"></span>
                 Sistema 100% Operativo
             </div>
-            
+
             <h1 class="hero-title">
                 Educonta
             </h1>
-            
+
             <p class="hero-subtitle">
-                Sistema contable inteligente diseñado específicamente para instituciones educativas. 
+                Sistema contable inteligente diseñado específicamente para instituciones educativas.
                 Gestiona múltiples colegios con aislamiento total de datos.
             </p>
-            
+
             <div class="hero-buttons">
                 <a href="/login.html" class="btn btn-primary">
                     <svg width="20" height="20" fill="currentColor">
-                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     Acceder al Sistema
                 </a>
                 <a href="/api/health" class="btn btn-outline" onclick="checkHealth(event)">
                     <svg width="20" height="20" fill="currentColor">
-                        <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        <path
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                     <span id="health-text">Health Check</span>
                 </a>
@@ -486,17 +561,18 @@
 
         <section class="features" id="features">
             <h2 class="features-title">Características Principales</h2>
-            
+
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">
                         <svg width="24" height="24" fill="currentColor">
-                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                            <path
+                                d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
                         </svg>
                     </div>
                     <h3 class="feature-title">Multi-Tenant</h3>
                     <p class="feature-description">
-                        Gestiona múltiples instituciones educativas desde una sola plataforma 
+                        Gestiona múltiples instituciones educativas desde una sola plataforma
                         con aislamiento completo de datos.
                     </p>
                 </div>
@@ -504,12 +580,13 @@
                 <div class="feature-card">
                     <div class="feature-icon">
                         <svg width="24" height="24" fill="currentColor">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                         </svg>
                     </div>
                     <h3 class="feature-title">Contabilidad Completa</h3>
                     <p class="feature-description">
-                        Plan de cuentas personalizable, transacciones con doble entrada 
+                        Plan de cuentas personalizable, transacciones con doble entrada
                         y reportes financieros en tiempo real.
                     </p>
                 </div>
@@ -517,12 +594,13 @@
                 <div class="feature-card">
                     <div class="feature-icon">
                         <svg width="24" height="24" fill="currentColor">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            <path
+                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                         </svg>
                     </div>
                     <h3 class="feature-title">Facturación Automática</h3>
                     <p class="feature-description">
-                        Genera facturas automáticamente para matrículas, mensualidades 
+                        Genera facturas automáticamente para matrículas, mensualidades
                         y eventos especiales con notificaciones por email.
                     </p>
                 </div>
@@ -530,12 +608,13 @@
                 <div class="feature-card">
                     <div class="feature-icon">
                         <svg width="24" height="24" fill="currentColor">
-                            <path d="M16 4v4h4m-4 2v4h4m-4 2v4h4M4 4v4h4V4H4zm0 6v4h4v-4H4zm0 6v4h4v-4H4zm6-10v4h4V6h-4zm0 6v4h4v-4h-4z"/>
+                            <path
+                                d="M16 4v4h4m-4 2v4h4m-4 2v4h4M4 4v4h4V4H4zm0 6v4h4v-4H4zm0 6v4h4v-4H4zm6-10v4h4V6h-4zm0 6v4h4v-4h-4z" />
                         </svg>
                     </div>
                     <h3 class="feature-title">Dashboard Inteligente</h3>
                     <p class="feature-description">
-                        Visualiza KPIs importantes, estados financieros y 
+                        Visualiza KPIs importantes, estados financieros y
                         análisis de rendimiento en tiempo real.
                     </p>
                 </div>
@@ -543,12 +622,13 @@
                 <div class="feature-card">
                     <div class="feature-icon">
                         <svg width="24" height="24" fill="currentColor">
-                            <path d="M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                            <path
+                                d="M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                         </svg>
                     </div>
                     <h3 class="feature-title">Gestión Estudiantil</h3>
                     <p class="feature-description">
-                        Importación masiva de estudiantes, datos completos de padres 
+                        Importación masiva de estudiantes, datos completos de padres
                         y seguimiento académico-financiero integrado.
                     </p>
                 </div>
@@ -556,22 +636,38 @@
                 <div class="feature-card">
                     <div class="feature-icon">
                         <svg width="24" height="24" fill="currentColor">
-                            <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            <path
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                     </div>
                     <h3 class="feature-title">Seguridad Avanzada</h3>
                     <p class="feature-description">
-                        Autenticación JWT, roles granulares, auditoría completa 
+                        Autenticación JWT, roles granulares, auditoría completa
                         y protección de datos sensibles.
                     </p>
                 </div>
             </div>
         </section>
 
-      
+
     </main>
 
     <script>
+        // Update theme labels
+        function updateThemeLabels() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const lightLabel = document.getElementById('light-label');
+            const darkLabel = document.getElementById('dark-label');
+
+            if (currentTheme === 'dark') {
+                lightLabel.classList.remove('active');
+                darkLabel.classList.add('active');
+            } else {
+                lightLabel.classList.add('active');
+                darkLabel.classList.remove('active');
+            }
+        }
+
         // Theme toggle
         function toggleTheme() {
             const html = document.documentElement;
@@ -579,11 +675,13 @@
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
+            updateThemeLabels();
         }
 
         // Load saved theme
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeLabels();
 
         // Health check
         async function checkHealth(event) {
@@ -591,14 +689,14 @@
             const button = event.currentTarget;
             const textElement = document.getElementById('health-text');
             const originalText = textElement.textContent;
-            
+
             textElement.innerHTML = '<span class="loading"></span> Verificando...';
             button.style.pointerEvents = 'none';
-            
+
             try {
                 const response = await fetch('/api/health');
                 const data = await response.json();
-                
+
                 if (data.status === 'OK') {
                     textElement.textContent = '✅ Sistema OK';
                     setTimeout(() => {
@@ -639,4 +737,5 @@
         });
     </script>
 </body>
+
 </html>
