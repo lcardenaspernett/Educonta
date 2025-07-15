@@ -1,0 +1,406 @@
+// ===================================
+// EDUCONTA - Schema de Base de Datos
+// ===================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===================================
+// INSTITUCIONES (Multi-tenant)
+// ===================================
+model Institution {
+  id            String   @id @default(cuid())
+  name          String
+  nit           String   @unique
+  address       String
+  phone         String
+  email         String
+  logo          String?
+  city          String
+  department    String
+  country       String   @default("Colombia")
+  educationLevel EducationLevel
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relaciones
+  users         User[]
+  students      Student[]
+  accounts      Account[]
+  transactions  Transaction[]
+  paymentEvents PaymentEvent[]
+  invoices      Invoice[]
+  categories    Category[]
+  auditLogs     AuditLog[]
+
+  @@map("institutions")
+}
+
+enum EducationLevel {
+  PREESCOLAR
+  PRIMARIA
+  SECUNDARIA
+  MEDIA
+  SUPERIOR
+  MIXTA
+}
+
+// ===================================
+// USUARIOS Y ROLES
+// ===================================
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  firstName    String
+  lastName     String
+  role         UserRole
+  isActive     Boolean  @default(true)
+  lastLogin    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Multi-tenant
+  institutionId String?
+  institution   Institution? @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  // Creado por
+  createdById   String?
+  createdBy     User?    @relation("UserCreatedBy", fields: [createdById], references: [id])
+  createdUsers  User[]   @relation("UserCreatedBy")
+
+  // Permisos
+  permissions   UserPermission[]
+
+  // Auditoría
+  auditLogs     AuditLog[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  RECTOR
+  AUXILIARY_ACCOUNTANT
+}
+
+model UserPermission {
+  id        String   @id @default(cuid())
+  userId    String
+  module    String
+  actions   String[] // ["create", "read", "update", "delete"]
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, module])
+  @@map("user_permissions")
+}
+
+// ===================================
+// ESTUDIANTES
+// ===================================
+model Student {
+  id              String    @id @default(cuid())
+  studentCode     String    // Código único del estudiante
+  firstName       String
+  lastName        String
+  documentType    DocumentType
+  documentNumber  String
+  grade           String
+  section         String?
+  birthDate       DateTime?
+  parentName      String?
+  parentPhone     String?
+  parentEmail     String?
+  address         String?
+  isActive        Boolean   @default(true)
+  enrollmentDate  DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Multi-tenant
+  institutionId   String
+  institution     Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  // Relaciones
+  paymentAssignments PaymentAssignment[]
+  invoices          Invoice[]
+
+  @@unique([institutionId, studentCode])
+  @@unique([institutionId, documentNumber])
+  @@map("students")
+}
+
+enum DocumentType {
+  TI  // Tarjeta de Identidad
+  CC  // Cédula de Ciudadanía
+  CE  // Cédula de Extranjería
+  PP  // Pasaporte
+  RC  // Registro Civil
+}
+
+// ===================================
+// PLAN DE CUENTAS
+// ===================================
+model Account {
+  id          String      @id @default(cuid())
+  code        String      // Código contable (ej: 1105, 4135)
+  name        String
+  accountType AccountType
+  parentId    String?
+  level       Int         @default(1)
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Multi-tenant
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  // Relaciones jerárquicas
+  parent        Account?      @relation("AccountHierarchy", fields: [parentId], references: [id])
+  children      Account[]     @relation("AccountHierarchy")
+
+  // Transacciones
+  debitTransactions  Transaction[] @relation("DebitAccount")
+  creditTransactions Transaction[] @relation("CreditAccount")
+
+  @@unique([institutionId, code])
+  @@map("accounts")
+}
+
+enum AccountType {
+  ASSET      // Activo
+  LIABILITY  // Pasivo
+  EQUITY     // Patrimonio
+  INCOME     // Ingreso
+  EXPENSE    // Gasto
+}
+
+// ===================================
+// TRANSACCIONES CONTABLES
+// ===================================
+model Transaction {
+  id          String          @id @default(cuid())
+  date        DateTime
+  reference   String          // Número de comprobante
+  description String
+  amount      Decimal         @db.Decimal(15, 2)
+  type        TransactionType
+  status      TransactionStatus @default(PENDING)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Multi-tenant
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  // Cuentas involucradas
+  debitAccountId  String
+  creditAccountId String
+  debitAccount    Account @relation("DebitAccount", fields: [debitAccountId], references: [id])
+  creditAccount   Account @relation("CreditAccount", fields: [creditAccountId], references: [id])
+
+  // Relaciones opcionales
+  invoiceId       String?
+  invoice         Invoice? @relation(fields: [invoiceId], references: [id])
+  
+  paymentEventId  String?
+  paymentEvent    PaymentEvent? @relation(fields: [paymentEventId], references: [id])
+
+  // Categoría
+  categoryId      String?
+  category        Category? @relation(fields: [categoryId], references: [id])
+
+  @@map("transactions")
+}
+
+enum TransactionType {
+  INCOME    // Ingreso
+  EXPENSE   // Egreso
+  TRANSFER  // Traslado
+}
+
+enum TransactionStatus {
+  PENDING   // Pendiente
+  APPROVED  // Aprobado
+  REJECTED  // Rechazado
+}
+
+// ===================================
+// EVENTOS DE PAGO
+// ===================================
+model PaymentEvent {
+  id          String      @id @default(cuid())
+  name        String      // "Matrícula 2024", "Rifa Navideña"
+  description String?
+  amount      Decimal     @db.Decimal(10, 2)
+  dueDate     DateTime?
+  eventType   EventType
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Multi-tenant
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  // Categoría
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id])
+
+  // Asignaciones a estudiantes
+  assignments   PaymentAssignment[]
+  transactions  Transaction[]
+
+  @@map("payment_events")
+}
+
+enum EventType {
+  MATRICULA
+  MENSUALIDAD
+  RIFA
+  PRUEBA
+  GRADO
+  EXCURSION
+  UNIFORME
+  OTRO
+}
+
+model PaymentAssignment {
+  id            String        @id @default(cuid())
+  amount        Decimal       @db.Decimal(10, 2)
+  paidAmount    Decimal       @default(0) @db.Decimal(10, 2)
+  status        PaymentStatus @default(PENDING)
+  assignedDate  DateTime      @default(now())
+  paidDate      DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relaciones
+  studentId     String
+  student       Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  paymentEventId String
+  paymentEvent   PaymentEvent @relation(fields: [paymentEventId], references: [id], onDelete: Cascade)
+
+  // Facturas
+  invoices      Invoice[]
+
+  @@unique([studentId, paymentEventId])
+  @@map("payment_assignments")
+}
+
+enum PaymentStatus {
+  PENDING   // Pendiente
+  PARTIAL   // Parcial
+  PAID      // Pagado
+  OVERDUE   // Vencido
+}
+
+// ===================================
+// FACTURAS
+// ===================================
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        // Número consecutivo
+  date          DateTime      @default(now())
+  dueDate       DateTime?
+  subtotal      Decimal       @db.Decimal(10, 2)
+  tax           Decimal       @default(0) @db.Decimal(10, 2)
+  total         Decimal       @db.Decimal(10, 2)
+  status        InvoiceStatus @default(PENDING)
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Multi-tenant
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  // Cliente (estudiante)
+  studentId     String
+  student       Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  // Pago relacionado
+  paymentAssignmentId String?
+  paymentAssignment   PaymentAssignment? @relation(fields: [paymentAssignmentId], references: [id])
+
+  // Transacciones
+  transactions  Transaction[]
+
+  @@unique([institutionId, invoiceNumber])
+  @@map("invoices")
+}
+
+enum InvoiceStatus {
+  DRAFT     // Borrador
+  PENDING   // Pendiente
+  PAID      // Pagado
+  OVERDUE   // Vencido
+  CANCELLED // Anulado
+}
+
+// ===================================
+// CATEGORÍAS
+// ===================================
+model Category {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  color       String?     // Color hexadecimal para UI
+  type        CategoryType
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Multi-tenant
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  // Relaciones
+  transactions  Transaction[]
+  paymentEvents PaymentEvent[]
+
+  @@unique([institutionId, name])
+  @@map("categories")
+}
+
+enum CategoryType {
+  INCOME    // Ingresos
+  EXPENSE   // Gastos
+  EVENT     // Eventos
+}
+
+// ===================================
+// AUDITORÍA
+// ===================================
+model AuditLog {
+  id            String   @id @default(cuid())
+  action        String   // CREATE, UPDATE, DELETE
+  tableName     String
+  recordId      String
+  oldValues     Json?
+  newValues     Json?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  // Multi-tenant
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  // Usuario que realizó la acción
+  userId        String
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("audit_logs")
+}
