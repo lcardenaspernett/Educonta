@@ -2,263 +2,150 @@
 // EDUCONTA - Middleware de Manejo de Errores
 // ===================================
 
-const config = require('../config/config');
+/**
+ * Clases de errores personalizados
+ */
+class AppError extends Error {
+  constructor(message, statusCode = 500, code = 'INTERNAL_ERROR') {
+    super(message);
+    this.statusCode = statusCode;
+    this.code = code;
+    this.isOperational = true;
+    
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+class ValidationError extends AppError {
+  constructor(message, details = null) {
+    super(message, 400, 'VALIDATION_ERROR');
+    this.details = details;
+  }
+}
+
+class NotFoundError extends AppError {
+  constructor(message = 'Recurso no encontrado') {
+    super(message, 404, 'NOT_FOUND');
+  }
+}
+
+class ConflictError extends AppError {
+  constructor(message = 'Conflicto con recurso existente') {
+    super(message, 409, 'CONFLICT');
+  }
+}
+
+class AuthError extends AppError {
+  constructor(message = 'No autorizado') {
+    super(message, 401, 'UNAUTHORIZED');
+  }
+}
+
+class ForbiddenError extends AppError {
+  constructor(message = 'Acceso prohibido') {
+    super(message, 403, 'FORBIDDEN');
+  }
+}
 
 /**
- * Middleware principal de manejo de errores
- * Debe ir al final de todas las rutas
+ * Middleware de manejo de errores global
  */
-const errorHandler = (err, req, res, next) => {
-  let error = { ...err };
-  error.message = err.message;
+const errorHandler = (error, req, res, next) => {
+  let err = { ...error };
+  err.message = error.message;
 
   // Log del error
-  console.error('🚨 Error capturado:', {
-    message: err.message,
-    stack: config.isDevelopment() ? err.stack : undefined,
+  console.error('Error:', {
+    message: error.message,
+    stack: error.stack,
     url: req.originalUrl,
     method: req.method,
     ip: req.ip,
     userAgent: req.get('User-Agent'),
     userId: req.user?.id,
-    institutionId: req.institution?.id,
-    timestamp: new Date().toISOString()
+    institutionId: req.user?.institutionId
   });
 
-  // ===================================
-  // ERRORES ESPECÍFICOS DE PRISMA
-  // ===================================
-  
-  // Error de registro duplicado
-  if (err.code === 'P2002') {
-    const field = err.meta?.target?.[0] || 'campo';
-    const message = getFieldMessage(field);
-    error = createError(400, message);
+  // Error de validación de Prisma
+  if (error.code === 'P2002') {
+    const message = 'Recurso duplicado. Ya existe un registro con estos datos únicos.';
+    err = new ConflictError(message);
   }
-  
-  // Error de clave foránea
-  if (err.code === 'P2003') {
-    error = createError(400, 'No se puede eliminar este registro porque está siendo utilizado por otros datos');
+
+  // Error de registro no encontrado en Prisma
+  if (error.code === 'P2025') {
+    const message = 'Registro no encontrado';
+    err = new NotFoundError(message);
   }
-  
-  // Error de registro no encontrado
-  if (err.code === 'P2025') {
-    error = createError(404, 'El registro solicitado no existe o no tienes permisos para acceder a él');
-  }
-  
+
   // Error de conexión a base de datos
-  if (err.code === 'P1001') {
-    error = createError(503, 'Error de conexión a la base de datos. Intenta nuevamente en unos momentos');
+  if (error.code === 'P1001') {
+    const message = 'No se puede conectar a la base de datos';
+    err = new AppError(message, 503, 'DATABASE_CONNECTION_ERROR');
   }
 
-  // ===================================
-  // ERRORES DE VALIDACIÓN
-  // ===================================
-  
-  // Errores de express-validator
-  if (err.name === 'ValidationError' || err.errors) {
-    const message = extractValidationErrors(err);
-    error = createError(400, message);
+  // Error de JWT
+  if (error.name === 'JsonWebTokenError') {
+    const message = 'Token inválido';
+    err = new AuthError(message);
   }
 
-  // ===================================
-  // ERRORES DE JWT
-  // ===================================
-  
-  if (err.name === 'JsonWebTokenError') {
-    error = createError(401, 'Token de acceso inválido');
-  }
-  
-  if (err.name === 'TokenExpiredError') {
-    error = createError(401, 'Token de acceso expirado');
+  if (error.name === 'TokenExpiredError') {
+    const message = 'Token expirado';
+    err = new AuthError(message);
   }
 
-  // ===================================
-  // ERRORES DE MULTER (ARCHIVOS)
-  // ===================================
-  
-  if (err.code === 'LIMIT_FILE_SIZE') {
-    error = createError(400, `El archivo es demasiado grande. Máximo permitido: ${config.UPLOAD.MAX_FILE_SIZE / 1024 / 1024}MB`);
-  }
-  
-  if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-    error = createError(400, 'Tipo de archivo no permitido');
+  // Error de validación de express-validator
+  if (error.type === 'entity.parse.failed') {
+    const message = 'JSON inválido en el cuerpo de la petición';
+    err = new ValidationError(message);
   }
 
-  // ===================================
-  // ERRORES DE CAST (MongoDB style)
-  // ===================================
-  
-  if (err.name === 'CastError') {
-    error = createError(400, 'ID de recurso inválido');
-  }
-
-  // ===================================
-  // ERRORES HTTP ESTÁNDAR
-  // ===================================
-  
-  const statusCode = error.statusCode || err.statusCode || 500;
-  const message = error.message || 'Error interno del servidor';
-
-  // Estructura de respuesta
+  // Respuesta de error
   const response = {
     success: false,
-    error: {
-      message: message,
-      statusCode: statusCode,
-      ...(config.isDevelopment() && {
-        stack: err.stack,
-        details: err
-      })
-    },
-    timestamp: new Date().toISOString(),
-    path: req.originalUrl,
-    method: req.method
+    error: err.message || 'Error interno del servidor',
+    code: err.code || 'INTERNAL_ERROR'
   };
 
-  // Enviar respuesta
-  res.status(statusCode).json(response);
-};
-
-/**
- * Manejo de errores asíncronos
- * Wrapper para controladores async
- */
-const asyncHandler = (fn) => (req, res, next) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
-};
-
-/**
- * Crear error personalizado
- */
-const createError = (statusCode, message) => {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  return error;
-};
-
-/**
- * Extraer mensajes de errores de validación
- */
-const extractValidationErrors = (err) => {
-  if (err.errors) {
-    // Mongoose style validation errors
-    const errors = Object.values(err.errors).map(error => error.message);
-    return `Errores de validación: ${errors.join(', ')}`;
+  // Agregar detalles en errores de validación
+  if (err instanceof ValidationError && err.details) {
+    response.details = err.details;
   }
-  
-  if (err.details) {
-    // Joi style validation errors
-    const errors = err.details.map(detail => detail.message);
-    return `Errores de validación: ${errors.join(', ')}`;
+
+  // En desarrollo, incluir stack trace
+  if (process.env.NODE_ENV === 'development') {
+    response.stack = error.stack;
   }
-  
-  return err.message || 'Error de validación';
+
+  res.status(err.statusCode || 500).json(response);
 };
 
 /**
- * Obtener mensaje personalizado para campos duplicados
+ * Middleware para manejar rutas no encontradas
  */
-const getFieldMessage = (field) => {
-  const fieldMessages = {
-    'email': 'Ya existe un usuario con este email',
-    'nit': 'Ya existe una institución con este NIT',
-    'studentCode': 'Ya existe un estudiante con este código',
-    'documentNumber': 'Ya existe un estudiante con este número de documento',
-    'invoiceNumber': 'Ya existe una factura con este número',
-    'code': 'Ya existe un registro con este código'
-  };
-  
-  return fieldMessages[field] || `Ya existe un registro con este ${field}`;
-};
-
-/**
- * Middleware para errores 404 (rutas no encontradas)
- */
-const notFound = (req, res, next) => {
-  const error = createError(404, `Ruta no encontrada: ${req.originalUrl}`);
+const notFoundHandler = (req, res, next) => {
+  const error = new NotFoundError(`Ruta ${req.originalUrl} no encontrada`);
   next(error);
 };
 
 /**
- * Errores específicos de negocio para Educonta
+ * Wrapper para funciones async que maneja errores automáticamente
  */
-class EducontaError extends Error {
-  constructor(message, statusCode = 400, code = null) {
-    super(message);
-    this.name = 'EducontaError';
-    this.statusCode = statusCode;
-    this.code = code;
-  }
-}
-
-/**
- * Errores específicos para multi-tenant
- */
-class TenantError extends Error {
-  constructor(message, statusCode = 403) {
-    super(message);
-    this.name = 'TenantError';
-    this.statusCode = statusCode;
-  }
-}
-
-/**
- * Errores de permisos
- */
-class PermissionError extends Error {
-  constructor(message = 'No tienes permisos para realizar esta acción', statusCode = 403) {
-    super(message);
-    this.name = 'PermissionError';
-    this.statusCode = statusCode;
-  }
-}
-
-/**
- * Errores de autenticación
- */
-class AuthError extends Error {
-  constructor(message = 'No autorizado', statusCode = 401) {
-    super(message);
-    this.name = 'AuthError';
-    this.statusCode = statusCode;
-  }
-}
-
-/**
- * Errores de validación de negocio
- */
-class ValidationError extends Error {
-  constructor(message, field = null) {
-    super(message);
-    this.name = 'ValidationError';
-    this.statusCode = 400;
-    this.field = field;
-  }
-}
-
-/**
- * Manejar errores específicos de contabilidad
- */
-class AccountingError extends Error {
-  constructor(message, statusCode = 400) {
-    super(message);
-    this.name = 'AccountingError';
-    this.statusCode = statusCode;
-  }
-}
+const asyncHandler = (fn) => {
+  return (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
+};
 
 module.exports = {
-  errorHandler,
-  asyncHandler,
-  createError,
-  notFound,
-  
-  // Errores personalizados
-  EducontaError,
-  TenantError,
-  PermissionError,
-  AuthError,
+  AppError,
   ValidationError,
-  AccountingError
+  NotFoundError,
+  ConflictError,
+  AuthError,
+  ForbiddenError,
+  errorHandler,
+  notFoundHandler,
+  asyncHandler
 };

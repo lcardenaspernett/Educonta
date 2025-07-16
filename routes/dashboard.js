@@ -38,39 +38,145 @@ router.get('/stats', authenticate, async (req, res) => {
     let stats = {};
     
     if (user.role === 'SUPER_ADMIN') {
-      // Stats para Super Admin
-      const institutionsCount = await req.prisma.institution.count({
-        where: { isActive: true }
-      });
-      
-      const studentsCount = await req.prisma.student.count();
-      
-      // Simular ingresos (no hay tabla de facturas aún)
-      const monthlyRevenue = 2450000;
-      const pendingInvoices = 3;
+      // Stats para Super Admin - Datos reales de todas las instituciones
+      const [
+        institutionsCount,
+        totalStudents,
+        activeStudents,
+        inactiveStudents,
+        recentEnrollments,
+        institutionsWithStudents
+      ] = await Promise.all([
+        // Total instituciones activas
+        req.prisma.institution.count({
+          where: { isActive: true }
+        }),
+        
+        // Total estudiantes
+        req.prisma.student.count(),
+        
+        // Estudiantes activos
+        req.prisma.student.count({
+          where: { isActive: true }
+        }),
+        
+        // Estudiantes inactivos
+        req.prisma.student.count({
+          where: { isActive: false }
+        }),
+        
+        // Matrículas recientes (últimos 30 días)
+        req.prisma.student.count({
+          where: {
+            enrollmentDate: {
+              gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+            }
+          }
+        }),
+        
+        // Instituciones con estudiantes
+        req.prisma.institution.count({
+          where: {
+            isActive: true,
+            students: {
+              some: {}
+            }
+          }
+        })
+      ]);
       
       stats = {
         institutions: institutionsCount,
-        students: studentsCount,
-        monthlyRevenue: monthlyRevenue,
-        pendingInvoices: pendingInvoices
+        students: totalStudents,
+        activeStudents: activeStudents,
+        inactiveStudents: inactiveStudents,
+        recentEnrollments: recentEnrollments,
+        institutionsWithStudents: institutionsWithStudents,
+        // Por ahora, ingresos y facturas son 0 hasta implementar esos módulos
+        monthlyRevenue: 0,
+        pendingInvoices: 0,
+        // Cambios comparado con período anterior
+        changes: {
+          institutions: institutionsCount > 0 ? `${institutionsCount} activas` : 'Sin instituciones',
+          students: recentEnrollments > 0 ? `+${recentEnrollments} este mes` : 'Sin matrículas recientes',
+          revenue: 'Módulo de pagos pendiente',
+          invoices: 'Módulo de facturación pendiente'
+        }
       };
       
     } else {
-      // Stats para Rector/Auxiliar
+      // Stats para Rector/Auxiliar - Solo su institución
       if (!req.institution) {
         return res.status(400).json({ success: false, error: 'Usuario sin institución' });
       }
       
-      const studentsCount = await req.prisma.student.count({
-        where: { institutionId: req.institution.id }
-      });
+      const [
+        totalStudents,
+        activeStudents,
+        inactiveStudents,
+        recentEnrollments,
+        gradeStats
+      ] = await Promise.all([
+        // Total estudiantes de la institución
+        req.prisma.student.count({
+          where: { institutionId: req.institution.id }
+        }),
+        
+        // Estudiantes activos
+        req.prisma.student.count({
+          where: { 
+            institutionId: req.institution.id,
+            isActive: true 
+          }
+        }),
+        
+        // Estudiantes inactivos
+        req.prisma.student.count({
+          where: { 
+            institutionId: req.institution.id,
+            isActive: false 
+          }
+        }),
+        
+        // Matrículas recientes (últimos 30 días)
+        req.prisma.student.count({
+          where: {
+            institutionId: req.institution.id,
+            enrollmentDate: {
+              gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+            }
+          }
+        }),
+        
+        // Estadísticas por grado
+        req.prisma.student.groupBy({
+          by: ['grade'],
+          where: { 
+            institutionId: req.institution.id,
+            isActive: true 
+          },
+          _count: { grade: true },
+          orderBy: { grade: 'asc' }
+        })
+      ]);
       
       stats = {
         institutions: 1,
-        students: studentsCount,
-        monthlyRevenue: 850000,
-        pendingInvoices: 2
+        students: totalStudents,
+        activeStudents: activeStudents,
+        inactiveStudents: inactiveStudents,
+        recentEnrollments: recentEnrollments,
+        gradeDistribution: gradeStats,
+        // Por ahora, ingresos y facturas son 0 hasta implementar esos módulos
+        monthlyRevenue: 0,
+        pendingInvoices: 0,
+        // Cambios comparado con período anterior
+        changes: {
+          institutions: req.institution.name,
+          students: recentEnrollments > 0 ? `+${recentEnrollments} este mes` : 'Sin matrículas recientes',
+          revenue: 'Módulo de pagos pendiente',
+          invoices: 'Módulo de facturación pendiente'
+        }
       };
     }
     

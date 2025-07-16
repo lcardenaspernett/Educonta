@@ -73,6 +73,14 @@ try {
   console.log('⚠️ Institution routes not found');
 }
 
+try {
+  const studentRoutes = require('./routes/students');
+  app.use('/api/students', studentRoutes);
+  console.log('✅ Student routes loaded');
+} catch (error) {
+  console.log('⚠️ Student routes not found');
+}
+
 // 404 handler
 app.use('/api/*', (req, res) => {
   res.status(404).json({ error: 'API route not found' });
@@ -82,11 +90,14 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Error handler
-app.use((error, req, res, next) => {
-  console.error('Error:', error);
-  res.status(500).json({ error: 'Internal server error' });
-});
+// Error handlers
+const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
+
+// 404 handler para rutas no encontradas
+app.use(notFoundHandler);
+
+// Error handler global
+app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 3000;
