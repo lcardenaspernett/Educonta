@@ -1,11 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { PrismaClient } = require('@prisma/client');
 require('dotenv').config();
 
+// Usar nuestro cliente Prisma personalizado con middleware
+const prisma = require('./config/prisma');
+
 const app = express();
-const prisma = new PrismaClient();
 
 // Middlewares básicos
 app.use(cors());

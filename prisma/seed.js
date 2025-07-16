@@ -2,10 +2,10 @@
 // EDUCONTA - Script de Seeding
 // ===================================
 
-const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
-const prisma = new PrismaClient();
+// Usar nuestro cliente Prisma personalizado con middleware de hasheo automático
+const prisma = require('../config/prisma');
 
 // ===================================
 // DATOS DE CONFIGURACIÓN
