@@ -13,10 +13,34 @@ const getInstitutionId = async (req) => {
     if (req.query.institutionId) {
       return req.query.institutionId;
     } else {
-      const firstInstitution = await req.prisma.institution.findFirst({
-        where: { isActive: true }
-      });
-      return firstInstitution?.id || null;
+      try {
+        const firstInstitution = await req.prisma.institution.findFirst({
+          where: { isActive: true }
+        });
+        if (firstInstitution) {
+          return firstInstitution.id;
+        } else {
+          // Si no hay instituciones, crear una de ejemplo para Super Admin
+          console.log('⚠️ No hay instituciones disponibles, creando institución de ejemplo...');
+          const exampleInstitution = await req.prisma.institution.create({
+            data: {
+              name: 'Institución de Ejemplo',
+              nit: '000000000-0',
+              address: 'Dirección de ejemplo',
+              phone: '000-000-0000',
+              email: 'ejemplo@educonta.com',
+              city: 'Ciudad Ejemplo',
+              department: 'Departamento Ejemplo',
+              educationLevel: 'MIXTA',
+              isActive: true
+            }
+          });
+          return exampleInstitution.id;
+        }
+      } catch (error) {
+        console.error('Error obteniendo institución:', error);
+        return null;
+      }
     }
   } else {
     return req.user.institutionId;
@@ -39,26 +63,9 @@ const getStudents = async (req, res, next) => {
       sortOrder = 'asc'
     } = req.query;
 
-    // Construir filtros
-    let institutionId;
-    if (req.user.role === 'SUPER_ADMIN') {
-      // Super Admin puede ver estudiantes de cualquier institución
-      // Si no especifica institución, buscar la primera disponible
-      if (req.query.institutionId) {
-        institutionId = req.query.institutionId;
-      } else {
-        // Buscar la primera institución disponible para Super Admin
-        const firstInstitution = await req.prisma.institution.findFirst({
-          where: { isActive: true }
-        });
-        if (firstInstitution) {
-          institutionId = firstInstitution.id;
-        }
-      }
-    } else {
-      institutionId = req.user.institutionId;
-    }
-
+    // Obtener institución usando la función helper
+    const institutionId = await getInstitutionId(req);
+    
     if (!institutionId) {
       return res.status(400).json({
         success: false,
@@ -166,21 +173,14 @@ const getStudentById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Determinar institución
-    let institutionId;
-    if (req.user.role === 'SUPER_ADMIN') {
-      if (req.query.institutionId) {
-        institutionId = req.query.institutionId;
-      } else {
-        const firstInstitution = await req.prisma.institution.findFirst({
-          where: { isActive: true }
-        });
-        if (firstInstitution) {
-          institutionId = firstInstitution.id;
-        }
-      }
-    } else {
-      institutionId = req.user.institutionId;
+    // Obtener institución usando la función helper
+    const institutionId = await getInstitutionId(req);
+    
+    if (!institutionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'No hay instituciones disponibles'
+      });
     }
 
     const student = await req.prisma.student.findFirst({
