@@ -49,6 +49,7 @@ enum EducationLevel {
   SECUNDARIA
   MEDIA
   SUPERIOR
+  TECNICA
   MIXTA
 }
 

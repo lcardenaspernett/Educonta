@@ -475,20 +475,55 @@ async function handleStudentSubmit(e) {
     saveLoading.style.display = 'inline-block';
     
     try {
-        const formData = {
-            studentCode: document.getElementById('student-code').value,
-            firstName: document.getElementById('first-name').value,
-            lastName: document.getElementById('last-name').value,
-            documentType: document.getElementById('document-type').value,
-            documentNumber: document.getElementById('document-number').value,
-            grade: document.getElementById('grade').value,
-            section: document.getElementById('section').value || null,
-            birthDate: document.getElementById('birth-date').value || null,
-            parentName: document.getElementById('parent-name').value || null,
-            parentPhone: document.getElementById('parent-phone').value || null,
-            parentEmail: document.getElementById('parent-email').value || null,
-            address: document.getElementById('address').value || null
-        };
+        // CONSTRUCCIÓN MEJORADA DEL FORM DATA - SIN NULLS (como en instituciones)
+        const formData = {};
+        
+        // Campos requeridos
+        formData.studentCode = document.getElementById('student-code').value.trim();
+        formData.firstName = document.getElementById('first-name').value.trim();
+        formData.lastName = document.getElementById('last-name').value.trim();
+        formData.documentType = document.getElementById('document-type').value;
+        formData.documentNumber = document.getElementById('document-number').value.trim();
+        formData.grade = document.getElementById('grade').value;
+
+        // Campos opcionales - SOLO SI TIENEN VALOR
+        const section = document.getElementById('section').value.trim();
+        if (section) {
+            formData.section = section;
+            console.log('✅ Agregando section:', section);
+        }
+
+        const birthDate = document.getElementById('birth-date').value;
+        if (birthDate) {
+            formData.birthDate = birthDate;
+            console.log('✅ Agregando birthDate:', birthDate);
+        }
+
+        const parentName = document.getElementById('parent-name').value.trim();
+        if (parentName) {
+            formData.parentName = parentName;
+            console.log('✅ Agregando parentName:', parentName);
+        }
+
+        const parentPhone = document.getElementById('parent-phone').value.trim();
+        if (parentPhone) {
+            formData.parentPhone = parentPhone;
+            console.log('✅ Agregando parentPhone:', parentPhone);
+        }
+
+        const parentEmail = document.getElementById('parent-email').value.trim();
+        if (parentEmail) {
+            formData.parentEmail = parentEmail;
+            console.log('✅ Agregando parentEmail:', parentEmail);
+        }
+
+        const address = document.getElementById('address').value.trim();
+        if (address) {
+            formData.address = address;
+            console.log('✅ Agregando address:', address);
+        }
+
+        console.log('🔧 STUDENT FORM DATA FINAL (SIN NULLS):', JSON.stringify(formData, null, 2));
         
         const token = localStorage.getItem('token');
         const url = currentStudentId ? `/api/students/${currentStudentId}` : '/api/students';

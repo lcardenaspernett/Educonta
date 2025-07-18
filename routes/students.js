@@ -183,8 +183,8 @@ const validateStudentCreate = [
 
 const validateStudentUpdate = [
     param('id')
-        .isUUID()
-        .withMessage('ID de estudiante inválido'),
+        .notEmpty()
+        .withMessage('ID de estudiante requerido'),
 
     ...validateStudentCreate.map(validation => validation.optional()),
 
@@ -196,8 +196,8 @@ const validateStudentUpdate = [
 
 const validateStudentId = [
     param('id')
-        .isUUID()
-        .withMessage('ID de estudiante inválido')
+        .notEmpty()
+        .withMessage('ID de estudiante requerido')
 ];
 
 const validateStudentQuery = [

@@ -15,7 +15,15 @@ const authenticate = async (req, res, next) => {
     // Obtener token del header
     const authHeader = req.header('Authorization');
     
+    console.log('🔧 AUTH MIDDLEWARE - Headers recibidos:', {
+      authorization: authHeader ? `${authHeader.substring(0, 20)}...` : 'MISSING',
+      'user-agent': req.header('User-Agent'),
+      'content-type': req.header('Content-Type')
+    });
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('❌ AUTH MIDDLEWARE - Token missing or invalid format');
+      console.log('❌ AUTH HEADER:', authHeader);
       throw new AuthError('Token de acceso requerido');
     }
 

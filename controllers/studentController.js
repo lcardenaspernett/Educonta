@@ -339,9 +339,21 @@ const createStudent = async (req, res, next) => {
  */
 const updateStudent = async (req, res, next) => {
   try {
+    console.log('🔧 UPDATE STUDENT - Datos recibidos:', JSON.stringify(req.body, null, 2));
+    console.log('🔧 UPDATE STUDENT - ID:', req.params.id);
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return next(new ValidationError('Datos de estudiante inválidos', errors.array()));
+      console.log('❌ Errores de validación de estudiante detallados:', JSON.stringify(errors.array(), null, 2));
+      console.log('📝 Datos recibidos completos:', JSON.stringify(req.body, null, 2));
+      
+      // Enviar respuesta más detallada para debug
+      return res.status(400).json({
+        success: false,
+        error: 'Datos de estudiante inválidos',
+        details: errors.array(),
+        receivedData: req.body
+      });
     }
 
     const { id } = req.params;
