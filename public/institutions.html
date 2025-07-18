@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instituciones - Educonta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --accent: #8b5cf6;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --bg: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --border: rgba(255, 255, 255, 0.2);
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #10b981;
+            --accent: #a855f7;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --success: #34d399;
+            --text: #f9fafb;
+            --text-light: #d1d5db;
+            --bg: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: rgba(15, 23, 42, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        /* Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, 
+                var(--primary) 0%, 
+                var(--secondary) 50%, 
+                var(--accent) 100%);
+            opacity: 0.03;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+        }
+
+        .theme-label {
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .theme-label.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 50px;
+            height: 25px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            width: 19px;
+            height: 19px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        [data-theme="dark"] .theme-toggle::before {
+            transform: translateX(25px);
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            border-radius: 8px;
+        }
+
+        .btn-text {
+            margin-left: 0.25rem;
+            font-weight: 500;
+        }
+
+        /* Responsive buttons - hide text on small screens */
+        @media (max-width: 768px) {
+            .btn-text {
+                display: none;
+            }
+            
+            .btn-sm {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Main Content */
+        .main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-light);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px var(--shadow);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        /* Filters */
+        .filters {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.875rem;
+        }
+
+        .form-input, .form-select {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Table */
+        .table-container {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .table td {
+            color: var(--text);
+        }
+
+        .table tbody tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .education-level {
+            background: var(--bg-secondary);
+            color: var(--text);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pagination-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-secondary);
+            color: var(--text);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert.show {
+            display: flex;
+        }
+
+        .alert.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        /* View Modal Styles */
+        .detail-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.875rem;
+        }
+
+        .detail-value {
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.875rem;
+            min-height: 2.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main {
+                padding: 1rem;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+            
+            .table {
+                min-width: 1000px;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <header class="header">
+        <nav class="nav">
+            <a href="/dashboard.html" class="logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 9.739 9 11 5.16-1.261 9-5.45 9-11V7l-10-5z"/>
+                </svg>
+                Educonta
+            </a>
+            
+            <div class="nav-actions">
+                <div class="theme-toggle-container">
+                    <span class="theme-label" id="light-label">CLARO</span>
+                    <button class="theme-toggle" onclick="toggleTheme()"></button>
+                    <span class="theme-label" id="dark-label">OSCURO</span>
+                </div>
+                <a href="/dashboard.html" class="btn btn-secondary">
+                    <svg width="16" height="16" fill="currentColor">
+                        <path d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Volver al Dashboard
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Gestión de Instituciones</h1>
+                <p class="page-subtitle">Administra todas las instituciones educativas del sistema</p>
+            </div>
+            <button class="btn btn-primary" onclick="openInstitutionModal()">
+                <svg width="16" height="16" fill="currentColor">
+                    <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Nueva Institución
+            </button>
+        </div>
+
+        <!-- Alert -->
+        <div class="alert" id="alert">
+            <svg width="20" height="20" fill="currentColor">
+                <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v6a1 1 0 102 0V5zm-1 9a1 1 0 100-2 1 1 0 000 2z"/>
+            </svg>
+            <span id="alert-message"></span>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-institutions">
+                    <span class="loading"></span>
+                </div>
+                <div class="stat-label">Total Instituciones</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="active-institutions">
+                    <span class="loading"></span>
+                </div>
+                <div class="stat-label">Instituciones Activas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="with-students">
+                    <span class="loading"></span>
+                </div>
+                <div class="stat-label">Con Estudiantes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="recent-institutions">
+                    <span class="loading"></span>
+                </div>
+                <div class="stat-label">Nuevas (30 días)</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filters-grid">
+                <div class="form-group">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" class="form-input" id="search-input" placeholder="Nombre, NIT o ciudad...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Departamento</label>
+                    <select class="form-select" id="department-filter">
+                        <option value="">Todos los departamentos</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nivel Educativo</label>
+                    <select class="form-select" id="education-level-filter">
+                        <option value="">Todos los niveles</option>
+                        <option value="PREESCOLAR">Preescolar</option>
+                        <option value="PRIMARIA">Primaria</option>
+                        <option value="SECUNDARIA">Secundaria</option>
+                        <option value="MEDIA">Media</option>
+                        <option value="TECNICA">Técnica</option>
+                        <option value="UNIVERSITARIA">Universitaria</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Estado</label>
+                    <select class="form-select" id="status-filter">
+                        <option value="true">Activas</option>
+                        <option value="false">Inactivas</option>
+                        <option value="all">Todas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary" onclick="loadInstitutions()">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        Buscar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3 class="table-title">Lista de Instituciones</h3>
+            </div>
+            <div style="position: relative;">
+                <div class="loading-overlay" id="table-loading" style="display: none;">
+                    <div class="loading"></div>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>NIT</th>
+                            <th>Ciudad</th>
+                            <th>Departamento</th>
+                            <th>Nivel Educativo</th>
+                            <th>Estudiantes</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="institutions-table-body">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 2rem;">
+                                <div class="loading"></div>
+                                <p style="margin-top: 1rem;">Cargando instituciones...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <!-- Pagination buttons will be inserted here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Institution Modal -->
+    <div class="modal" id="institution-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Nueva Institución</h2>
+                <button class="modal-close" onclick="closeInstitutionModal()">×</button>
+            </div>
+            
+            <form id="institution-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nombre de la Institución *</label>
+                        <input type="text" class="form-input" id="institution-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">NIT *</label>
+                        <input type="text" class="form-input" id="institution-nit" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ciudad *</label>
+                        <input type="text" class="form-input" id="institution-city" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Departamento *</label>
+                        <input type="text" class="form-input" id="institution-department" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nivel Educativo *</label>
+                        <select class="form-select" id="institution-education-level" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="PREESCOLAR">Preescolar</option>
+                            <option value="PRIMARIA">Primaria</option>
+                            <option value="SECUNDARIA">Secundaria</option>
+                            <option value="MEDIA">Media</option>
+                            <option value="TECNICA">Técnica</option>
+                            <option value="UNIVERSITARIA">Universitaria</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Teléfono</label>
+                        <input type="tel" class="form-input" id="institution-phone">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="institution-email">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Página Web</label>
+                        <input type="url" class="form-input" id="institution-website">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label">Dirección *</label>
+                        <input type="text" class="form-input" id="institution-address" required>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-input" id="institution-description" rows="3" placeholder="Breve descripción de la institución..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeInstitutionModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="save-btn">
+                        <span id="save-text">Guardar</span>
+                        <div class="loading" id="save-loading" style="display: none;"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Institution Modal (Read-only) -->
+    <div class="modal" id="view-institution-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Detalles de la Institución</h2>
+                <button class="modal-close" onclick="closeViewInstitutionModal()">×</button>
+            </div>
+            
+            <div class="institution-details">
+                <div class="form-grid">
+                    <div class="detail-group">
+                        <label class="detail-label">Nombre de la Institución</label>
+                        <div class="detail-value" id="view-institution-name">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <label class="detail-label">NIT</label>
+                        <div class="detail-value" id="view-institution-nit">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <label class="detail-label">Ciudad</label>
+                        <div class="detail-value" id="view-institution-city">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <label class="detail-label">Departamento</label>
+                        <div class="detail-value" id="view-institution-department">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <label class="detail-label">Nivel Educativo</label>
+                        <div class="detail-value" id="view-institution-education-level">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <label class="detail-label">Teléfono</label>
+                        <div class="detail-value" id="view-institution-phone">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <label class="detail-label">Email</label>
+                        <div class="detail-value" id="view-institution-email">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <label class="detail-label">Página Web</label>
+                        <div class="detail-value" id="view-institution-website">-</div>
+                    </div>
+                    <div class="detail-group" style="grid-column: 1 / -1;">
+                        <label class="detail-label">Dirección</label>
+                        <div class="detail-value" id="view-institution-address">-</div>
+                    </div>
+                    <div class="detail-group" style="grid-column: 1 / -1;">
+                        <label class="detail-label">Descripción</label>
+                        <div class="detail-value" id="view-institution-description">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <label class="detail-label">Estado</label>
+                        <div class="detail-value" id="view-institution-status">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <label class="detail-label">Total de Estudiantes</label>
+                        <div class="detail-value" id="view-institution-students">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <label class="detail-label">Fecha de Creación</label>
+                        <div class="detail-value" id="view-institution-created">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <label class="detail-label">Última Actualización</label>
+                        <div class="detail-value" id="view-institution-updated">-</div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeViewInstitutionModal()">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="editFromView()">
+                        <svg width="14" height="14" fill="currentColor">
+                            <path d="M11 4a2 2 0 114 4l-9 9-4 1 1-4 9-9z"/>
+                        </svg>
+                        Editar Institución
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🚀 Página de instituciones iniciada');
+        
+        let currentUser = null;
+        let currentInstitutions = [];
+        let currentPage = 1;
+        let totalPages = 1;
+        let editingInstitution = null;
+        let viewingInstitution = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOM cargado, iniciando verificación de autenticación');
+            initializeTheme();
+            checkAuth();
+        });
+
+        // Theme Management
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeLabels();
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeLabels();
+        }
+
+        function updateThemeLabels() {
+            const theme = document.documentElement.getAttribute('data-theme');
+            const lightLabel = document.getElementById('light-label');
+            const darkLabel = document.getElementById('dark-label');
+            
+            if (theme === 'dark') {
+                lightLabel.classList.remove('active');
+                darkLabel.classList.add('active');
+            } else {
+                lightLabel.classList.add('active');
+                darkLabel.classList.remove('active');
+            }
+        }
+
+        // Authentication
+        async function checkAuth() {
+            const token = localStorage.getItem('token');
+            console.log('🔑 Token encontrado:', token ? 'Sí' : 'No');
+            
+            if (!token) {
+                console.log('❌ No hay token, redirigiendo a login');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            try {
+                console.log('🔍 Verificando token con el servidor...');
+                const response = await fetch('/api/auth/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.user;
+                    console.log('👤 Usuario autenticado:', currentUser);
+                    
+                    // Verificar que sea SUPER_ADMIN
+                    if (currentUser.role !== 'SUPER_ADMIN') {
+                        console.log('❌ Usuario no es SUPER_ADMIN:', currentUser.role);
+                        showAccessDenied();
+                        return;
+                    }
+                    
+                    console.log('✅ Usuario es SUPER_ADMIN, cargando página');
+                    initializePage();
+                } else {
+                    console.log('❌ Token inválido, limpiando y redirigiendo');
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('❌ Error verificando autenticación:', error);
+                window.location.href = '/login.html';
+            }
+        }
+
+        function showAccessDenied() {
+            document.querySelector('.main').innerHTML = `
+                <div style="text-align: center; padding: 4rem 2rem; background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border);">
+                    <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">🔒</div>
+                    <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: var(--text);">Acceso Denegado</h3>
+                    <p style="color: var(--text-light); margin-bottom: 2rem;">
+                        Solo los Super Administradores pueden gestionar instituciones.<br>
+                        Tu rol actual es: <strong>${currentUser.role}</strong>
+                    </p>
+                    <a href="/dashboard.html" class="btn btn-secondary">
+                        <svg width="16" height="16" fill="currentColor">
+                            <path d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        Volver al Dashboard
+                    </a>
+                </div>
+            `;
+        }
+
+        // Page Initialization
+        function initializePage() {
+            console.log('🏗️ Inicializando página de instituciones');
+            loadStats();
+            loadInstitutions();
+        }
+
+        // Load Statistics
+        async function loadStats() {
+            const token = localStorage.getItem('token');
+            
+            try {
+                const response = await fetch('/api/institutions/stats', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStats(data.data);
+                } else {
+                    console.error('Error loading stats');
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('total-institutions').textContent = stats.total || 0;
+            document.getElementById('active-institutions').textContent = stats.active || 0;
+            document.getElementById('with-students').textContent = stats.withStudents || 0;
+            document.getElementById('recent-institutions').textContent = stats.recentInstitutions || 0;
+        }
+
+        // Load Institutions
+        async function loadInstitutions(page = 1) {
+            const token = localStorage.getItem('token');
+            const searchInput = document.getElementById('search-input');
+            const departmentFilter = document.getElementById('department-filter');
+            const educationLevelFilter = document.getElementById('education-level-filter');
+            const statusFilter = document.getElementById('status-filter');
+            
+            // Show loading
+            document.getElementById('table-loading').style.display = 'flex';
+            
+            try {
+                const params = new URLSearchParams({
+                    page: page,
+                    limit: 10
+                });
+
+                if (searchInput.value.trim()) {
+                    params.append('search', searchInput.value.trim());
+                }
+                if (departmentFilter.value) {
+                    params.append('department', departmentFilter.value);
+                }
+                if (educationLevelFilter.value) {
+                    params.append('educationLevel', educationLevelFilter.value);
+                }
+                if (statusFilter.value !== 'all') {
+                    params.append('isActive', statusFilter.value);
+                }
+
+                const response = await fetch(`/api/institutions?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentInstitutions = data.data;
+                    currentPage = data.pagination.currentPage;
+                    totalPages = data.pagination.totalPages;
+                    
+                    updateInstitutionsTable();
+                    updatePagination();
+                } else {
+                    showAlert('Error cargando instituciones', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading institutions:', error);
+                showAlert('Error de conexión', 'error');
+            } finally {
+                document.getElementById('table-loading').style.display = 'none';
+            }
+        }
+
+        function updateInstitutionsTable() {
+            const tbody = document.getElementById('institutions-table-body');
+            
+            if (currentInstitutions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                            No se encontraron instituciones
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = currentInstitutions.map(institution => `
+                <tr class="fade-in">
+                    <td>
+                        <div style="font-weight: 600;">${institution.name}</div>
+                    </td>
+                    <td>${institution.nit}</td>
+                    <td>${institution.city}</td>
+                    <td>${institution.department}</td>
+                    <td>
+                        <span class="education-level">${institution.educationLevel}</span>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600; color: var(--primary);">
+                            ${institution._count?.students || 0}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge ${institution.isActive ? 'status-active' : 'status-inactive'}">
+                            ${institution.isActive ? 'Activa' : 'Inactiva'}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-sm btn-secondary" onclick="viewInstitution('${institution.id}')" title="Ver detalles">
+                                <svg width="14" height="14" fill="currentColor">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <span class="btn-text">Ver</span>
+                            </button>
+                            <button class="btn btn-sm btn-primary" onclick="editInstitution('${institution.id}')" title="Editar">
+                                <svg width="14" height="14" fill="currentColor">
+                                    <path d="M11 4a2 2 0 114 4l-9 9-4 1 1-4 9-9z"/>
+                                </svg>
+                                <span class="btn-text">Editar</span>
+                            </button>
+                            <button class="btn btn-sm ${institution.isActive ? 'btn-danger' : 'btn-success'}" onclick="toggleInstitutionStatus('${institution.id}')" title="${institution.isActive ? 'Desactivar' : 'Activar'}">
+                                <svg width="14" height="14" fill="currentColor">
+                                    ${institution.isActive ? 
+                                        '<path d="M18 6L6 18M6 6l12 12"/>' : 
+                                        '<path d="M20 6L9 17l-5-5"/>'
+                                    }
+                                </svg>
+                                <span class="btn-text">${institution.isActive ? 'Desactivar' : 'Activar'}</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            let paginationHTML = '';
+
+            // Previous button
+            paginationHTML += `
+                <button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="loadInstitutions(${currentPage - 1})">
+                    <svg width="16" height="16" fill="currentColor">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </button>
+            `;
+
+            // Page numbers
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="loadInstitutions(${i})">
+                        ${i}
+                    </button>
+                `;
+            }
+
+            // Next button
+            paginationHTML += `
+                <button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="loadInstitutions(${currentPage + 1})">
+                    <svg width="16" height="16" fill="currentColor">
+                        <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                </button>
+            `;
+
+            pagination.innerHTML = paginationHTML;
+        }
+
+        // Modal Management
+        function openInstitutionModal() {
+            editingInstitution = null;
+            document.getElementById('modal-title').textContent = 'Nueva Institución';
+            document.getElementById('institution-form').reset();
+            document.getElementById('institution-modal').classList.add('show');
+        }
+
+        function closeInstitutionModal() {
+            document.getElementById('institution-modal').classList.remove('show');
+            editingInstitution = null;
+        }
+
+        function closeViewInstitutionModal() {
+            document.getElementById('view-institution-modal').classList.remove('show');
+            viewingInstitution = null;
+        }
+
+        // Institution Actions
+        async function viewInstitution(institutionId) {
+            const institution = currentInstitutions.find(i => i.id === institutionId);
+            if (!institution) return;
+
+            viewingInstitution = institution;
+
+            // Populate view modal
+            document.getElementById('view-institution-name').textContent = institution.name || '-';
+            document.getElementById('view-institution-nit').textContent = institution.nit || '-';
+            document.getElementById('view-institution-city').textContent = institution.city || '-';
+            document.getElementById('view-institution-department').textContent = institution.department || '-';
+            document.getElementById('view-institution-education-level').textContent = institution.educationLevel || '-';
+            document.getElementById('view-institution-phone').textContent = institution.phone || '-';
+            document.getElementById('view-institution-email').textContent = institution.email || '-';
+            document.getElementById('view-institution-website').textContent = institution.website || '-';
+            document.getElementById('view-institution-address').textContent = institution.address || '-';
+            document.getElementById('view-institution-description').textContent = institution.description || '-';
+            document.getElementById('view-institution-status').innerHTML = `
+                <span class="status-badge ${institution.isActive ? 'status-active' : 'status-inactive'}">
+                    ${institution.isActive ? 'Activa' : 'Inactiva'}
+                </span>
+            `;
+            document.getElementById('view-institution-students').textContent = institution._count?.students || '0';
+            document.getElementById('view-institution-created').textContent = institution.createdAt ? 
+                new Date(institution.createdAt).toLocaleDateString('es-ES') : '-';
+            document.getElementById('view-institution-updated').textContent = institution.updatedAt ? 
+                new Date(institution.updatedAt).toLocaleDateString('es-ES') : '-';
+
+            document.getElementById('view-institution-modal').classList.add('show');
+        }
+
+        function editFromView() {
+            if (!viewingInstitution) return;
+            
+            closeViewInstitutionModal();
+            editInstitution(viewingInstitution.id);
+        }
+
+        function editInstitution(institutionId) {
+            const institution = currentInstitutions.find(i => i.id === institutionId);
+            if (!institution) return;
+
+            editingInstitution = institution;
+            document.getElementById('modal-title').textContent = 'Editar Institución';
+
+            // Populate form
+            document.getElementById('institution-name').value = institution.name || '';
+            document.getElementById('institution-nit').value = institution.nit || '';
+            document.getElementById('institution-city').value = institution.city || '';
+            document.getElementById('institution-department').value = institution.department || '';
+            document.getElementById('institution-education-level').value = institution.educationLevel || '';
+            document.getElementById('institution-phone').value = institution.phone || '';
+            document.getElementById('institution-email').value = institution.email || '';
+            document.getElementById('institution-website').value = institution.website || '';
+            document.getElementById('institution-address').value = institution.address || '';
+            document.getElementById('institution-description').value = institution.description || '';
+
+            document.getElementById('institution-modal').classList.add('show');
+        }
+
+        async function toggleInstitutionStatus(institutionId) {
+            const institution = currentInstitutions.find(i => i.id === institutionId);
+            if (!institution) return;
+
+            const action = institution.isActive ? 'desactivar' : 'activar';
+            if (!confirm(`¿Estás seguro de que quieres ${action} esta institución?`)) {
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+
+            try {
+                const response = await fetch(`/api/institutions/${institutionId}/toggle-status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    showAlert(`Institución ${action}da exitosamente`, 'success');
+                    loadInstitutions(currentPage);
+                    loadStats();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.message || `Error al ${action} institución`, 'error');
+                }
+            } catch (error) {
+                console.error('Error toggling institution status:', error);
+                showAlert('Error de conexión', 'error');
+            }
+        }
+
+        // Form Submission
+        document.getElementById('institution-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const token = localStorage.getItem('token');
+            const saveBtn = document.getElementById('save-btn');
+            const saveText = document.getElementById('save-text');
+            const saveLoading = document.getElementById('save-loading');
+
+            // Show loading
+            saveBtn.disabled = true;
+            saveText.style.display = 'none';
+            saveLoading.style.display = 'inline-block';
+
+            const formData = {
+                name: document.getElementById('institution-name').value.trim(),
+                nit: document.getElementById('institution-nit').value.trim(),
+                city: document.getElementById('institution-city').value.trim(),
+                department: document.getElementById('institution-department').value.trim(),
+                educationLevel: document.getElementById('institution-education-level').value,
+                phone: document.getElementById('institution-phone').value.trim() || null,
+                email: document.getElementById('institution-email').value.trim() || null,
+                website: document.getElementById('institution-website').value.trim() || null,
+                address: document.getElementById('institution-address').value.trim(),
+                description: document.getElementById('institution-description').value.trim() || null
+            };
+
+            try {
+                const isEditing = editingInstitution !== null;
+                const url = isEditing ? `/api/institutions/${editingInstitution.id}` : '/api/institutions';
+                const method = isEditing ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    const action = isEditing ? 'actualizada' : 'creada';
+                    showAlert(`Institución ${action} exitosamente`, 'success');
+                    closeInstitutionModal();
+                    loadInstitutions(currentPage);
+                    loadStats();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.message || 'Error guardando institución', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving institution:', error);
+                showAlert('Error de conexión', 'error');
+            } finally {
+                // Hide loading
+                saveBtn.disabled = false;
+                saveText.style.display = 'inline';
+                saveLoading.style.display = 'none';
+            }
+        });
+
+        // Utility Functions
+        function showAlert(message, type = 'success') {
+            const alert = document.getElementById('alert');
+            const alertMessage = document.getElementById('alert-message');
+            
+            alert.className = `alert ${type} show`;
+            alertMessage.textContent = message;
+            
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                if (e.target.id === 'institution-modal') {
+                    closeInstitutionModal();
+                } else if (e.target.id === 'view-institution-modal') {
+                    closeViewInstitutionModal();
+                }
+            }
+        });
+
+        // Search on Enter key
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadInstitutions(1);
+            }
+        });
+    </script>
+</body>
+</html>

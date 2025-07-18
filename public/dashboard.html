@@ -183,8 +183,25 @@
             gap: 0.5rem;
         }
 
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
         .btn-danger {
             background: var(--danger);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
             color: white;
         }
 
@@ -448,6 +465,348 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Institutions Section */
+        .institutions-section {
+            display: none;
+        }
+
+        .institutions-section.active {
+            display: block;
+        }
+
+        .institutions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .institutions-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 0.875rem;
+            min-width: 150px;
+        }
+
+        .institutions-table {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .table td {
+            color: var(--text);
+        }
+
+        .table tbody tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-badge.inactive {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .education-level-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: var(--bg-secondary);
+            color: var(--text-light);
+        }
+
+        .actions-menu {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-icon.edit {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+        }
+
+        .btn-icon.delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .btn-icon.view {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--text-light);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pagination-info {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-secondary);
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 0.875rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-light);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .empty-state-description {
+            margin-bottom: 2rem;
+        }
     </style>
 </head>
 <body>
@@ -494,7 +853,7 @@
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link" onclick="showSection('institutions')">
+                    <a href="/institutions.html" class="sidebar-link">
                         <svg width="20" height="20" fill="currentColor">
                             <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                         </svg>
@@ -623,8 +982,251 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Sección de Instituciones -->
+            <div id="institutions-section" class="institutions-section">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Gestión de Instituciones</h1>
+                        <p class="page-subtitle">Administra todas las instituciones educativas del sistema</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openCreateModal()">
+                        <svg width="20" height="20" fill="currentColor">
+                            <path d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Nueva Institución
+                    </button>
+                </div>
+
+                <!-- Estadísticas de Instituciones -->
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon primary">
+                                <svg width="24" height="24" fill="currentColor">
+                                    <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="inst-total-count">
+                            <span class="loading"></span>
+                        </div>
+                        <div class="stat-label">Total Instituciones</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon secondary">
+                                <svg width="24" height="24" fill="currentColor">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="inst-active-count">
+                            <span class="loading"></span>
+                        </div>
+                        <div class="stat-label">Activas</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon warning">
+                                <svg width="24" height="24" fill="currentColor">
+                                    <path d="M12 14l9-5-9-5-9 5 9 5z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="inst-with-students">
+                            <span class="loading"></span>
+                        </div>
+                        <div class="stat-label">Con Estudiantes</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon danger">
+                                <svg width="24" height="24" fill="currentColor">
+                                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="inst-recent-count">
+                            <span class="loading"></span>
+                        </div>
+                        <div class="stat-label">Nuevas (30 días)</div>
+                    </div>
+                </div>
+
+                <!-- Controles de Búsqueda y Filtros -->
+                <div class="institutions-controls">
+                    <div class="search-box">
+                        <svg class="search-icon" width="16" height="16" fill="currentColor">
+                            <path d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                        <input type="text" class="search-input" id="search-input" placeholder="Buscar por nombre, NIT, ciudad...">
+                    </div>
+                    
+                    <select class="filter-select" id="education-level-filter">
+                        <option value="">Todos los niveles</option>
+                        <option value="PREESCOLAR">Preescolar</option>
+                        <option value="PRIMARIA">Primaria</option>
+                        <option value="SECUNDARIA">Secundaria</option>
+                        <option value="MEDIA">Media</option>
+                        <option value="SUPERIOR">Superior</option>
+                        <option value="MIXTA">Mixta</option>
+                    </select>
+                    
+                    <select class="filter-select" id="status-filter">
+                        <option value="all">Todos los estados</option>
+                        <option value="true">Activas</option>
+                        <option value="false">Inactivas</option>
+                    </select>
+                    
+                    <button class="btn btn-secondary" onclick="clearFilters()">
+                        <svg width="16" height="16" fill="currentColor">
+                            <path d="M4 4l16 16m0-16L4 20"/>
+                        </svg>
+                        Limpiar
+                    </button>
+                </div>
+
+                <!-- Tabla de Instituciones -->
+                <div class="institutions-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Institución</th>
+                                <th>NIT</th>
+                                <th>Ubicación</th>
+                                <th>Nivel Educativo</th>
+                                <th>Estudiantes</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="institutions-tbody">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem;">
+                                    <span class="loading"></span> Cargando instituciones...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginación -->
+                <div class="pagination" id="institutions-pagination">
+                    <!-- Se genera dinámicamente -->
+                </div>
+
+                <!-- Estado vacío -->
+                <div class="empty-state" id="institutions-empty" style="display: none;">
+                    <div class="empty-state-icon">🏫</div>
+                    <h3 class="empty-state-title">No hay instituciones</h3>
+                    <p class="empty-state-description">
+                        No se encontraron instituciones que coincidan con los criterios de búsqueda.
+                    </p>
+                    <button class="btn btn-primary" onclick="openCreateModal()">
+                        <svg width="20" height="20" fill="currentColor">
+                            <path d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Crear Primera Institución
+                    </button>
+                </div>
+            </div>
+
+            <!-- Secciones en desarrollo -->
+            <div id="accounting-section" class="fade-in" style="display: none;">
+                <div class="page-header">
+                    <h1 class="page-title">Contabilidad</h1>
+                    <p class="page-subtitle">Sección "contabilidad" en desarrollo. Próximamente disponible.</p>
+                </div>
+            </div>
+
+            <div id="reports-section" class="fade-in" style="display: none;">
+                <div class="page-header">
+                    <h1 class="page-title">Reportes</h1>
+                    <p class="page-subtitle">Sección "reportes" en desarrollo. Próximamente disponible.</p>
+                </div>
+            </div>
         </section>
     </main>
+
+    <!-- Modal para Crear/Editar Institución -->
+    <div class="modal" id="institution-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Nueva Institución</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <form id="institution-form">
+                <div class="form-group">
+                    <label class="form-label" for="inst-name">Nombre de la Institución *</label>
+                    <input type="text" class="form-input" id="inst-name" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="inst-nit">NIT *</label>
+                        <input type="text" class="form-input" id="inst-nit" placeholder="123456789-0" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="inst-education-level">Nivel Educativo *</label>
+                        <select class="form-select" id="inst-education-level" required>
+                            <option value="">Seleccionar nivel</option>
+                            <option value="PREESCOLAR">Preescolar</option>
+                            <option value="PRIMARIA">Primaria</option>
+                            <option value="SECUNDARIA">Secundaria</option>
+                            <option value="MEDIA">Media</option>
+                            <option value="SUPERIOR">Superior</option>
+                            <option value="MIXTA">Mixta</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="inst-address">Dirección *</label>
+                    <input type="text" class="form-input" id="inst-address" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="inst-city">Ciudad *</label>
+                        <input type="text" class="form-input" id="inst-city" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="inst-department">Departamento *</label>
+                        <input type="text" class="form-input" id="inst-department" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="inst-phone">Teléfono *</label>
+                        <input type="tel" class="form-input" id="inst-phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="inst-email">Email</label>
+                        <input type="email" class="form-input" id="inst-email">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="inst-country">País</label>
+                    <input type="text" class="form-input" id="inst-country" value="Colombia">
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <span id="submit-text">Crear Institución</span>
+                        <span class="loading" id="submit-loading" style="display: none;"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         let currentUser = null;
@@ -703,6 +1305,10 @@
             userWelcome.textContent = `Hola, ${currentUser.firstName}`;
             userInitials.textContent = `${currentUser.firstName.charAt(0)}${currentUser.lastName.charAt(0)}`;
 
+            // Debug: mostrar rol del usuario
+            console.log('Usuario actual:', currentUser);
+            console.log('Rol del usuario:', currentUser.role);
+
             loadDashboardStats();
         }
 
@@ -710,12 +1316,16 @@
         async function loadDashboardStats() {
             const token = localStorage.getItem('token');
             
+            console.log('🔄 Cargando estadísticas del dashboard...');
+            
             try {
                 const statsResponse = await fetch('/api/dashboard/stats', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
+                
+                console.log('📊 Respuesta de stats:', statsResponse.status, statsResponse.statusText);
                 
                 if (statsResponse.ok) {
                     const statsData = await statsResponse.json();
@@ -827,19 +1437,7 @@
             }
         }
 
-        function showSection(section) {
-            document.querySelectorAll('.sidebar-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            event.target.closest('.sidebar-link').classList.add('active');
 
-            if (section !== 'dashboard') {
-                alert(`Sección "${section}" en desarrollo. Próximamente disponible.`);
-                return;
-            }
-
-            currentSection = section;
-        }
 
         async function logout() {
             const token = localStorage.getItem('token');
@@ -878,6 +1476,57 @@
                 element.classList.add('neutral');
             }
         }
+
+        // ===================================
+        // NAVEGACIÓN ENTRE SECCIONES
+        // ===================================
+
+        function showSection(sectionName) {
+            // Ocultar todas las secciones
+            const sections = ['dashboard', 'institutions', 'accounting', 'reports'];
+            sections.forEach(section => {
+                const element = document.getElementById(`${section}-section`);
+                if (element) {
+                    element.style.display = 'none';
+                }
+            });
+
+            // Mostrar la sección seleccionada
+            const targetSection = document.getElementById(`${sectionName}-section`);
+            if (targetSection) {
+                targetSection.style.display = 'block';
+                targetSection.classList.add('fade-in');
+            }
+
+            // Actualizar enlaces activos en el sidebar
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            const activeLink = document.querySelector(`[onclick="showSection('${sectionName}')"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+
+            // Actualizar sección actual
+            currentSection = sectionName;
+
+            // Inicializar sección específica
+            if (sectionName === 'institutions' && typeof initializeInstitutions === 'function') {
+                initializeInstitutions();
+            }
+        }
+
+        // Función para logout
+        function logout() {
+            if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+                localStorage.removeItem('token');
+                window.location.href = '/login.html';
+            }
+        }
     </script>
+    
+    <!-- Script específico para instituciones -->
+    <script src="/js/institutions.js"></script>
 </body>
 </html>

@@ -40,8 +40,17 @@ const enforceTenant = (req, res, next) => {
  */
 const validateTenantAccess = async (req, res, next) => {
   try {
+    // Ignorar rutas especiales que no son IDs de institución
+    const specialRoutes = ['stats', 'options', 'dashboard', 'logo'];
+    const pathSegments = req.originalUrl.split('/');
+    const lastSegment = pathSegments[pathSegments.length - 1].split('?')[0];
+    
+    if (specialRoutes.includes(lastSegment)) {
+      return next();
+    }
+    
     const requestedInstitutionId = 
-      req.params.institutionId || 
+      req.params.id || 
       req.body.institutionId || 
       req.query.institutionId ||
       req.headers['x-institution-id'];

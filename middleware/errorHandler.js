@@ -47,6 +47,18 @@ class ForbiddenError extends AppError {
   }
 }
 
+class TenantError extends AppError {
+  constructor(message = 'Error de tenant/institución') {
+    super(message, 403, 'TENANT_ERROR');
+  }
+}
+
+class PermissionError extends AppError {
+  constructor(message = 'Permisos insuficientes') {
+    super(message, 403, 'PERMISSION_ERROR');
+  }
+}
+
 /**
  * Middleware de manejo de errores global
  */
@@ -145,6 +157,8 @@ module.exports = {
   ConflictError,
   AuthError,
   ForbiddenError,
+  TenantError,
+  PermissionError,
   errorHandler,
   notFoundHandler,
   asyncHandler
