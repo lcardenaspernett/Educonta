@@ -4,7 +4,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "postinstall": "npx prisma generate"
+    "postinstall": "npx prisma generate",
+    "build": "npx prisma db push && npx prisma generate",
+    "deploy": "npx prisma db push && npx prisma generate && node server.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
