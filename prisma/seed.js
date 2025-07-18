@@ -14,8 +14,8 @@ const prisma = require('../config/prisma');
 const SEED_CONFIG = {
   // Control de seeding
   CREATE_SUPER_ADMIN: true,
-  CREATE_DEMO_INSTITUTION: process.env.NODE_ENV === 'development',
-  CREATE_SAMPLE_DATA: process.env.NODE_ENV === 'development',
+  CREATE_DEMO_INSTITUTION: true, // Crear siempre para tener datos de prueba
+  CREATE_SAMPLE_DATA: true, // Crear siempre para tener datos de prueba
   
   // Credenciales por defecto
   SUPER_ADMIN: {

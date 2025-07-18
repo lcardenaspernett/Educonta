@@ -4,6 +4,6 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npx prisma db push && npx prisma generate && node server.js"
+    "startCommand": "npx prisma db push && npx prisma generate && npx prisma db seed && node server.js"
   }
 }
