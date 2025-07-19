@@ -246,6 +246,16 @@ async function createUserPermissions(userId, role) {
 async function createBasicAccountPlan(institutionId) {
   console.log('📊 Creando plan de cuentas básico...');
   
+  // Verificar si ya existe plan de cuentas para esta institución
+  const existingAccounts = await prisma.account.findMany({
+    where: { institutionId }
+  });
+
+  if (existingAccounts.length > 0) {
+    console.log('ℹ️  Plan de cuentas ya existe para esta institución:', existingAccounts.length, 'cuentas');
+    return existingAccounts.map(acc => acc.id);
+  }
+
   const accounts = [
     // ACTIVOS
     { code: '1', name: 'ACTIVOS', accountType: 'ASSET', level: 1, parent: null },
@@ -309,6 +319,16 @@ async function createBasicAccountPlan(institutionId) {
 async function createBasicCategories(institutionId) {
   console.log('🏷️  Creando categorías básicas...');
   
+  // Verificar si ya existen categorías para esta institución
+  const existingCategories = await prisma.category.findMany({
+    where: { institutionId }
+  });
+
+  if (existingCategories.length > 0) {
+    console.log('ℹ️  Categorías ya existen para esta institución:', existingCategories.length, 'categorías');
+    return existingCategories;
+  }
+
   const categories = [
     { name: 'Matrículas', description: 'Ingresos por matrículas de estudiantes', type: 'INCOME', color: '#10b981' },
     { name: 'Mensualidades', description: 'Ingresos por mensualidades', type: 'INCOME', color: '#3b82f6' },
