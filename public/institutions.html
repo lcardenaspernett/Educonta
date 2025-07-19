@@ -1486,12 +1486,28 @@
             }
         });
 
-        // Search on Enter key
+        // Búsqueda en tiempo real (como en estudiantes)
+        document.getElementById('search-input').addEventListener('input', debounce(() => loadInstitutions(1), 500));
+        
+        // También mantener búsqueda con Enter
         document.getElementById('search-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 loadInstitutions(1);
             }
         });
+
+        // Función debounce para búsqueda en tiempo real
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
     </script>
 </body>
 </html>
