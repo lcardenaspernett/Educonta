@@ -645,6 +645,12 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Animación shimmer para búsqueda */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
     </style>
 </head>
 <body>
@@ -1106,15 +1112,22 @@
         }
 
         // Load Institutions
-        async function loadInstitutions(page = 1) {
+        async function loadInstitutions(page = 1, isSearch = false) {
             const token = localStorage.getItem('token');
             const searchInput = document.getElementById('search-input');
             const departmentFilter = document.getElementById('department-filter');
             const educationLevelFilter = document.getElementById('education-level-filter');
             const statusFilter = document.getElementById('status-filter');
             
-            // Show loading
-            document.getElementById('table-loading').style.display = 'flex';
+            // Solo mostrar loading completo para navegación de páginas, no para búsquedas
+            if (!isSearch) {
+                document.getElementById('table-loading').style.display = 'flex';
+            } else {
+                // Para búsquedas, mostrar indicador sutil en el campo de búsqueda
+                searchInput.style.background = 'linear-gradient(90deg, var(--bg) 0%, var(--bg-secondary) 50%, var(--bg) 100%)';
+                searchInput.style.backgroundSize = '200% 100%';
+                searchInput.style.animation = 'shimmer 1s ease-in-out infinite';
+            }
             
             try {
                 const params = new URLSearchParams({
@@ -1156,7 +1169,15 @@
                 console.error('Error loading institutions:', error);
                 showAlert('Error de conexión', 'error');
             } finally {
-                document.getElementById('table-loading').style.display = 'none';
+                // Ocultar loading apropiado según el tipo de operación
+                if (!isSearch) {
+                    document.getElementById('table-loading').style.display = 'none';
+                } else {
+                    // Restaurar estilo normal del campo de búsqueda
+                    searchInput.style.background = '';
+                    searchInput.style.backgroundSize = '';
+                    searchInput.style.animation = '';
+                }
             }
         }
 
@@ -1486,8 +1507,8 @@
             }
         });
 
-        // Búsqueda en tiempo real (como en estudiantes)
-        document.getElementById('search-input').addEventListener('input', debounce(() => loadInstitutions(1), 500));
+        // Búsqueda en tiempo real (como en estudiantes) - Más rápido
+        document.getElementById('search-input').addEventListener('input', debounce(() => loadInstitutions(1, true), 300));
         
         // También mantener búsqueda con Enter
         document.getElementById('search-input').addEventListener('keypress', function(e) {

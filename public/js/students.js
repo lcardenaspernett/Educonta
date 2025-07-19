@@ -112,8 +112,8 @@ function initializeEventListeners() {
     // Formulario de estudiante
     document.getElementById('student-form').addEventListener('submit', handleStudentSubmit);
     
-    // Búsqueda en tiempo real
-    document.getElementById('search-input').addEventListener('input', debounce(() => loadStudents(1), 500));
+    // Búsqueda en tiempo real - Más rápido y fluido
+    document.getElementById('search-input').addEventListener('input', debounce(() => loadStudents(1, true), 300));
     
     // Filtros
     document.getElementById('grade-filter').addEventListener('change', () => loadStudents(1));
@@ -230,9 +230,18 @@ function populateSelect(selectId, options) {
 // CARGA DE ESTUDIANTES
 // ===================================
 
-async function loadStudents(page = 1) {
+async function loadStudents(page = 1, isSearch = false) {
     try {
-        showTableLoading(true);
+        // Solo mostrar loading completo para navegación de páginas, no para búsquedas
+        if (!isSearch) {
+            showTableLoading(true);
+        } else {
+            // Para búsquedas, mostrar indicador sutil en el campo de búsqueda
+            const searchInput = document.getElementById('search-input');
+            searchInput.style.background = 'linear-gradient(90deg, var(--bg) 0%, var(--bg-secondary) 50%, var(--bg) 100%)';
+            searchInput.style.backgroundSize = '200% 100%';
+            searchInput.style.animation = 'shimmer 1s ease-in-out infinite';
+        }
         
         const token = localStorage.getItem('token');
         const params = new URLSearchParams({
@@ -270,7 +279,16 @@ async function loadStudents(page = 1) {
         showAlert('Error cargando estudiantes', 'error');
         renderEmptyTable();
     } finally {
-        showTableLoading(false);
+        // Ocultar loading apropiado según el tipo de operación
+        if (!isSearch) {
+            showTableLoading(false);
+        } else {
+            // Restaurar estilo normal del campo de búsqueda
+            const searchInput = document.getElementById('search-input');
+            searchInput.style.background = '';
+            searchInput.style.backgroundSize = '';
+            searchInput.style.animation = '';
+        }
     }
 }
 
