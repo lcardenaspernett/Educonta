@@ -138,41 +138,59 @@ async function createDemoUsers(institutionId) {
   try {
     const users = [];
 
-    // Crear rector
-    const rector = await prisma.user.create({
-      data: {
-        email: SEED_CONFIG.DEMO_RECTOR.email,
-        password: SEED_CONFIG.DEMO_RECTOR.password,
-        firstName: SEED_CONFIG.DEMO_RECTOR.firstName,
-        lastName: SEED_CONFIG.DEMO_RECTOR.lastName,
-        role: 'RECTOR',
-        isActive: true,
-        institutionId
-      }
+    // Verificar y crear rector
+    let rector = await prisma.user.findUnique({
+      where: { email: SEED_CONFIG.DEMO_RECTOR.email }
     });
+
+    if (!rector) {
+      rector = await prisma.user.create({
+        data: {
+          email: SEED_CONFIG.DEMO_RECTOR.email,
+          password: SEED_CONFIG.DEMO_RECTOR.password,
+          firstName: SEED_CONFIG.DEMO_RECTOR.firstName,
+          lastName: SEED_CONFIG.DEMO_RECTOR.lastName,
+          role: 'RECTOR',
+          isActive: true,
+          institutionId
+        }
+      });
+      console.log('✅ Rector creado:', rector.email);
+      
+      // Crear permisos para rector
+      await createUserPermissions(rector.id, 'RECTOR');
+    } else {
+      console.log('ℹ️  Rector ya existe:', rector.email);
+    }
     users.push(rector);
 
-    // Crear permisos para rector
-    await createUserPermissions(rector.id, 'RECTOR');
-
-    // Crear auxiliar contable
-    const accountant = await prisma.user.create({
-      data: {
-        email: SEED_CONFIG.DEMO_ACCOUNTANT.email,
-        password: SEED_CONFIG.DEMO_ACCOUNTANT.password,
-        firstName: SEED_CONFIG.DEMO_ACCOUNTANT.firstName,
-        lastName: SEED_CONFIG.DEMO_ACCOUNTANT.lastName,
-        role: 'AUXILIARY_ACCOUNTANT',
-        isActive: true,
-        institutionId
-      }
+    // Verificar y crear auxiliar contable
+    let accountant = await prisma.user.findUnique({
+      where: { email: SEED_CONFIG.DEMO_ACCOUNTANT.email }
     });
+
+    if (!accountant) {
+      accountant = await prisma.user.create({
+        data: {
+          email: SEED_CONFIG.DEMO_ACCOUNTANT.email,
+          password: SEED_CONFIG.DEMO_ACCOUNTANT.password,
+          firstName: SEED_CONFIG.DEMO_ACCOUNTANT.firstName,
+          lastName: SEED_CONFIG.DEMO_ACCOUNTANT.lastName,
+          role: 'AUXILIARY_ACCOUNTANT',
+          isActive: true,
+          institutionId
+        }
+      });
+      console.log('✅ Auxiliar contable creado:', accountant.email);
+      
+      // Crear permisos para auxiliar contable
+      await createUserPermissions(accountant.id, 'AUXILIARY_ACCOUNTANT');
+    } else {
+      console.log('ℹ️  Auxiliar contable ya existe:', accountant.email);
+    }
     users.push(accountant);
 
-    // Crear permisos para auxiliar contable
-    await createUserPermissions(accountant.id, 'AUXILIARY_ACCOUNTANT');
-
-    console.log('✅ Usuarios demo creados:', users.length);
+    console.log('✅ Usuarios demo verificados:', users.length);
     return users;
   } catch (error) {
     console.error('❌ Error creando usuarios demo:', error);
@@ -326,7 +344,7 @@ async function createBasicCategories(institutionId) {
 async function createSampleStudents(institutionId) {
   console.log('👨‍🎓 Creando estudiantes demo...');
   
-  const students = [
+  const studentsData = [
     {
       studentCode: 'EST001',
       firstName: 'Ana',
@@ -401,19 +419,36 @@ async function createSampleStudents(institutionId) {
 
   const createdStudents = [];
 
-  for (const studentData of students) {
-    const student = await prisma.student.create({
-      data: {
-        ...studentData,
-        institutionId,
-        isActive: true,
-        enrollmentDate: new Date()
+  for (const studentData of studentsData) {
+    // Verificar si el estudiante ya existe por código o documento
+    const existingStudent = await prisma.student.findFirst({
+      where: {
+        OR: [
+          { studentCode: studentData.studentCode },
+          { documentNumber: studentData.documentNumber }
+        ],
+        institutionId
       }
     });
-    createdStudents.push(student);
+
+    if (!existingStudent) {
+      const student = await prisma.student.create({
+        data: {
+          ...studentData,
+          institutionId,
+          isActive: true,
+          enrollmentDate: new Date()
+        }
+      });
+      createdStudents.push(student);
+      console.log('✅ Estudiante creado:', student.studentCode, '-', student.firstName, student.lastName);
+    } else {
+      console.log('ℹ️  Estudiante ya existe:', existingStudent.studentCode, '-', existingStudent.firstName, existingStudent.lastName);
+      createdStudents.push(existingStudent);
+    }
   }
 
-  console.log('✅ Estudiantes demo creados:', createdStudents.length);
+  console.log('✅ Estudiantes demo verificados:', createdStudents.length);
   return createdStudents;
 }
 
