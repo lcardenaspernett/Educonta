@@ -1017,7 +1017,7 @@
             
             if (!token) {
                 console.log('❌ No hay token, redirigiendo a login');
-                window.location.href = '/login.html';
+                window.location.href = '/login';
                 return;
             }
 
@@ -1048,11 +1048,11 @@
                 } else {
                     console.log('❌ Token inválido, limpiando y redirigiendo');
                     localStorage.removeItem('token');
-                    window.location.href = '/login.html';
+                    window.location.href = '/login';
                 }
             } catch (error) {
                 console.error('❌ Error verificando autenticación:', error);
-                window.location.href = '/login.html';
+                window.location.href = '/login';
             }
         }
 

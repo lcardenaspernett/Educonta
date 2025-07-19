@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function checkAuth() {
     const token = localStorage.getItem('token');
     if (!token) {
-        window.location.href = '/login.html';
+        window.location.href = '/login';
         return;
     }
 
@@ -46,11 +46,11 @@ async function checkAuth() {
             initializeApp();
         } else {
             localStorage.removeItem('token');
-            window.location.href = '/login.html';
+            window.location.href = '/login';
         }
     } catch (error) {
         console.error('Error verificando autenticación:', error);
-        window.location.href = '/login.html';
+        window.location.href = '/login';
     }
 }
 

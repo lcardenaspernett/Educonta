@@ -32,6 +32,19 @@ app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
+app.get('/accounting', (req, res) => {
+  console.log('📊 Serving accounting page');
+  res.sendFile(path.join(__dirname, 'public', 'accounting.html'));
+});
+
+app.get('/institutions', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'institutions.html'));
+});
+
+app.get('/students', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'students.html'));
+});
+
 app.get('/api/health', async (req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
@@ -82,20 +95,21 @@ try {
   console.log('⚠️ Student routes not found');
 }
 
-// 404 handler
+try {
+  const accountingRoutes = require('./routes/accounting');
+  app.use('/api/accounting', accountingRoutes);
+  console.log('✅ Accounting routes loaded');
+} catch (error) {
+  console.log('⚠️ Accounting routes not found:', error.message);
+}
+
+// 404 handler para API routes
 app.use('/api/*', (req, res) => {
   res.status(404).json({ error: 'API route not found' });
 });
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
 // Error handlers
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
-
-// 404 handler para rutas no encontradas
-app.use(notFoundHandler);
 
 // Error handler global
 app.use(errorHandler);
