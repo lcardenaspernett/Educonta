@@ -1,35 +1,27 @@
 // ===================================
-// EDUCONTA - Rutas de Contabilidad
+// EDUCONTA - Rutas de Contabilidad Mínimas (Test)
 // ===================================
 
 const express = require('express');
-const { body, query } = require('express-validator');
 const router = express.Router();
 
+// Prisma Client
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
 // Middleware
-const auth = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const { checkPermission } = require('../middleware/permission');
 
-// Controlador
-const {
-  getAccounts,
-  getAccountById,
-  createAccount,
-  getTransactions,
-  createTransaction,
-  getBalanceSheet,
-  getStats
-} = require('../controllers/accountingController');
-
 // ===================================
-// PRUEBA (SIN AUTH)
+// RUTAS BÁSICAS DE PRUEBA
 // ===================================
 
 /**
  * GET /api/accounting/test
- * Endpoint de prueba sin autenticación
+ * Endpoint de prueba básico
  */
-router.get('/test', (_req, res) => {
+router.get('/test', (req, res) => {
   res.json({
     success: true,
     message: 'Accounting routes are working!',
@@ -38,838 +30,457 @@ router.get('/test', (_req, res) => {
 });
 
 /**
- * GET /api/accounting/test-stats
- * Endpoint de prueba para estadísticas sin autenticación
- */
-router.get('/test-stats', async (req, res) => {
-  try {
-    res.json({
-      success: true,
-      message: 'Stats endpoint working!',
-      data: {
-        totalAccounts: 15,
-        activeAccounts: 15,
-        totalTransactions: 25,
-        pendingTransactions: 3,
-        totalBalance: 1250000,
-        accountsByType: {
-          ASSET: 5,
-          LIABILITY: 3,
-          EQUITY: 2,
-          INCOME: 3,
-          EXPENSE: 2
-        },
-        recentTransactions: [
-          {
-            id: '1',
-            reference: 'FAC-001',
-            description: 'Venta de servicios',
-            amount: 500000,
-            date: new Date().toISOString()
-          }
-        ],
-        transactionsByMonth: [
-          { date: new Date(), count: 10, amount: 1000000 }
-        ]
-      }
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-/**
- * GET /api/accounting/test-accounts
- * Endpoint de prueba para cuentas sin autenticación
- */
-router.get('/test-accounts', async (req, res) => {
-  try {
-    const sampleAccounts = [
-      {
-        id: '1',
-        code: '1105',
-        name: 'Caja',
-        accountType: 'ASSET',
-        level: 2,
-        parentId: null,
-        balance: 500000,
-        isActive: true,
-        children: []
-      },
-      {
-        id: '2',
-        code: '1110',
-        name: 'Bancos',
-        accountType: 'ASSET',
-        level: 2,
-        parentId: null,
-        balance: 2500000,
-        isActive: true,
-        children: []
-      },
-      {
-        id: '3',
-        code: '2105',
-        name: 'Proveedores',
-        accountType: 'LIABILITY',
-        level: 2,
-        parentId: null,
-        balance: 800000,
-        isActive: true,
-        children: []
-      },
-      {
-        id: '4',
-        code: '3105',
-        name: 'Capital Social',
-        accountType: 'EQUITY',
-        level: 2,
-        parentId: null,
-        balance: 1000000,
-        isActive: true,
-        children: []
-      },
-      {
-        id: '5',
-        code: '4135',
-        name: 'Ingresos por Servicios',
-        accountType: 'INCOME',
-        level: 2,
-        parentId: null,
-        balance: 1500000,
-        isActive: true,
-        children: []
-      },
-      {
-        id: '6',
-        code: '5105',
-        name: 'Gastos Administrativos',
-        accountType: 'EXPENSE',
-        level: 2,
-        parentId: null,
-        balance: 300000,
-        isActive: true,
-        children: []
-      }
-    ];
-
-    res.json({
-      success: true,
-      message: 'Accounts endpoint working!',
-      data: sampleAccounts,
-      tree: sampleAccounts,
-      summary: {
-        total: sampleAccounts.length,
-        byType: {
-          ASSET: 2,
-          LIABILITY: 1,
-          EQUITY: 1,
-          INCOME: 1,
-          EXPENSE: 1
-        },
-        byInstitution: null
-      }
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-/**
- * GET /api/accounting/test-transactions
- * Endpoint de prueba para transacciones sin autenticación
- */
-router.get('/test-transactions', async (req, res) => {
-  try {
-    const sampleTransactions = [
-      {
-        id: '1',
-        date: new Date().toISOString(),
-        reference: 'FAC-001',
-        description: 'Venta de servicios educativos',
-        amount: 500000,
-        type: 'INCOME',
-        status: 'APPROVED',
-        debitAccountId: '1',
-        creditAccountId: '5',
-        debitAccount: {
-          id: '1',
-          code: '1105',
-          name: 'Caja',
-          accountType: 'ASSET'
-        },
-        creditAccount: {
-          id: '5',
-          code: '4135',
-          name: 'Ingresos por Servicios',
-          accountType: 'INCOME'
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '2',
-        date: new Date().toISOString(),
-        reference: 'REC-001',
-        description: 'Pago de servicios públicos',
-        amount: 150000,
-        type: 'EXPENSE',
-        status: 'PENDING',
-        debitAccountId: '6',
-        creditAccountId: '1',
-        debitAccount: {
-          id: '6',
-          code: '5105',
-          name: 'Gastos Administrativos',
-          accountType: 'EXPENSE'
-        },
-        creditAccount: {
-          id: '1',
-          code: '1105',
-          name: 'Caja',
-          accountType: 'ASSET'
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ];
-
-    res.json({
-      success: true,
-      data: sampleTransactions,
-      pagination: {
-        currentPage: 1,
-        totalPages: 1,
-        totalCount: sampleTransactions.length,
-        limit: 20,
-        hasNextPage: false,
-        hasPrevPage: false
-      }
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-// ===================================
-// ESTADÍSTICAS
-// ===================================
-
-/**
  * GET /api/accounting/stats
- * Obtener estadísticas de contabilidad (SIN AUTH TEMPORALMENTE)
+ * Estadísticas completas con autenticación y validaciones
  */
-router.get('/stats', async (req, res) => {
+router.get('/stats', authenticate, checkPermission('accounting', 'read'), async (req, res) => {
   try {
+    // Obtener institutionId del usuario autenticado o usar fallback
+    const institutionId = req.user?.institutionId || 'cmd3z16yp0002w6heeiym4ex6';
+    
+    // Validar parámetros de entrada
+    const period = req.query.period && ['day', 'week', 'month', 'year'].includes(req.query.period) ? req.query.period : 'month';
+    const includeCharts = req.query.charts === 'true';
+    
+    // Calcular fechas según el período
+    const now = new Date();
+    let startDate = new Date();
+    
+    switch (period) {
+      case 'day':
+        startDate.setDate(now.getDate() - 1);
+        break;
+      case 'week':
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case 'month':
+        startDate.setMonth(now.getMonth() - 1);
+        break;
+      case 'year':
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+    }
+    
+    // Ejecutar todas las consultas en paralelo para mejor rendimiento
+    const [
+      totalAccounts,
+      activeAccounts,
+      totalTransactions,
+      approvedTransactions,
+      pendingTransactions,
+      rejectedTransactions,
+      recentTransactions,
+      totalIncome,
+      totalExpenses,
+      accountsByType
+    ] = await Promise.all([
+      // Conteo de cuentas
+      prisma.account.count({
+        where: { institutionId }
+      }),
+      prisma.account.count({
+        where: { institutionId, isActive: true }
+      }),
+      
+      // Conteo de transacciones
+      prisma.transaction.count({
+        where: { institutionId }
+      }),
+      prisma.transaction.count({
+        where: { institutionId, status: 'APPROVED' }
+      }),
+      prisma.transaction.count({
+        where: { institutionId, status: 'PENDING' }
+      }),
+      prisma.transaction.count({
+        where: { institutionId, status: 'REJECTED' }
+      }),
+      
+      // Transacciones recientes
+      prisma.transaction.findMany({
+        where: {
+          institutionId,
+          date: {
+            gte: startDate
+          }
+        },
+        include: {
+          debitAccount: {
+            select: { code: true, name: true }
+          },
+          creditAccount: {
+            select: { code: true, name: true }
+          }
+        },
+        orderBy: { date: 'desc' },
+        take: 5
+      }),
+      
+      // Totales financieros
+      prisma.transaction.aggregate({
+        where: {
+          institutionId,
+          status: 'APPROVED',
+          type: 'INCOME',
+          date: {
+            gte: startDate
+          }
+        },
+        _sum: {
+          amount: true
+        }
+      }),
+      prisma.transaction.aggregate({
+        where: {
+          institutionId,
+          status: 'APPROVED',
+          type: 'EXPENSE',
+          date: {
+            gte: startDate
+          }
+        },
+        _sum: {
+          amount: true
+        }
+      }),
+      
+      // Cuentas por tipo
+      prisma.account.groupBy({
+        by: ['accountType'],
+        where: {
+          institutionId,
+          isActive: true
+        },
+        _count: {
+          accountType: true
+        }
+      })
+    ]);
+    
+    // Calcular métricas derivadas
+    const incomeAmount = totalIncome._sum.amount || 0;
+    const expenseAmount = totalExpenses._sum.amount || 0;
+    const netIncome = incomeAmount - expenseAmount;
+    const transactionApprovalRate = totalTransactions > 0 ? (approvedTransactions / totalTransactions * 100).toFixed(2) : 0;
+    
+    // Preparar datos para gráficos si se solicita
+    let chartData = null;
+    if (includeCharts) {
+      chartData = {
+        accountTypes: accountsByType.map(item => ({
+          type: item.accountType,
+          count: item._count.accountType
+        })),
+        transactionStatus: [
+          { status: 'APPROVED', count: approvedTransactions },
+          { status: 'PENDING', count: pendingTransactions },
+          { status: 'REJECTED', count: rejectedTransactions }
+        ]
+      };
+    }
+    
     res.json({
       success: true,
       data: {
-        totalAccounts: 15,
-        activeAccounts: 15,
-        totalTransactions: 25,
-        pendingTransactions: 3,
-        totalBalance: 1250000,
-        accountsByType: {
-          ASSET: 5,
-          LIABILITY: 3,
-          EQUITY: 2,
-          INCOME: 3,
-          EXPENSE: 2
+        // Resumen general
+        summary: {
+          totalAccounts,
+          activeAccounts,
+          inactiveAccounts: totalAccounts - activeAccounts,
+          totalTransactions,
+          approvedTransactions,
+          pendingTransactions,
+          rejectedTransactions,
+          transactionApprovalRate: parseFloat(transactionApprovalRate)
         },
-        recentTransactions: [
-          {
-            id: '1',
-            reference: 'FAC-001',
-            description: 'Venta de servicios',
-            amount: 500000,
-            date: new Date().toISOString()
-          }
-        ],
-        transactionsByMonth: [
-          { date: new Date(), count: 10, amount: 1000000 }
-        ]
-      }
+        
+        // Métricas financieras
+        financial: {
+          totalIncome: incomeAmount,
+          totalExpenses: expenseAmount,
+          netIncome,
+          period,
+          startDate: startDate.toISOString(),
+          endDate: now.toISOString()
+        },
+        
+        // Transacciones recientes
+        recentTransactions,
+        
+        // Distribución de cuentas por tipo
+        accountDistribution: accountsByType,
+        
+        // Datos para gráficos (opcional)
+        charts: chartData
+      },
+      message: `Complete stats for ${period} period working!`
     });
   } catch (error) {
+    console.error('Error getting stats:', error);
     res.status(500).json({
       success: false,
       error: error.message
     });
   }
 });
-
-// ===================================
-// PLAN DE CUENTAS
-// ===================================
 
 /**
  * GET /api/accounting/accounts
- * Obtener plan de cuentas (SIN AUTH TEMPORALMENTE)
+ * Cuentas con autenticación, filtros y jerarquía
  */
-router.get('/accounts', async (req, res) => {
+router.get('/accounts', authenticate, checkPermission('accounting', 'read'), async (req, res) => {
   try {
-    const sampleAccounts = [
-      {
-        id: '1',
-        code: '1105',
-        name: 'Caja',
-        accountType: 'ASSET',
-        level: 2,
-        parentId: null,
-        balance: 500000,
-        isActive: true,
-        children: [],
-        _count: { debitTransactions: 5, creditTransactions: 2 }
+    // Obtener institutionId del usuario autenticado o usar fallback
+    const institutionId = req.user?.institutionId || 'cmd3z16yp0002w6heeiym4ex6';
+    
+    // Validar y sanitizar parámetros de entrada
+    const accountType = req.query.type && ['ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE'].includes(req.query.type) ? req.query.type : null;
+    const isActive = req.query.active !== undefined ? req.query.active === 'true' : null;
+    const search = req.query.search && typeof req.query.search === 'string' ? req.query.search.trim() : null;
+    const includeBalance = req.query.includeBalance === 'true';
+    
+    // Construir filtros dinámicos
+    const where = {
+      institutionId: institutionId
+    };
+    
+    if (accountType) {
+      where.accountType = accountType;
+    }
+    
+    if (isActive !== null) {
+      where.isActive = isActive;
+    }
+    
+    if (search) {
+      where.OR = [
+        {
+          name: {
+            contains: search,
+            mode: 'insensitive'
+          }
+        },
+        {
+          code: {
+            contains: search,
+            mode: 'insensitive'
+          }
+        }
+      ];
+    }
+    
+    // Obtener cuentas con información completa
+    const accounts = await prisma.account.findMany({
+      where,
+      include: {
+        parent: {
+          select: {
+            id: true,
+            code: true,
+            name: true
+          }
+        },
+        children: {
+          select: {
+            id: true,
+            code: true,
+            name: true,
+            accountType: true,
+            isActive: true
+          },
+          where: {
+            isActive: true
+          }
+        },
+        _count: {
+          select: {
+            debitTransactions: true,
+            creditTransactions: true,
+            children: true
+          }
+        }
       },
-      {
-        id: '2',
-        code: '1110',
-        name: 'Bancos',
-        accountType: 'ASSET',
-        level: 2,
-        parentId: null,
-        balance: 2500000,
-        isActive: true,
-        children: [],
-        _count: { debitTransactions: 8, creditTransactions: 3 }
-      },
-      {
-        id: '3',
-        code: '2105',
-        name: 'Proveedores',
-        accountType: 'LIABILITY',
-        level: 2,
-        parentId: null,
-        balance: 800000,
-        isActive: true,
-        children: [],
-        _count: { debitTransactions: 2, creditTransactions: 6 }
-      },
-      {
-        id: '4',
-        code: '3105',
-        name: 'Capital Social',
-        accountType: 'EQUITY',
-        level: 2,
-        parentId: null,
-        balance: 1000000,
-        isActive: true,
-        children: [],
-        _count: { debitTransactions: 0, creditTransactions: 1 }
-      },
-      {
-        id: '5',
-        code: '4135',
-        name: 'Ingresos por Servicios',
-        accountType: 'INCOME',
-        level: 2,
-        parentId: null,
-        balance: 1500000,
-        isActive: true,
-        children: [],
-        _count: { debitTransactions: 1, creditTransactions: 10 }
-      },
-      {
-        id: '6',
-        code: '5105',
-        name: 'Gastos Administrativos',
-        accountType: 'EXPENSE',
-        level: 2,
-        parentId: null,
-        balance: 300000,
-        isActive: true,
-        children: [],
-        _count: { debitTransactions: 4, creditTransactions: 0 }
-      }
-    ];
-
+      orderBy: [
+        { code: 'asc' },
+        { name: 'asc' }
+      ]
+    });
+    
+    // Calcular balances si se solicita
+    let accountsWithBalance = accounts;
+    if (includeBalance) {
+      accountsWithBalance = await Promise.all(
+        accounts.map(async (account) => {
+          // Calcular balance basado en transacciones
+          const debitTotal = await prisma.transaction.aggregate({
+            where: {
+              debitAccountId: account.id,
+              status: 'APPROVED'
+            },
+            _sum: {
+              amount: true
+            }
+          });
+          
+          const creditTotal = await prisma.transaction.aggregate({
+            where: {
+              creditAccountId: account.id,
+              status: 'APPROVED'
+            },
+            _sum: {
+              amount: true
+            }
+          });
+          
+          const debitAmount = debitTotal._sum.amount || 0;
+          const creditAmount = creditTotal._sum.amount || 0;
+          
+          // El balance depende del tipo de cuenta
+          let balance = 0;
+          if (['ASSET', 'EXPENSE'].includes(account.accountType)) {
+            balance = debitAmount - creditAmount;
+          } else {
+            balance = creditAmount - debitAmount;
+          }
+          
+          return {
+            ...account,
+            balance: balance,
+            debitTotal: debitAmount,
+            creditTotal: creditAmount
+          };
+        })
+      );
+    }
+    
     res.json({
       success: true,
-      data: sampleAccounts,
-      tree: sampleAccounts,
+      data: accountsWithBalance,
+      filters: {
+        accountType,
+        isActive,
+        search,
+        includeBalance
+      },
       summary: {
-        total: sampleAccounts.length,
-        byType: {
-          ASSET: 2,
-          LIABILITY: 1,
-          EQUITY: 1,
-          INCOME: 1,
-          EXPENSE: 1
-        },
-        byInstitution: null
-      }
+        totalAccounts: accounts.length,
+        activeAccounts: accounts.filter(a => a.isActive).length,
+        inactiveAccounts: accounts.filter(a => !a.isActive).length
+      },
+      message: 'Accounts with filters and hierarchy working!'
     });
   } catch (error) {
+    console.error('Error getting accounts:', error);
     res.status(500).json({
       success: false,
       error: error.message
     });
   }
 });
-
-/**
- * GET /api/accounting/accounts/:id
- * Obtener cuenta por ID
- */
-router.get('/accounts/:id',
-  auth,
-  checkPermission('accounting', 'read'),
-  getAccountById
-);
-
-/**
- * POST /api/accounting/accounts
- * Crear nueva cuenta
- */
-router.post('/accounts',
-  auth,
-  checkPermission('accounting', 'create'),
-  [
-    body('code')
-      .notEmpty()
-      .withMessage('Código de cuenta es requerido')
-      .isLength({ min: 1, max: 10 })
-      .withMessage('Código debe tener entre 1 y 10 caracteres')
-      .matches(/^[0-9]+$/)
-      .withMessage('Código debe contener solo números'),
-
-    body('name')
-      .notEmpty()
-      .withMessage('Nombre de cuenta es requerido')
-      .isLength({ min: 3, max: 100 })
-      .withMessage('Nombre debe tener entre 3 y 100 caracteres'),
-
-    body('accountType')
-      .isIn(['ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE'])
-      .withMessage('Tipo de cuenta inválido'),
-
-    body('parentId')
-      .optional()
-      .isString()
-      .withMessage('ID de cuenta padre debe ser una cadena'),
-
-    body('level')
-      .optional()
-      .isInt({ min: 1, max: 5 })
-      .withMessage('Nivel debe ser entre 1 y 5')
-  ],
-  createAccount
-);
-
-// ===================================
-// TRANSACCIONES
-// ===================================
 
 /**
  * GET /api/accounting/transactions
- * Obtener transacciones (SIN AUTH TEMPORALMENTE)
+ * Transacciones con autenticación, paginación y filtros
  */
-router.get('/transactions', async (req, res) => {
+router.get('/transactions', authenticate, checkPermission('accounting', 'read'), async (req, res) => {
   try {
-    const sampleTransactions = [
-      {
-        id: '1',
-        date: new Date().toISOString(),
-        reference: 'FAC-001',
-        description: 'Venta de servicios educativos',
-        amount: 500000,
-        type: 'INCOME',
-        status: 'APPROVED',
-        debitAccountId: '1',
-        creditAccountId: '5',
-        debitAccount: {
-          id: '1',
-          code: '1105',
-          name: 'Caja',
-          accountType: 'ASSET'
+    // Obtener institutionId del usuario autenticado o usar fallback
+    const institutionId = req.user?.institutionId || 'cmd3z16yp0002w6heeiym4ex6';
+    
+    // Validar y sanitizar parámetros de entrada
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const status = req.query.status && ['PENDING', 'APPROVED', 'REJECTED'].includes(req.query.status) ? req.query.status : null;
+    const type = req.query.type && ['INCOME', 'EXPENSE', 'TRANSFER'].includes(req.query.type) ? req.query.type : null;
+    const accountId = req.query.accountId && typeof req.query.accountId === 'string' ? req.query.accountId.trim() : null;
+    
+    const skip = (page - 1) * limit;
+    
+    // Construir filtros dinámicos
+    const where = {
+      institutionId: institutionId
+    };
+    
+    if (status) {
+      where.status = status;
+    }
+    
+    if (type) {
+      where.type = type;
+    }
+    
+    if (accountId) {
+      where.OR = [
+        { debitAccountId: accountId },
+        { creditAccountId: accountId }
+      ];
+    }
+    
+    // Obtener transacciones con paginación
+    const [transactions, totalCount] = await Promise.all([
+      prisma.transaction.findMany({
+        where,
+        include: {
+          debitAccount: {
+            select: {
+              id: true,
+              code: true,
+              name: true,
+              accountType: true
+            }
+          },
+          creditAccount: {
+            select: {
+              id: true,
+              code: true,
+              name: true,
+              accountType: true
+            }
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              color: true
+            }
+          }
         },
-        creditAccount: {
-          id: '5',
-          code: '4135',
-          name: 'Ingresos por Servicios',
-          accountType: 'INCOME'
+        orderBy: {
+          date: 'desc'
         },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '2',
-        date: new Date().toISOString(),
-        reference: 'REC-001',
-        description: 'Pago de servicios públicos',
-        amount: 150000,
-        type: 'EXPENSE',
-        status: 'PENDING',
-        debitAccountId: '6',
-        creditAccountId: '1',
-        debitAccount: {
-          id: '6',
-          code: '5105',
-          name: 'Gastos Administrativos',
-          accountType: 'EXPENSE'
-        },
-        creditAccount: {
-          id: '1',
-          code: '1105',
-          name: 'Caja',
-          accountType: 'ASSET'
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '3',
-        date: new Date(Date.now() - 86400000).toISOString(), // Yesterday
-        reference: 'TRF-001',
-        description: 'Transferencia entre cuentas',
-        amount: 200000,
-        type: 'TRANSFER',
-        status: 'APPROVED',
-        debitAccountId: '2',
-        creditAccountId: '1',
-        debitAccount: {
-          id: '2',
-          code: '1110',
-          name: 'Bancos',
-          accountType: 'ASSET'
-        },
-        creditAccount: {
-          id: '1',
-          code: '1105',
-          name: 'Caja',
-          accountType: 'ASSET'
-        },
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-        updatedAt: new Date(Date.now() - 86400000).toISOString()
-      }
-    ];
-
+        skip,
+        take: limit
+      }),
+      prisma.transaction.count({ where })
+    ]);
+    
+    const totalPages = Math.ceil(totalCount / limit);
+    
     res.json({
       success: true,
-      data: sampleTransactions,
+      data: transactions,
       pagination: {
-        currentPage: 1,
-        totalPages: 1,
-        totalCount: sampleTransactions.length,
-        limit: 20,
-        hasNextPage: false,
-        hasPrevPage: false
-      }
+        currentPage: page,
+        totalPages,
+        totalCount,
+        limit,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1
+      },
+      filters: {
+        status,
+        type,
+        accountId
+      },
+      message: 'Transactions with pagination and filters working!'
     });
   } catch (error) {
+    console.error('Error getting transactions:', error);
     res.status(500).json({
       success: false,
       error: error.message
     });
   }
-});
-
-/**
- * POST /api/accounting/transactions
- * Crear nueva transacción
- */
-router.post('/transactions',
-  auth,
-  checkPermission('accounting', 'create'),
-  [
-    body('date')
-      .isISO8601()
-      .withMessage('Fecha debe ser válida'),
-
-    body('reference')
-      .notEmpty()
-      .withMessage('Referencia es requerida')
-      .isLength({ min: 1, max: 50 })
-      .withMessage('Referencia debe tener entre 1 y 50 caracteres'),
-
-    body('description')
-      .notEmpty()
-      .withMessage('Descripción es requerida')
-      .isLength({ min: 5, max: 200 })
-      .withMessage('Descripción debe tener entre 5 y 200 caracteres'),
-
-    body('amount')
-      .isFloat({ min: 0.01 })
-      .withMessage('Monto debe ser mayor a 0'),
-
-    body('type')
-      .isIn(['INCOME', 'EXPENSE', 'TRANSFER'])
-      .withMessage('Tipo de transacción inválido'),
-
-    body('debitAccountId')
-      .notEmpty()
-      .withMessage('Cuenta débito es requerida'),
-
-    body('creditAccountId')
-      .notEmpty()
-      .withMessage('Cuenta crédito es requerida')
-  ],
-  createTransaction
-);
-
-// ===================================
-// REPORTES
-// ===================================
-
-/**
- * GET /api/accounting/balance-sheet
- * Obtener balance general
- */
-router.get('/balance-sheet',
-  auth,
-  checkPermission('accounting', 'read'),
-  [
-    query('date')
-      .optional()
-      .isISO8601()
-      .withMessage('Fecha debe ser válida')
-  ],
-  getBalanceSheet
-);
-
-// ===================================
-// RUTAS DE DESARROLLO (SIN MIDDLEWARE)
-// ===================================
-
-/**
- * GET /api/accounting/dev-stats
- * Estadísticas sin middleware para desarrollo
- */
-router.get('/dev-stats', (req, res) => {
-  console.log('🔧 DEV-STATS route hit!');
-  res.json({
-    success: true,
-    data: {
-      totalAccounts: 15,
-      activeAccounts: 15,
-      totalTransactions: 25,
-      pendingTransactions: 3,
-      totalBalance: 1250000,
-      accountsByType: {
-        ASSET: 5,
-        LIABILITY: 3,
-        EQUITY: 2,
-        INCOME: 3,
-        EXPENSE: 2
-      },
-      recentTransactions: [
-        {
-          id: '1',
-          reference: 'FAC-001',
-          description: 'Venta de servicios',
-          amount: 500000,
-          date: new Date().toISOString()
-        }
-      ],
-      transactionsByMonth: [
-        { date: new Date(), count: 10, amount: 1000000 }
-      ]
-    }
-  });
-});
-
-/**
- * GET /api/accounting/dev-accounts
- * Cuentas sin middleware para desarrollo
- */
-router.get('/dev-accounts', (req, res) => {
-  const sampleAccounts = [
-    {
-      id: '1',
-      code: '1105',
-      name: 'Caja',
-      accountType: 'ASSET',
-      level: 2,
-      parentId: null,
-      balance: 500000,
-      isActive: true,
-      children: [],
-      _count: { debitTransactions: 5, creditTransactions: 2 }
-    },
-    {
-      id: '2',
-      code: '1110',
-      name: 'Bancos',
-      accountType: 'ASSET',
-      level: 2,
-      parentId: null,
-      balance: 2500000,
-      isActive: true,
-      children: [],
-      _count: { debitTransactions: 8, creditTransactions: 3 }
-    },
-    {
-      id: '3',
-      code: '2105',
-      name: 'Proveedores',
-      accountType: 'LIABILITY',
-      level: 2,
-      parentId: null,
-      balance: 800000,
-      isActive: true,
-      children: [],
-      _count: { debitTransactions: 2, creditTransactions: 6 }
-    },
-    {
-      id: '4',
-      code: '3105',
-      name: 'Capital Social',
-      accountType: 'EQUITY',
-      level: 2,
-      parentId: null,
-      balance: 1000000,
-      isActive: true,
-      children: [],
-      _count: { debitTransactions: 0, creditTransactions: 1 }
-    },
-    {
-      id: '5',
-      code: '4135',
-      name: 'Ingresos por Servicios',
-      accountType: 'INCOME',
-      level: 2,
-      parentId: null,
-      balance: 1500000,
-      isActive: true,
-      children: [],
-      _count: { debitTransactions: 1, creditTransactions: 10 }
-    },
-    {
-      id: '6',
-      code: '5105',
-      name: 'Gastos Administrativos',
-      accountType: 'EXPENSE',
-      level: 2,
-      parentId: null,
-      balance: 300000,
-      isActive: true,
-      children: [],
-      _count: { debitTransactions: 4, creditTransactions: 0 }
-    }
-  ];
-
-  res.json({
-    success: true,
-    data: sampleAccounts,
-    tree: sampleAccounts,
-    summary: {
-      total: sampleAccounts.length,
-      byType: {
-        ASSET: 2,
-        LIABILITY: 1,
-        EQUITY: 1,
-        INCOME: 1,
-        EXPENSE: 1
-      },
-      byInstitution: null
-    }
-  });
-});
-
-/**
- * GET /api/accounting/dev-transactions
- * Transacciones sin middleware para desarrollo
- */
-router.get('/dev-transactions', (req, res) => {
-  const sampleTransactions = [
-    {
-      id: '1',
-      date: new Date().toISOString(),
-      reference: 'FAC-001',
-      description: 'Venta de servicios educativos',
-      amount: 500000,
-      type: 'INCOME',
-      status: 'APPROVED',
-      debitAccountId: '1',
-      creditAccountId: '5',
-      debitAccount: {
-        id: '1',
-        code: '1105',
-        name: 'Caja',
-        accountType: 'ASSET'
-      },
-      creditAccount: {
-        id: '5',
-        code: '4135',
-        name: 'Ingresos por Servicios',
-        accountType: 'INCOME'
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
-    {
-      id: '2',
-      date: new Date().toISOString(),
-      reference: 'REC-001',
-      description: 'Pago de servicios públicos',
-      amount: 150000,
-      type: 'EXPENSE',
-      status: 'PENDING',
-      debitAccountId: '6',
-      creditAccountId: '1',
-      debitAccount: {
-        id: '6',
-        code: '5105',
-        name: 'Gastos Administrativos',
-        accountType: 'EXPENSE'
-      },
-      creditAccount: {
-        id: '1',
-        code: '1105',
-        name: 'Caja',
-        accountType: 'ASSET'
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
-    {
-      id: '3',
-      date: new Date(Date.now() - 86400000).toISOString(),
-      reference: 'TRF-001',
-      description: 'Transferencia entre cuentas',
-      amount: 200000,
-      type: 'TRANSFER',
-      status: 'APPROVED',
-      debitAccountId: '2',
-      creditAccountId: '1',
-      debitAccount: {
-        id: '2',
-        code: '1110',
-        name: 'Bancos',
-        accountType: 'ASSET'
-      },
-      creditAccount: {
-        id: '1',
-        code: '1105',
-        name: 'Caja',
-        accountType: 'ASSET'
-      },
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      updatedAt: new Date(Date.now() - 86400000).toISOString()
-    }
-  ];
-
-  res.json({
-    success: true,
-    data: sampleTransactions,
-    pagination: {
-      currentPage: 1,
-      totalPages: 1,
-      totalCount: sampleTransactions.length,
-      limit: 20,
-      hasNextPage: false,
-      hasPrevPage: false
-    }
-  });
 });
 
 module.exports = router;
