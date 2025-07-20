@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('📄 DOM cargado, iniciando verificación de autenticación');
     initializeTheme();
     
+    // CONFIGURAR EVENT LISTENER PARA EL BOTÓN DE TEMA
+    setupThemeToggleListener();
+    
     // Verificar si venimos de otra página con usuario ya autenticado
     const urlParams = new URLSearchParams(window.location.search);
     const token = localStorage.getItem('token');
@@ -43,164 +46,127 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ===================================
-// GESTIÓN DE TEMA - VERSIÓN FINAL CORREGIDA
+// GESTIÓN DE TEMA - VERSIÓN SIMPLIFICADA Y ROBUSTA
 // ===================================
 
-// Variable para prevenir múltiples inicializaciones
-let themeInitialized = false;
-
 function initializeTheme() {
-    // Solo inicializar una vez para evitar conflictos
-    if (themeInitialized) {
-        console.log('🎨 Tema ya inicializado, saltando...');
-        return;
-    }
-    
-    console.log('🎨 Inicializando tema en módulo de contabilidad...');
+    console.log('🎨 Inicializando tema...');
     
     const savedTheme = localStorage.getItem('theme') || 'light';
-    
-    // Aplicar tema al documento
     document.documentElement.setAttribute('data-theme', savedTheme);
     
-    // Asegurar que el CSS de tema está presente
-    ensureThemeCSS();
-    
-    // Marcar como inicializado
-    themeInitialized = true;
-    
-    // Actualizar labels del interruptor con verificación
+    // Usar setTimeout para asegurar que el DOM esté completamente cargado
     setTimeout(() => {
         updateThemeLabels();
-    }, 100); // Pequeño delay para asegurar que el DOM está listo
+    }, 50);
     
-    console.log(`✅ Tema aplicado: ${savedTheme}`);
+    console.log(`✅ Tema inicializado: ${savedTheme}`);
 }
 
 function toggleTheme() {
-    console.log('🔄 Cambiando tema...');
+    console.log('🔄 Toggle tema iniciado...');
     
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-    console.log(`🔄 Cambio: ${currentTheme} → ${newTheme}`);
-
-    // Aplicar nuevo tema al documento INMEDIATAMENTE
-    document.documentElement.setAttribute('data-theme', newTheme);
-    
-    // Guardar en localStorage INMEDIATAMENTE
-    localStorage.setItem('theme', newTheme);
-    
-    console.log(`✅ Tema cambiado a: ${newTheme}`);
-    
-    // FORZAR actualización de labels inmediatamente SIN ASYNC
-    updateThemeLabelsForced(newTheme);
-    
-    console.log('✅ Cambio de tema completado exitosamente');
-}
-
-// Nueva función que fuerza la actualización sin verificaciones async
-function updateThemeLabelsForced(forcedTheme) {
-    console.log('🏷️ FORZANDO actualización de labels del tema...');
-    
-    const theme = forcedTheme || document.documentElement.getAttribute('data-theme') || 'light';
-    
-    console.log('🔍 Tema forzado:', theme);
-    
-    const lightLabel = document.getElementById('light-label');
-    const darkLabel = document.getElementById('dark-label');
-
-    // ✅ VERIFICAR que los elementos existen
-    if (!lightLabel || !darkLabel) {
-        console.warn('⚠️ Elementos de tema no encontrados');
-        return;
+    try {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        console.log(`Cambiando de ${currentTheme} a ${newTheme}`);
+        
+        // Aplicar cambios
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        
+        // Actualizar UI
+        updateThemeLabels();
+        
+        console.log(`✅ Tema cambiado exitosamente a: ${newTheme}`);
+        
+    } catch (error) {
+        console.error('❌ Error en toggleTheme:', error);
     }
-
-    // Remover TODAS las clases activas
-    lightLabel.classList.remove('active');
-    darkLabel.classList.remove('active');
-    
-    // Aplicar clase según el tema forzado
-    if (theme === 'dark') {
-        darkLabel.classList.add('active');
-        console.log('🌙 Modo oscuro FORZADO');
-    } else {
-        lightLabel.classList.add('active');
-        console.log('☀️ Modo claro FORZADO');
-    }
-    
-    // Verificar que se aplicó correctamente
-    console.log('🔍 Verificación inmediata:', {
-        lightActive: lightLabel.classList.contains('active'),
-        darkActive: darkLabel.classList.contains('active'),
-        themeEnDOM: document.documentElement.getAttribute('data-theme')
-    });
 }
 
 function updateThemeLabels() {
-    console.log('🏷️ Actualizando labels del tema...');
+    console.log('🏷️ Actualizando labels...');
     
-    // Obtener tema de diferentes fuentes para asegurar consistencia
-    const documentTheme = document.documentElement.getAttribute('data-theme');
-    const savedTheme = localStorage.getItem('theme');
-    const theme = documentTheme || savedTheme || 'light';
-    
-    console.log('🔍 Debug tema:', { documentTheme, savedTheme, finalTheme: theme });
-    
-    const lightLabel = document.getElementById('light-label');
-    const darkLabel = document.getElementById('dark-label');
-
-    // ✅ VERIFICAR que los elementos existen antes de usarlos
-    if (!lightLabel || !darkLabel) {
-        console.warn('⚠️ Elementos de tema no encontrados, intentando reparar...');
+    try {
+        const theme = document.documentElement.getAttribute('data-theme') || 'light';
         
-        // Intentar buscar elementos alternativos
-        const allLabels = document.querySelectorAll('.theme-label');
-        if (allLabels.length >= 2) {
-            const light = allLabels[0];
-            const dark = allLabels[1];
-            
-            light.classList.remove('active');
-            dark.classList.remove('active');
-            
-            if (theme === 'dark') {
-                dark.classList.add('active');
-                console.log('🌙 Modo oscuro activado (alternativo)');
-            } else {
-                light.classList.add('active');
-                console.log('☀️ Modo claro activado (alternativo)');
-            }
-        } else {
-            console.error('❌ No se pudieron encontrar elementos de tema para actualizar');
+        const lightLabel = document.getElementById('light-label');
+        const darkLabel = document.getElementById('dark-label');
+        
+        if (!lightLabel || !darkLabel) {
+            console.warn('⚠️ Labels no encontrados');
+            return;
         }
-        return;
+        
+        // Limpiar clases
+        lightLabel.classList.remove('active');
+        darkLabel.classList.remove('active');
+        
+        // Aplicar clase activa
+        if (theme === 'dark') {
+            darkLabel.classList.add('active');
+            console.log('🌙 Modo oscuro activado');
+        } else {
+            lightLabel.classList.add('active');
+            console.log('☀️ Modo claro activado');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error actualizando labels:', error);
     }
+}
 
-    // Remover clases activas existentes
-    lightLabel.classList.remove('active');
-    darkLabel.classList.remove('active');
+// Función de emergencia para debugging
+function debugTheme() {
+    console.log('🔍 Debug del tema:');
+    console.log('- Tema en documento:', document.documentElement.getAttribute('data-theme'));
+    console.log('- Tema en localStorage:', localStorage.getItem('theme'));
+    console.log('- Light label existe:', !!document.getElementById('light-label'));
+    console.log('- Dark label existe:', !!document.getElementById('dark-label'));
+    console.log('- Light label activo:', document.getElementById('light-label')?.classList.contains('active'));
+    console.log('- Dark label activo:', document.getElementById('dark-label')?.classList.contains('active'));
+}
+
+// Configurar event listener para el botón de tema
+function setupThemeToggleListener() {
+    console.log('🌎 Configurando event listener para tema...');
     
-    // Verificar estado actual de las clases antes del cambio
-    console.log('🔍 Estado antes del cambio:', {
-        lightActive: lightLabel.classList.contains('active'),
-        darkActive: darkLabel.classList.contains('active')
-    });
+    // Buscar el botón de tema
+    const themeButton = document.querySelector('.theme-toggle');
     
-    if (theme === 'dark') {
-        darkLabel.classList.add('active');
-        console.log('🌙 Modo oscuro activado');
-        console.log('🔍 Estado después del cambio:', {
-            lightActive: lightLabel.classList.contains('active'),
-            darkActive: darkLabel.classList.contains('active')
+    if (themeButton) {
+        // Remover cualquier event listener existente
+        themeButton.removeEventListener('click', toggleTheme);
+        
+        // Agregar nuevo event listener
+        themeButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('💆 Clic en botón de tema detectado');
+            toggleTheme();
         });
+        
+        console.log('✅ Event listener configurado correctamente');
     } else {
-        lightLabel.classList.add('active');
-        console.log('☀️ Modo claro activado');
-        console.log('🔍 Estado después del cambio:', {
-            lightActive: lightLabel.classList.contains('active'),
-            darkActive: darkLabel.classList.contains('active')
-        });
+        console.warn('⚠️ Botón de tema no encontrado');
+        
+        // Intentar configurar después de un delay
+        setTimeout(() => {
+            setupThemeToggleListener();
+        }, 500);
     }
+}
+
+// Hacer funciones disponibles globalmente
+window.debugTheme = debugTheme;
+window.toggleTheme = toggleTheme;
+window.setupThemeToggleListener = setupThemeToggleListener;
+
+// Asegurar que toggleTheme esté disponible globalmente para onclick
+if (typeof window !== 'undefined') {
+    window.toggleTheme = toggleTheme;
 }
 
 // Función para asegurar que el CSS de tema está presente
