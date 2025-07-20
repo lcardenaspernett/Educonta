@@ -40,15 +40,11 @@ const enforceTenant = (req, res, next) => {
  */
 const validateTenantAccess = async (req, res, next) => {
   try {
-    // Ignorar rutas especiales que no son IDs de institución
-    const specialRoutes = ['stats', 'options', 'dashboard', 'logo'];
-    const pathSegments = req.originalUrl.split('/');
-    const lastSegment = pathSegments[pathSegments.length - 1].split('?')[0];
-    
-    if (specialRoutes.includes(lastSegment)) {
+    // Para SUPER_ADMIN, permitir acceso directo sin validaciones adicionales
+    if (req.user && req.user.role === 'SUPER_ADMIN') {
       return next();
     }
-    
+
     const requestedInstitutionId = 
       req.params.id || 
       req.body.institutionId || 
@@ -57,24 +53,6 @@ const validateTenantAccess = async (req, res, next) => {
 
     if (!req.user) {
       return next(new AuthError('Autenticación requerida'));
-    }
-
-    // SUPER_ADMIN puede acceder a cualquier institución
-    if (req.user.role === 'SUPER_ADMIN') {
-      if (requestedInstitutionId) {
-        // Verificar que la institución existe
-        const institution = await req.prisma.institution.findUnique({
-          where: { id: requestedInstitutionId }
-        });
-
-        if (!institution) {
-          return next(new TenantError('Institución no encontrada'));
-        }
-
-        req.targetInstitution = institution;
-        req.tenantId = institution.id;
-      }
-      return next();
     }
 
     // Para otros usuarios, verificar acceso a su propia institución

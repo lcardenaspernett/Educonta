@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contabilidad - Educonta</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="css/accounting.css">
     <link rel="stylesheet" href="css/accounting-dashboard.css">
 </head>
+
 <body>
     <div class="bg-animation"></div>
 
@@ -15,7 +18,7 @@
         <nav class="nav">
             <a href="/dashboard.html" class="logo">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2L2 7v10c0 5.55 3.84 9.739 9 11 5.16-1.261 9-5.45 9-11V7l-10-5z"/>
+                    <path d="M12 2L2 7v10c0 5.55 3.84 9.739 9 11 5.16-1.261 9-5.45 9-11V7l-10-5z" />
                 </svg>
                 Educonta
             </a>
@@ -27,7 +30,7 @@
                 </div>
                 <a href="/dashboard.html" class="btn btn-secondary">
                     <svg width="16" height="16" fill="currentColor">
-                        <path d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Volver al Dashboard
                 </a>
@@ -46,7 +49,8 @@
         <!-- Alert -->
         <div class="alert" id="alert">
             <svg width="20" height="20" fill="currentColor">
-                <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v6a1 1 0 102 0V5zm-1 9a1 1 0 100-2 1 1 0 000 2z"/>
+                <path
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v6a1 1 0 102 0V5zm-1 9a1 1 0 100-2 1 1 0 000 2z" />
             </svg>
             <span id="alert-message"></span>
         </div>
@@ -55,19 +59,20 @@
         <nav class="tabs-nav">
             <button class="tab-btn active" onclick="showTab('accounts')">
                 <svg width="16" height="16" fill="currentColor" style="margin-right: 0.5rem;">
-                    <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v2"/>
+                    <path
+                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v2" />
                 </svg>
                 Plan de Cuentas
             </button>
             <button class="tab-btn" onclick="showTab('transactions')">
                 <svg width="16" height="16" fill="currentColor" style="margin-right: 0.5rem;">
-                    <path d="M9 5l7 7-7 7M7 12H21M15 5v14"/>
+                    <path d="M9 5l7 7-7 7M7 12H21M15 5v14" />
                 </svg>
                 Transacciones
             </button>
             <button class="tab-btn" onclick="showTab('reports')">
                 <svg width="16" height="16" fill="currentColor" style="margin-right: 0.5rem;">
-                    <path d="M9 17v-2m3 2v-4m3 4v-6M9 3L5 7l4 4 4-4-4-4z"/>
+                    <path d="M9 17v-2m3 2v-4m3 4v-6M9 3L5 7l4 4 4-4-4-4z" />
                 </svg>
                 Reportes
             </button>
@@ -110,7 +115,7 @@
                     <h3 class="chart-title">Distribución por Tipo de Cuenta</h3>
                     <canvas id="accountTypeChart" width="200" height="200"></canvas>
                 </div>
-                
+
                 <!-- Gráfico de Balance por Cuenta -->
                 <div class="chart-container">
                     <h3 class="chart-title">Balance por Cuenta Principal</h3>
@@ -130,7 +135,7 @@
                 </div>
                 <button class="btn btn-primary" onclick="openAccountModal()">
                     <svg width="16" height="16" fill="currentColor">
-                        <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        <path d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                     Nueva Cuenta
                 </button>
@@ -141,7 +146,8 @@
                 <div class="filters-grid">
                     <div class="form-group">
                         <label class="form-label">Buscar</label>
-                        <input type="text" class="form-input" id="account-search-input" placeholder="Código o nombre de cuenta...">
+                        <input type="text" class="form-input" id="account-search-input"
+                            placeholder="Código o nombre de cuenta...">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Tipo de Cuenta</label>
@@ -168,8 +174,8 @@
                     <div class="form-group">
                         <button class="btn btn-primary" onclick="loadAccounts()">
                             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                <circle cx="11" cy="11" r="8"/>
-                                <path d="m21 21-4.35-4.35"/>
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.35-4.35" />
                             </svg>
                             Buscar
                         </button>
@@ -201,7 +207,7 @@
                 </div>
                 <button class="btn btn-primary" onclick="openTransactionModal()">
                     <svg width="16" height="16" fill="currentColor">
-                        <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        <path d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                     Nueva Transacción
                 </button>
@@ -212,7 +218,8 @@
                 <div class="filters-grid">
                     <div class="form-group">
                         <label class="form-label">Buscar</label>
-                        <input type="text" class="form-input" id="transaction-search-input" placeholder="Referencia o descripción...">
+                        <input type="text" class="form-input" id="transaction-search-input"
+                            placeholder="Referencia o descripción...">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Fecha Desde</label>
@@ -243,8 +250,8 @@
                     <div class="form-group">
                         <button class="btn btn-primary" onclick="loadTransactions()">
                             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                <circle cx="11" cy="11" r="8"/>
-                                <path d="m21 21-4.35-4.35"/>
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.35-4.35" />
                             </svg>
                             Buscar
                         </button>
@@ -302,13 +309,14 @@
                     <input type="date" class="form-input" id="report-date" style="width: auto;">
                     <button class="btn btn-primary" onclick="generateBalanceSheet()">
                         <svg width="16" height="16" fill="currentColor">
-                            <path d="M9 17v-2m3 2v-4m3 4v-6M9 3L5 7l4 4 4-4-4-4z"/>
+                            <path d="M9 17v-2m3 2v-4m3 4v-6M9 3L5 7l4 4 4-4-4-4z" />
                         </svg>
                         Generar Balance
                     </button>
                     <button class="btn btn-secondary" onclick="generateIncomeStatement()">
                         <svg width="16" height="16" fill="currentColor">
-                            <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v2"/>
+                            <path
+                                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v2" />
                         </svg>
                         Estado de Resultados
                     </button>
@@ -326,7 +334,7 @@
                     </div>
                     <div id="reports-content" style="padding: 2rem; text-align: center; color: var(--text-light);">
                         <svg width="64" height="64" fill="currentColor" style="opacity: 0.3; margin-bottom: 1rem;">
-                            <path d="M9 17v-2m3 2v-4m3 4v-6M9 3L5 7l4 4 4-4-4-4z"/>
+                            <path d="M9 17v-2m3 2v-4m3 4v-6M9 3L5 7l4 4 4-4-4-4z" />
                         </svg>
                         <p>Selecciona una fecha y genera un reporte para ver los resultados aquí</p>
                     </div>
@@ -346,7 +354,8 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label class="form-label">Código de Cuenta *</label>
-                        <input type="text" class="form-input" id="account-code" required pattern="[0-9]+" maxlength="10" placeholder="Ej: 1105, 4135">
+                        <input type="text" class="form-input" id="account-code" required pattern="[0-9]+" maxlength="10"
+                            placeholder="Ej: 1105, 4135">
                         <small style="color: var(--text-light); font-size: 0.75rem;">Solo números</small>
                     </div>
                     <div class="form-group">
@@ -381,7 +390,8 @@
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label class="form-label">Descripción</label>
-                        <textarea class="form-input" id="account-description" rows="3" placeholder="Descripción opcional de la cuenta..."></textarea>
+                        <textarea class="form-input" id="account-description" rows="3"
+                            placeholder="Descripción opcional de la cuenta..."></textarea>
                     </div>
                 </div>
                 <div class="form-actions">
@@ -410,7 +420,8 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Referencia *</label>
-                        <input type="text" class="form-input" id="transaction-reference" required maxlength="50" placeholder="Ej: FAC-001, REC-123">
+                        <input type="text" class="form-input" id="transaction-reference" required maxlength="50"
+                            placeholder="Ej: FAC-001, REC-123">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Monto *</label>
@@ -441,7 +452,8 @@
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label class="form-label">Descripción *</label>
-                        <textarea class="form-input" id="transaction-description" required rows="3" maxlength="200" placeholder="Descripción de la transacción..."></textarea>
+                        <textarea class="form-input" id="transaction-description" required rows="3" maxlength="200"
+                            placeholder="Descripción de la transacción..."></textarea>
                     </div>
                 </div>
                 <div class="form-actions">
@@ -510,22 +522,26 @@
                     </div>
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeViewTransactionModal()">Cerrar</button>
-                    <button type="button" class="btn btn-primary" onclick="editFromViewTransaction()" id="edit-transaction-btn">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeViewTransactionModal()">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="editFromViewTransaction()"
+                        id="edit-transaction-btn">
                         <svg width="14" height="14" fill="currentColor">
-                            <path d="M11 4a2 2 0 114 4l-9 9-4 1 1-4 9-9z"/>
+                            <path d="M11 4a2 2 0 114 4l-9 9-4 1 1-4 9-9z" />
                         </svg>
                         Editar Transacción
                     </button>
-                    <button type="button" class="btn btn-success" onclick="approveTransaction()" id="approve-transaction-btn" style="display: none;">
+                    <button type="button" class="btn btn-success" onclick="approveTransaction()"
+                        id="approve-transaction-btn" style="display: none;">
                         <svg width="14" height="14" fill="currentColor">
-                            <path d="M20 6L9 17l-5-5"/>
+                            <path d="M20 6L9 17l-5-5" />
                         </svg>
                         Aprobar
                     </button>
-                    <button type="button" class="btn btn-danger" onclick="rejectTransaction()" id="reject-transaction-btn" style="display: none;">
+                    <button type="button" class="btn btn-danger" onclick="rejectTransaction()"
+                        id="reject-transaction-btn" style="display: none;">
                         <svg width="14" height="14" fill="currentColor">
-                            <path d="M18 6L6 18M6 6l12 12"/>
+                            <path d="M18 6L6 18M6 6l12 12" />
                         </svg>
                         Rechazar
                     </button>
@@ -537,9 +553,10 @@
     <!-- Core Scripts -->
     <script src="js/accounting/core.js"></script>
     <script src="js/accounting/accounts.js"></script>
-    <script src="js/accounting-dashboard.js"></script>
-    
+    <script src="js/accounting/dashboard.js"></script>
+
     <!-- Main Script -->
     <script src="js/accounting.js"></script>
 </body>
+
 </html>

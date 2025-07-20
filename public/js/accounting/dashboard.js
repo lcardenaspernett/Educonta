@@ -6,11 +6,10 @@
  * Clase para gestionar el dashboard de contabilidad
  */
 class AccountingDashboard {
-    constructor(core) {
-        this.core = core;
+    constructor() {
         this.charts = {};
         this.metrics = {};
-        
+
         this.init();
     }
 
@@ -19,17 +18,18 @@ class AccountingDashboard {
      */
     init() {
         console.log('📊 Inicializando Dashboard de Contabilidad');
-        
-        // Escuchar eventos del core
-        this.core.on('dataLoaded', (data) => {
+
+        // Escuchar eventos globales del sistema
+        window.addEventListener('dataLoaded', (event) => {
+            const data = event.detail;
             this.updateMetrics(data.stats);
             this.updateCharts(data);
         });
-        
-        this.core.on('loadingChanged', (loading) => {
-            this.toggleLoadingState(loading);
+
+        window.addEventListener('loadingChanged', (event) => {
+            this.toggleLoadingState(event.detail.isLoading);
         });
-        
+
         // Configurar elementos interactivos
         this.setupInteractions();
     }
@@ -38,14 +38,19 @@ class AccountingDashboard {
      * Actualizar métricas
      */
     updateMetrics(stats) {
+        console.log('📊 Dashboard recibiendo stats:', stats);
+
         const metrics = {
             'total-accounts': stats.totalAccounts || 0,
             'active-accounts': stats.totalAccounts || 0, // Asumiendo que todas están activas
-            'total-balance': this.core.formatCurrency(stats.totalBalance || 0),
+            'total-balance': this.formatCurrency(stats.totalBalance || 0),
             'pending-transactions': stats.pendingTransactions || 0
         };
 
+        console.log('📊 Métricas calculadas:', metrics);
+
         Object.entries(metrics).forEach(([id, value]) => {
+            console.log(`📊 Actualizando ${id} con valor:`, value);
             this.updateMetricElement(id, value);
         });
 
@@ -58,10 +63,27 @@ class AccountingDashboard {
      */
     updateMetricElement(id, value) {
         const element = document.getElementById(id);
+        console.log(`📊 Actualizando elemento ${id}:`, element, 'con valor:', value);
+
         if (element) {
-            // Animación de contador
-            this.animateCounter(element, value);
+            // Remover el span de loading si existe
+            const loadingSpan = element.querySelector('.loading');
+            if (loadingSpan) {
+                loadingSpan.remove();
+            }
+
+            // Remover clase loading del elemento principal
             element.classList.remove('loading');
+
+            // Si es un número, usar animación; si no, actualizar directamente
+            if (typeof value === 'number' && id !== 'total-balance') {
+                this.animateCounter(element, value);
+            } else {
+                element.textContent = value;
+            }
+            console.log(`📊 Elemento ${id} actualizado a:`, element.textContent);
+        } else {
+            console.warn(`⚠️ Elemento ${id} no encontrado en el DOM`);
         }
     }
 
@@ -81,17 +103,17 @@ class AccountingDashboard {
         const animate = (currentTime) => {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            
+
             // Easing function (ease-out)
             const easeOut = 1 - Math.pow(1 - progress, 3);
             const currentValue = Math.floor(startValue + (finalValue - startValue) * easeOut);
-            
-            element.textContent = this.core.formatNumber(currentValue);
-            
+
+            element.textContent = this.formatNumber(currentValue);
+
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
-                element.textContent = this.core.formatNumber(finalValue);
+                element.textContent = this.formatNumber(finalValue);
             }
         };
 
@@ -115,10 +137,10 @@ class AccountingDashboard {
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
-        
+
         // Limpiar canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
         // Contar cuentas por tipo
         const accountTypes = accounts.reduce((acc, account) => {
             acc[account.accountType] = (acc[account.accountType] || 0) + 1;
@@ -146,14 +168,14 @@ class AccountingDashboard {
         const centerY = canvas.height / 2;
         const radius = Math.min(centerX, centerY) - 20;
         const innerRadius = radius * 0.6;
-        
+
         let currentAngle = -Math.PI / 2; // Empezar desde arriba
         const total = Object.values(accountTypes).reduce((sum, count) => sum + count, 0);
-        
+
         // Dibujar segmentos
         Object.entries(accountTypes).forEach(([type, count]) => {
             const sliceAngle = (count / total) * 2 * Math.PI;
-            
+
             // Segmento exterior
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
@@ -161,20 +183,20 @@ class AccountingDashboard {
             ctx.closePath();
             ctx.fillStyle = colors[type] || '#6b7280';
             ctx.fill();
-            
+
             // Texto del porcentaje
             const percentage = Math.round((count / total) * 100);
             const textAngle = currentAngle + sliceAngle / 2;
             const textRadius = (radius + innerRadius) / 2;
             const textX = centerX + Math.cos(textAngle) * textRadius;
             const textY = centerY + Math.sin(textAngle) * textRadius;
-            
+
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 12px Inter';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(`${percentage}%`, textX, textY);
-            
+
             currentAngle += sliceAngle;
         });
 
@@ -184,7 +206,7 @@ class AccountingDashboard {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(total.toString(), centerX, centerY - 5);
-        
+
         ctx.font = '12px Inter';
         ctx.fillText('Cuentas', centerX, centerY + 10);
 
@@ -198,7 +220,7 @@ class AccountingDashboard {
     createChartLegend(chartId, data, colors, labels) {
         const chartContainer = document.getElementById(chartId).parentElement;
         let legend = chartContainer.querySelector('.chart-legend');
-        
+
         if (!legend) {
             legend = document.createElement('div');
             legend.className = 'chart-legend';
@@ -228,7 +250,7 @@ class AccountingDashboard {
 
         // Filtrar cuentas principales con movimientos
         const mainAccounts = accounts
-            .filter(acc => acc.level <= 2 && acc._count && 
+            .filter(acc => acc.level <= 2 && acc._count &&
                 (acc._count.debitTransactions > 0 || acc._count.creditTransactions > 0))
             .slice(0, 5); // Top 5
 
@@ -240,17 +262,17 @@ class AccountingDashboard {
         const maxBalance = Math.max(...mainAccounts.map(acc => Math.abs(acc.balance || 0)));
 
         let html = '<div class="balance-bars">';
-        
+
         mainAccounts.forEach(account => {
             const balance = account.balance || 0;
             const percentage = maxBalance > 0 ? (Math.abs(balance) / maxBalance) * 100 : 0;
             const color = this.getAccountTypeColor(account.accountType);
-            
+
             html += `
                 <div class="balance-bar-item">
                     <div class="balance-bar-label">
                         <span>${account.code} - ${account.name}</span>
-                        <span class="balance-amount">${this.core.formatCurrency(balance)}</span>
+                        <span class="balance-amount">${this.formatCurrency(balance)}</span>
                     </div>
                     <div class="balance-bar-container">
                         <div class="balance-bar" 
@@ -282,12 +304,12 @@ class AccountingDashboard {
 
         // Datos simulados de los últimos 6 meses
         const months = ['Ago', 'Sep', 'Oct', 'Nov', 'Dic', 'Ene'];
-        const transactions = [1, 2, 1, 3, 5, 2]; // Basado en tus 5 transacciones
-        
+        const transactions = [1, 2, 1, 3, 5, stats.pendingTransactions || 2]; // Usar datos reales cuando estén disponibles
+
         const maxTransactions = Math.max(...transactions);
 
         let html = '<div class="trend-chart">';
-        
+
         months.forEach((month, index) => {
             const height = maxTransactions > 0 ? (transactions[index] / maxTransactions) * 100 : 0;
             html += `
@@ -370,7 +392,7 @@ class AccountingDashboard {
     setupInteractions() {
         // Hacer las métricas clickeables para más detalles
         document.querySelectorAll('.metric-card').forEach(card => {
-            card.addEventListener('click', (e) => {
+            card.addEventListener('click', () => {
                 const metricId = card.querySelector('[id]')?.id;
                 if (metricId) {
                     this.showMetricDetails(metricId);
@@ -391,7 +413,7 @@ class AccountingDashboard {
         };
 
         const message = details[metricId] || 'Información de la métrica';
-        this.core.showNotification(message, 'info');
+        this.showNotification(message, 'info');
     }
 
     /**
@@ -399,7 +421,7 @@ class AccountingDashboard {
      */
     toggleLoadingState(loading) {
         const elements = document.querySelectorAll('.metric-value, .chart-container');
-        
+
         elements.forEach(element => {
             if (loading) {
                 element.classList.add('loading');
@@ -414,7 +436,44 @@ class AccountingDashboard {
      */
     async refresh() {
         console.log('🔄 Actualizando dashboard...');
-        await this.core.loadInitialData();
+        // Recargar datos desde el sistema principal
+        if (window.loadAccountingStats) {
+            await window.loadAccountingStats();
+        }
+    }
+
+    /**
+     * Formatear moneda
+     */
+    formatCurrency(amount) {
+        return new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        }).format(amount || 0);
+    }
+
+    /**
+     * Formatear número
+     */
+    formatNumber(number, decimals = 0) {
+        return new Intl.NumberFormat('es-CO', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        }).format(number || 0);
+    }
+
+    /**
+     * Mostrar notificación
+     */
+    showNotification(message, type = 'info') {
+        // Usar la función global si existe, sino crear una básica
+        if (window.showAlert) {
+            window.showAlert(message, type);
+        } else {
+            alert(message);
+        }
     }
 }
 

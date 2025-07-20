@@ -102,6 +102,64 @@
     display: block;
 }
 
+/* Leyenda de gráficos */
+.chart-legend {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.legend-label {
+    flex: 1;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.legend-value {
+    color: var(--text-light);
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+}
+
+/* Tooltip para gráficos */
+.chart-tooltip {
+    position: absolute;
+    background: var(--text);
+    color: var(--bg);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: none;
+}
+
+/* Estado sin datos */
+.no-data {
+    text-align: center;
+    color: var(--text-light);
+    font-style: italic;
+    padding: 40px 20px;
+}
+
 /* Gráfico de Balance con Barras */
 .balance-bars {
     display: flex;

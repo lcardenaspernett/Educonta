@@ -17,40 +17,266 @@ let activeTab = 'accounts';
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📄 DOM cargado, iniciando verificación de autenticación');
     initializeTheme();
-    checkAuth();
+    
+    // Verificar si venimos de otra página con usuario ya autenticado
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = localStorage.getItem('token');
+    
+    if (urlParams.get('skipAuth') === 'true' && token) {
+        console.log('🔄 Saltando verificación de auth, usuario ya verificado');
+        // Crear un usuario básico para evitar errores
+        currentUser = {
+            id: 'temp',
+            email: 'temp@temp.com',
+            firstName: 'Usuario',
+            lastName: 'Autenticado'
+        };
+        initializePage();
+    } else if (token) {
+        checkAuth();
+    } else {
+        console.log('❌ No hay token, redirigiendo a login');
+        window.location.href = '/login.html';
+    }
+    
     setupEventListeners();
 });
 
 // ===================================
-// GESTIÓN DE TEMA
+// GESTIÓN DE TEMA - VERSIÓN FINAL CORREGIDA
 // ===================================
 
+// Variable para prevenir múltiples inicializaciones
+let themeInitialized = false;
+
 function initializeTheme() {
+    // Solo inicializar una vez para evitar conflictos
+    if (themeInitialized) {
+        console.log('🎨 Tema ya inicializado, saltando...');
+        return;
+    }
+    
+    console.log('🎨 Inicializando tema en módulo de contabilidad...');
+    
     const savedTheme = localStorage.getItem('theme') || 'light';
+    
+    // Aplicar tema al documento
     document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeLabels();
+    
+    // Asegurar que el CSS de tema está presente
+    ensureThemeCSS();
+    
+    // Marcar como inicializado
+    themeInitialized = true;
+    
+    // Actualizar labels del interruptor con verificación
+    setTimeout(() => {
+        updateThemeLabels();
+    }, 100); // Pequeño delay para asegurar que el DOM está listo
+    
+    console.log(`✅ Tema aplicado: ${savedTheme}`);
 }
 
 function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
+    console.log('🔄 Cambiando tema...');
+    
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
+    console.log(`🔄 Cambio: ${currentTheme} → ${newTheme}`);
+
+    // Aplicar nuevo tema al documento INMEDIATAMENTE
     document.documentElement.setAttribute('data-theme', newTheme);
+    
+    // Guardar en localStorage INMEDIATAMENTE
     localStorage.setItem('theme', newTheme);
-    updateThemeLabels();
+    
+    console.log(`✅ Tema cambiado a: ${newTheme}`);
+    
+    // FORZAR actualización de labels inmediatamente SIN ASYNC
+    updateThemeLabelsForced(newTheme);
+    
+    console.log('✅ Cambio de tema completado exitosamente');
 }
 
-function updateThemeLabels() {
-    const theme = document.documentElement.getAttribute('data-theme');
+// Nueva función que fuerza la actualización sin verificaciones async
+function updateThemeLabelsForced(forcedTheme) {
+    console.log('🏷️ FORZANDO actualización de labels del tema...');
+    
+    const theme = forcedTheme || document.documentElement.getAttribute('data-theme') || 'light';
+    
+    console.log('🔍 Tema forzado:', theme);
+    
     const lightLabel = document.getElementById('light-label');
     const darkLabel = document.getElementById('dark-label');
 
+    // ✅ VERIFICAR que los elementos existen
+    if (!lightLabel || !darkLabel) {
+        console.warn('⚠️ Elementos de tema no encontrados');
+        return;
+    }
+
+    // Remover TODAS las clases activas
+    lightLabel.classList.remove('active');
+    darkLabel.classList.remove('active');
+    
+    // Aplicar clase según el tema forzado
     if (theme === 'dark') {
-        lightLabel.classList.remove('active');
         darkLabel.classList.add('active');
+        console.log('🌙 Modo oscuro FORZADO');
     } else {
         lightLabel.classList.add('active');
-        darkLabel.classList.remove('active');
+        console.log('☀️ Modo claro FORZADO');
+    }
+    
+    // Verificar que se aplicó correctamente
+    console.log('🔍 Verificación inmediata:', {
+        lightActive: lightLabel.classList.contains('active'),
+        darkActive: darkLabel.classList.contains('active'),
+        themeEnDOM: document.documentElement.getAttribute('data-theme')
+    });
+}
+
+function updateThemeLabels() {
+    console.log('🏷️ Actualizando labels del tema...');
+    
+    // Obtener tema de diferentes fuentes para asegurar consistencia
+    const documentTheme = document.documentElement.getAttribute('data-theme');
+    const savedTheme = localStorage.getItem('theme');
+    const theme = documentTheme || savedTheme || 'light';
+    
+    console.log('🔍 Debug tema:', { documentTheme, savedTheme, finalTheme: theme });
+    
+    const lightLabel = document.getElementById('light-label');
+    const darkLabel = document.getElementById('dark-label');
+
+    // ✅ VERIFICAR que los elementos existen antes de usarlos
+    if (!lightLabel || !darkLabel) {
+        console.warn('⚠️ Elementos de tema no encontrados, intentando reparar...');
+        
+        // Intentar buscar elementos alternativos
+        const allLabels = document.querySelectorAll('.theme-label');
+        if (allLabels.length >= 2) {
+            const light = allLabels[0];
+            const dark = allLabels[1];
+            
+            light.classList.remove('active');
+            dark.classList.remove('active');
+            
+            if (theme === 'dark') {
+                dark.classList.add('active');
+                console.log('🌙 Modo oscuro activado (alternativo)');
+            } else {
+                light.classList.add('active');
+                console.log('☀️ Modo claro activado (alternativo)');
+            }
+        } else {
+            console.error('❌ No se pudieron encontrar elementos de tema para actualizar');
+        }
+        return;
+    }
+
+    // Remover clases activas existentes
+    lightLabel.classList.remove('active');
+    darkLabel.classList.remove('active');
+    
+    // Verificar estado actual de las clases antes del cambio
+    console.log('🔍 Estado antes del cambio:', {
+        lightActive: lightLabel.classList.contains('active'),
+        darkActive: darkLabel.classList.contains('active')
+    });
+    
+    if (theme === 'dark') {
+        darkLabel.classList.add('active');
+        console.log('🌙 Modo oscuro activado');
+        console.log('🔍 Estado después del cambio:', {
+            lightActive: lightLabel.classList.contains('active'),
+            darkActive: darkLabel.classList.contains('active')
+        });
+    } else {
+        lightLabel.classList.add('active');
+        console.log('☀️ Modo claro activado');
+        console.log('🔍 Estado después del cambio:', {
+            lightActive: lightLabel.classList.contains('active'),
+            darkActive: darkLabel.classList.contains('active')
+        });
+    }
+}
+
+// Función para asegurar que el CSS de tema está presente
+function ensureThemeCSS() {
+    if (!document.getElementById('contabilidad-theme-css')) {
+        const css = `
+        /* CSS específico para el interruptor de tema en contabilidad */
+        .theme-label {
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .theme-label.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .theme-toggle {
+            position: relative;
+            width: 50px;
+            height: 25px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            width: 19px;
+            height: 19px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+        
+        [data-theme="dark"] .theme-toggle::before {
+            transform: translateX(25px);
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+        }
+        
+        /* Mejorar variables CSS para mejor compatibilidad */
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --accent: #8b5cf6;
+            --text-light: #6b7280;
+            --bg-secondary: #f8fafc;
+            --border: rgba(255, 255, 255, 0.2);
+        }
+        
+        [data-theme="dark"] {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --accent: #a855f7;
+            --text-light: #d1d5db;
+            --bg-secondary: #1e293b;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        `;
+        
+        const style = document.createElement('style');
+        style.id = 'contabilidad-theme-css';
+        style.textContent = css;
+        document.head.appendChild(style);
+        
+        console.log('✅ CSS de tema para contabilidad agregado');
     }
 }
 
@@ -64,7 +290,7 @@ async function checkAuth() {
 
     if (!token) {
         console.log('❌ No hay token, redirigiendo a login');
-        window.location.href = '/login';
+        window.location.href = '/login.html';
         return;
     }
 
@@ -72,7 +298,8 @@ async function checkAuth() {
         console.log('🔍 Verificando token con el servidor...');
         const response = await fetch('/api/auth/profile', {
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
         });
 
@@ -80,19 +307,37 @@ async function checkAuth() {
 
         if (response.ok) {
             const data = await response.json();
-            currentUser = data.user;
-            console.log('👤 Usuario autenticado:', currentUser);
+            console.log('📄 Datos recibidos:', data);
             
-            console.log('✅ Usuario autenticado, cargando página');
-            initializePage();
+            if (data.success && data.user) {
+                currentUser = data.user;
+                console.log('👤 Usuario autenticado:', currentUser);
+                console.log('✅ Usuario autenticado, cargando página');
+                initializePage();
+            } else {
+                console.log('❌ Respuesta inválida del servidor:', data);
+                localStorage.removeItem('token');
+                window.location.href = '/login.html';
+            }
         } else {
-            console.log('❌ Token inválido, limpiando y redirigiendo');
+            console.log('❌ Error HTTP:', response.status);
+            
+            // Intentar leer el error del servidor
+            try {
+                const errorData = await response.json();
+                console.log('❌ Error del servidor:', errorData);
+            } catch (e) {
+                console.log('❌ No se pudo leer el error del servidor');
+            }
+            
             localStorage.removeItem('token');
-            window.location.href = '/login';
+            window.location.href = '/login.html';
         }
     } catch (error) {
         console.error('❌ Error verificando autenticación:', error);
-        window.location.href = '/login';
+        console.error('❌ Stack trace:', error.stack);
+        localStorage.removeItem('token');
+        window.location.href = '/login.html';
     }
 }
 
@@ -100,11 +345,26 @@ async function checkAuth() {
 // INICIALIZACIÓN DE PÁGINA
 // ===================================
 
-function initializePage() {
+async function initializePage() {
     console.log('🏗️ Inicializando página de contabilidad');
-    loadAccountingStats();
-    loadAccounts();
+    
+    // Inicializar dashboard si está disponible
+    if (window.AccountingDashboard) {
+        try {
+            window.accountingDashboard = new AccountingDashboard();
+            console.log('📊 Dashboard de contabilidad inicializado correctamente');
+        } catch (error) {
+            console.error('❌ Error inicializando dashboard:', error);
+        }
+    } else {
+        console.warn('⚠️ AccountingDashboard no está disponible');
+    }
+    
     setDefaultDate();
+    
+    // Cargar datos en secuencia para asegurar que el dashboard reciba todo
+    await loadAccountingStats();
+    await loadAccounts();
 }
 
 function setDefaultDate() {
@@ -150,7 +410,7 @@ async function loadAccountingStats() {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await fetch('/api/accounting/stats', {
+        const response = await fetch('/api/accounting-simple/stats', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -158,9 +418,10 @@ async function loadAccountingStats() {
 
         if (response.ok) {
             const data = await response.json();
+            console.log('📊 Datos recibidos del servidor:', data);
             updateAccountingStats(data.data);
         } else {
-            console.error('Error loading accounting stats');
+            console.error('Error loading accounting stats:', response.status, response.statusText);
         }
     } catch (error) {
         console.error('Error loading accounting stats:', error);
@@ -174,10 +435,32 @@ async function loadAccountingStats() {
 }
 
 function updateAccountingStats(stats) {
-    document.getElementById('total-accounts').textContent = stats.totalAccounts || 0;
-    document.getElementById('active-accounts').textContent = stats.activeAccounts || 0;
-    document.getElementById('total-balance').textContent = formatCurrency(stats.totalBalance || 0);
-    document.getElementById('pending-transactions').textContent = stats.pendingTransactions || 0;
+    console.log('📊 Actualizando estadísticas:', stats);
+    
+    // Solo actualizar dashboard si está disponible, sino actualizar DOM directamente
+    if (window.accountingDashboard) {
+        console.log('📊 Actualizando a través del dashboard');
+        window.accountingDashboard.updateMetrics(stats);
+        window.accountingDashboard.updateCharts({
+            accounts: currentAccounts || [],
+            stats: stats
+        });
+    } else {
+        console.log('📊 Actualizando DOM directamente');
+        // Actualizar elementos del DOM directamente como fallback
+        document.getElementById('total-accounts').textContent = stats.totalAccounts || 0;
+        document.getElementById('active-accounts').textContent = stats.activeAccounts || 0;
+        document.getElementById('total-balance').textContent = formatCurrency(stats.totalBalance || 0);
+        document.getElementById('pending-transactions').textContent = stats.pendingTransactions || 0;
+    }
+    
+    // Disparar evento para otros componentes que puedan estar escuchando
+    window.dispatchEvent(new CustomEvent('dataLoaded', { 
+        detail: { 
+            stats: stats,
+            accounts: currentAccounts || []
+        } 
+    }));
 }
 
 // ===================================
@@ -195,17 +478,17 @@ async function loadAccounts() {
     try {
         const params = new URLSearchParams();
 
-        if (searchInput.value.trim()) {
+        if (searchInput?.value.trim()) {
             params.append('search', searchInput.value.trim());
         }
-        if (typeFilter.value) {
+        if (typeFilter?.value) {
             params.append('type', typeFilter.value);
         }
-        if (levelFilter.value) {
+        if (levelFilter?.value) {
             params.append('level', levelFilter.value);
         }
 
-        const response = await fetch(`/api/accounting/accounts?${params}`, {
+        const response = await fetch(`/api/accounting-simple/accounts?${params}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -213,10 +496,24 @@ async function loadAccounts() {
 
         if (response.ok) {
             const data = await response.json();
+            console.log('🔧 ACCOUNTS LOADED:', {
+                count: data.data.length,
+                summary: data.summary,
+                firstAccount: data.data[0]?.code,
+                lastAccount: data.data[data.data.length - 1]?.code
+            });
             currentAccounts = data.data;
             updateAccountsTree();
             loadParentAccountOptions();
             loadAccountOptions();
+            
+            // Actualizar dashboard con las cuentas cargadas
+            if (window.accountingDashboard) {
+                window.accountingDashboard.updateCharts({
+                    accounts: currentAccounts,
+                    stats: {} // Las stats se cargan por separado
+                });
+            }
         } else {
             showAlert('Error cargando cuentas', 'error');
         }
@@ -240,56 +537,219 @@ function updateAccountsTree() {
         return;
     }
 
-    // Organize accounts by hierarchy
-    const accountsByLevel = {};
+    // Renderizar estructura jerárquica con categorías principales
+    accountsTree.innerHTML = renderHierarchicalAccountsStructure();
+}
+
+function renderHierarchicalAccountsStructure() {
+    // Agrupar cuentas por tipo
+    const accountsByType = {
+        'ASSET': [],
+        'LIABILITY': [],
+        'EQUITY': [],
+        'INCOME': [],
+        'EXPENSE': []
+    };
+
     currentAccounts.forEach(account => {
-        if (!accountsByLevel[account.level]) {
-            accountsByLevel[account.level] = [];
+        if (accountsByType[account.accountType]) {
+            accountsByType[account.accountType].push(account);
         }
-        accountsByLevel[account.level].push(account);
     });
 
-    let accountsHTML = '';
-    
-    // Sort by level and then by code
-    Object.keys(accountsByLevel).sort().forEach(level => {
-        accountsByLevel[level].sort((a, b) => a.code.localeCompare(b.code)).forEach(account => {
-            accountsHTML += `
-                <div class="account-item level-${account.level} fade-in">
-                    <div class="account-header">
-                        <div class="account-info">
-                            <span class="account-code">${account.code}</span>
-                            <span class="account-name">${account.name}</span>
-                            <span class="account-type">${getAccountTypeLabel(account.type)}</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <span class="account-balance">${formatCurrency(account.balance || 0)}</span>
-                            <div class="account-actions">
-                                <button class="btn btn-sm btn-secondary" onclick="viewAccount('${account.id}')" title="Ver detalles">
-                                    <svg width="14" height="14" fill="currentColor">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                </button>
-                                <button class="btn btn-sm btn-primary" onclick="editAccount('${account.id}')" title="Editar">
-                                    <svg width="14" height="14" fill="currentColor">
-                                        <path d="M11 4a2 2 0 114 4l-9 9-4 1 1-4 9-9z"/>
-                                    </svg>
-                                </button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteAccount('${account.id}')" title="Eliminar">
-                                    <svg width="14" height="14" fill="currentColor">
-                                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                            </div>
+    // Calcular totales por tipo (SOLO cuentas hijas, NO cuentas padre)
+    const typeTotals = {};
+    Object.keys(accountsByType).forEach(type => {
+        typeTotals[type] = accountsByType[type].reduce((sum, account) => {
+            // Solo sumar cuentas HIJAS (que tienen parentId)
+            if (account.parentId) {
+                return sum + (account.balance || 0);
+            }
+            return sum;
+        }, 0);
+    });
+
+    let html = '<div class="accounts-hierarchy">';
+
+    // Renderizar cada categoría principal
+    const categories = [
+        { type: 'ASSET', label: 'Activos', icon: '🏦', color: 'asset' },
+        { type: 'LIABILITY', label: 'Pasivos', icon: '💳', color: 'liability' },
+        { type: 'EQUITY', label: 'Patrimonio', icon: '💰', color: 'equity' },
+        { type: 'INCOME', label: 'Ingresos', icon: '📈', color: 'income' },
+        { type: 'EXPENSE', label: 'Gastos', icon: '📉', color: 'expense' }
+    ];
+
+    categories.forEach(category => {
+        const accounts = accountsByType[category.type] || [];
+        const total = typeTotals[category.type] || 0;
+        const count = accounts.length;
+
+        html += `
+            <div class="account-category ${category.color}">
+                <div class="category-header" onclick="toggleCategory('${category.type}')">
+                    <div class="category-info">
+                        <span class="category-icon">${category.icon}</span>
+                        <div class="category-details">
+                            <h3 class="category-title">${category.label}</h3>
+                            <span class="category-count">${count} cuenta${count !== 1 ? 's' : ''}</span>
                         </div>
                     </div>
+                    <div class="category-meta">
+                        <span class="category-total ${total >= 0 ? 'positive' : 'negative'}">
+                            ${formatCurrency(total)}
+                        </span>
+                        <button class="category-toggle" id="toggle-${category.type}">
+                            <svg width="16" height="16" fill="currentColor" class="chevron-icon">
+                                <path d="M6 9l6 6 6-6"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-            `;
-        });
+                <div class="category-accounts" id="accounts-${category.type}" style="display: none;">
+                    ${renderCategoryAccountsList(accounts)}
+                </div>
+            </div>
+        `;
     });
 
-    accountsTree.innerHTML = accountsHTML;
+    html += '</div>';
+    return html;
+}
+
+function renderCategoryAccountsList(accounts) {
+    if (!accounts || accounts.length === 0) {
+        return `
+            <div class="no-accounts">
+                <p>No hay cuentas en esta categoría</p>
+                <button class="btn btn-sm btn-primary" onclick="openAccountModal()">
+                    Crear cuenta
+                </button>
+            </div>
+        `;
+    }
+
+    // Organizar cuentas por jerarquía
+    const organizedAccounts = organizeAccountsByHierarchy(accounts);
+
+    let html = '<div class="accounts-list">';
+    organizedAccounts.forEach(account => {
+        html += renderAccountItemStructure(account, 0);
+    });
+    html += '</div>';
+
+    return html;
+}
+
+function organizeAccountsByHierarchy(accounts) {
+    const accountMap = new Map();
+    const rootAccounts = [];
+
+    // Crear mapa de cuentas
+    accounts.forEach(account => {
+        accountMap.set(account.id, { ...account, children: [] });
+    });
+
+    // Construir jerarquía
+    accounts.forEach(account => {
+        const accountWithChildren = accountMap.get(account.id);
+
+        if (account.parentId && accountMap.has(account.parentId)) {
+            const parent = accountMap.get(account.parentId);
+            parent.children.push(accountWithChildren);
+        } else {
+            rootAccounts.push(accountWithChildren);
+        }
+    });
+
+    // Ordenar por código
+    const sortByCode = (a, b) => a.code.localeCompare(b.code, undefined, { numeric: true });
+
+    rootAccounts.sort(sortByCode);
+    rootAccounts.forEach(account => {
+        if (account.children.length > 0) {
+            account.children.sort(sortByCode);
+        }
+    });
+
+    return rootAccounts;
+}
+
+function renderAccountItemStructure(account, depth = 0) {
+    const hasChildren = account.children && account.children.length > 0;
+    const hasMovements = account._count && (account._count.debitTransactions > 0 || account._count.creditTransactions > 0);
+    
+    // Calcular balance: si es cuenta padre, sumar hijas; si no, usar balance propio
+    let balance = account.balance || 0;
+    if (hasChildren && account.children.length > 0) {
+        balance = account.children.reduce((sum, child) => sum + (child.balance || 0), 0);
+    }
+
+    let html = `
+        <div class="account-item level-${account.level || 1}" data-account-id="${account.id}" style="margin-left: ${depth * 20}px;">
+            <div class="account-header ${hasChildren ? 'has-children' : ''} ${hasMovements ? 'has-movements' : ''}">
+                <div class="account-main-info">
+                    ${hasChildren ? `
+                        <button class="account-toggle" onclick="toggleAccountChildren('${account.id}')">
+                            <svg width="12" height="12" fill="currentColor" class="toggle-icon">
+                                <path d="M4.5 6l3 3 3-3"/>
+                            </svg>
+                        </button>
+                    ` : '<div class="account-spacer"></div>'}
+                    
+                    <div class="account-info">
+                        <span class="account-code">${account.code}</span>
+                        <span class="account-name">${account.name}</span>
+                        <span class="account-type-badge ${account.accountType.toLowerCase()}">
+                            ${getAccountTypeLabel(account.accountType)}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="account-meta">
+                    <span class="account-balance ${balance >= 0 ? 'positive' : 'negative'}">
+                        ${formatCurrency(balance)}
+                    </span>
+                    
+                    ${hasMovements ? `
+                        <span class="account-movements">
+                            ${(account._count.debitTransactions || 0) + (account._count.creditTransactions || 0)} mov.
+                        </span>
+                    ` : ''}
+                    
+                    <div class="account-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button class="btn btn-sm btn-secondary" onclick="viewAccount('${account.id}')" title="Ver detalles">
+                            <svg width="14" height="14" fill="currentColor">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            <span class="btn-text">Ver</span>
+                        </button>
+                        <button class="btn btn-sm btn-primary" onclick="editAccount('${account.id}')" title="Editar">
+                            <svg width="14" height="14" fill="currentColor">
+                                <path d="M11 4a2 2 0 114 4l-9 9-4 1 1-4 9-9z"/>
+                            </svg>
+                            <span class="btn-text">Editar</span>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteAccount('${account.id}')" title="Eliminar">
+                            <svg width="14" height="14" fill="currentColor">
+                                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            <span class="btn-text">Eliminar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            ${hasChildren ? `
+                <div class="account-children" id="children-${account.id}" style="display: none;">
+                    ${account.children.map(child => renderAccountItemStructure(child, depth + 1)).join('')}
+                </div>
+            ` : ''}
+        </div>
+    `;
+
+    return html;
 }
 
 function getAccountTypeLabel(type) {
@@ -384,7 +844,7 @@ async function deleteAccount(accountId) {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await fetch(`/api/accounting/accounts/${accountId}`, {
+        const response = await fetch(`/api/accounting-simple/accounts/${accountId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -409,7 +869,14 @@ async function deleteAccount(accountId) {
 // TRANSACCIONES
 // ===================================
 
-async function loadTransactions(page = 1, isSearch = false) {
+// 🔧 FIX: Función loadTransactions modificada para respetar preventAutoReload
+async function loadTransactions(page = 1, isSearch = false, forceReload = false) {
+    // Si hay una actualización de estado en proceso y no es forzada, no recargar
+    if (preventAutoReload && !forceReload && !isSearch) {
+        console.log('🚫 Recarga preventiva bloqueada para evitar sobrescribir estado actualizado');
+        return;
+    }
+
     const token = localStorage.getItem('token');
     const searchInput = document.getElementById('transaction-search-input');
     const dateFromFilter = document.getElementById('date-from-filter');
@@ -417,12 +884,13 @@ async function loadTransactions(page = 1, isSearch = false) {
     const typeFilter = document.getElementById('transaction-type-filter');
     const statusFilter = document.getElementById('transaction-status-filter');
 
-    if (!isSearch) {
-        document.getElementById('transactions-loading').style.display = 'flex';
-    } else {
+    // Mostrar indicador de búsqueda en tiempo real
+    if (isSearch && searchInput) {
         searchInput.style.background = 'linear-gradient(90deg, var(--bg) 0%, var(--bg-secondary) 50%, var(--bg) 100%)';
         searchInput.style.backgroundSize = '200% 100%';
         searchInput.style.animation = 'shimmer 1s ease-in-out infinite';
+    } else if (!isSearch) {
+        document.getElementById('transactions-loading').style.display = 'flex';
     }
 
     try {
@@ -431,23 +899,31 @@ async function loadTransactions(page = 1, isSearch = false) {
             limit: 20
         });
 
-        if (searchInput.value.trim()) {
+        if (searchInput?.value.trim()) {
             params.append('search', searchInput.value.trim());
         }
-        if (dateFromFilter.value) {
+        if (dateFromFilter?.value) {
             params.append('dateFrom', dateFromFilter.value);
         }
-        if (dateToFilter.value) {
+        if (dateToFilter?.value) {
             params.append('dateTo', dateToFilter.value);
         }
-        if (typeFilter.value) {
+        if (typeFilter?.value) {
             params.append('type', typeFilter.value);
         }
-        if (statusFilter.value) {
+        if (statusFilter?.value) {
             params.append('status', statusFilter.value);
         }
 
-        const response = await fetch(`/api/accounting/transactions?${params}`, {
+        console.log('🔍 Cargando transacciones:', { 
+            page, 
+            isSearch, 
+            forceReload, 
+            preventAutoReload,
+            params: params.toString() 
+        });
+
+        const response = await fetch(`/api/accounting-simple/transactions?${params}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -461,6 +937,8 @@ async function loadTransactions(page = 1, isSearch = false) {
 
             updateTransactionsTable();
             updateTransactionsPagination();
+            
+            console.log(`✅ ${currentTransactions.length} transacciones cargadas`);
         } else {
             showAlert('Error cargando transacciones', 'error');
         }
@@ -468,16 +946,18 @@ async function loadTransactions(page = 1, isSearch = false) {
         console.error('Error loading transactions:', error);
         showAlert('Error de conexión', 'error');
     } finally {
-        if (!isSearch) {
-            document.getElementById('transactions-loading').style.display = 'none';
-        } else {
+        // Limpiar indicadores de loading
+        if (isSearch && searchInput) {
             searchInput.style.background = '';
             searchInput.style.backgroundSize = '';
             searchInput.style.animation = '';
+        } else if (!isSearch) {
+            document.getElementById('transactions-loading').style.display = 'none';
         }
     }
 }
 
+// 🔧 FIX: Función mejorada para actualizar tabla con estado correcto
 function updateTransactionsTable() {
     const tbody = document.getElementById('transactions-table-body');
 
@@ -493,7 +973,7 @@ function updateTransactionsTable() {
     }
 
     tbody.innerHTML = currentTransactions.map(transaction => `
-        <tr class="fade-in">
+        <tr class="fade-in" data-transaction-id="${transaction.id}">
             <td>${formatDate(transaction.date)}</td>
             <td><strong>${transaction.reference}</strong></td>
             <td>${transaction.description}</td>
@@ -504,7 +984,8 @@ function updateTransactionsTable() {
                 <span class="account-type">${getTransactionTypeLabel(transaction.type)}</span>
             </td>
             <td>
-                <span class="status-badge status-${transaction.status.toLowerCase()}">
+                <span class="status-badge status-${transaction.status.toLowerCase()}" 
+                      data-status="${transaction.status}">
                     ${getTransactionStatusLabel(transaction.status)}
                 </span>
             </td>
@@ -541,6 +1022,20 @@ function updateTransactionsTable() {
             </td>
         </tr>
     `).join('');
+
+    // 🔧 FIX: Agregar animación de actualización a filas modificadas
+    tbody.querySelectorAll('tr[data-transaction-id]').forEach(row => {
+        const transactionId = row.dataset.transactionId;
+        const statusBadge = row.querySelector('.status-badge');
+        
+        // Destacar transacciones recién actualizadas
+        if (statusBadge && statusBadge.dataset.status !== 'PENDING') {
+            row.style.background = 'var(--success-light)';
+            setTimeout(() => {
+                row.style.background = '';
+            }, 2000);
+        }
+    });
 }
 
 function updateTransactionsPagination() {
@@ -698,12 +1193,37 @@ async function approveTransactionFromTable(transactionId) {
     await updateTransactionStatus(transactionId, 'APPROVED');
 }
 
+// ===================================
+// 🔧 FIX DEFINITIVO PARA ESTADO DE TRANSACCIONES
+// ===================================
+
+// Flag para prevenir recargas automáticas durante actualizaciones
+let preventAutoReload = false;
+
+// 🔧 FIX PRINCIPAL: Función updateTransactionStatus completamente reescrita
 async function updateTransactionStatus(transactionId, status) {
+    console.log('🔄 Iniciando actualización de estado:', { transactionId, status });
     const token = localStorage.getItem('token');
 
+    // Mostrar loading en el botón específico
+    const buttons = document.querySelectorAll(`[onclick*="${transactionId}"]`);
+    buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+    });
+
     try {
-        const response = await fetch(`/api/accounting/transactions/${transactionId}/status`, {
-            method: 'PATCH',
+        // Mapear estados correctamente para las rutas del backend
+        const statusMap = {
+            'APPROVED': 'approve',
+            'REJECTED': 'reject'
+        };
+        const endpoint = statusMap[status] || status.toLowerCase();
+        
+        console.log('📡 Enviando petición a:', `/api/accounting-simple/transactions/${transactionId}/${endpoint}`);
+        
+        const response = await fetch(`/api/accounting-simple/transactions/${transactionId}/${endpoint}`, {
+            method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -711,20 +1231,205 @@ async function updateTransactionStatus(transactionId, status) {
             body: JSON.stringify({ status })
         });
 
+        console.log('📨 Respuesta del servidor:', { status: response.status, ok: response.ok });
+
         if (response.ok) {
-            const statusLabel = getTransactionStatusLabel(status);
-            showAlert(`Transacción ${statusLabel.toLowerCase()} exitosamente`, 'success');
-            closeViewTransactionModal();
-            loadTransactions(currentPage);
-            loadAccountingStats();
+            const result = await response.json();
+            console.log('✅ Respuesta exitosa del servidor:', result);
+            
+            // ✅ VERIFICAR QUE EL BACKEND CONFIRMÓ EL CAMBIO
+            if (result.success && result.data && result.data.status === status) {
+                console.log('✅ Backend confirmó el cambio de estado');
+                
+                // Actualizar la transacción en el array local con los datos del servidor
+                const transactionIndex = currentTransactions.findIndex(t => t.id === transactionId);
+                if (transactionIndex !== -1) {
+                    // Usar los datos completos del servidor
+                    currentTransactions[transactionIndex] = {
+                        ...currentTransactions[transactionIndex],
+                        ...result.data,
+                        status: result.data.status || status
+                    };
+                    console.log('🔄 Transacción actualizada con datos del servidor:', currentTransactions[transactionIndex]);
+                }
+                
+                // Actualizar la tabla inmediatamente
+                updateTransactionsTable();
+                
+                // Mostrar mensaje de éxito
+                const statusLabel = getTransactionStatusLabel(status);
+                showAlert(`Transacción ${statusLabel.toLowerCase()} exitosamente`, 'success');
+                
+                // Cerrar modal si está abierto
+                closeViewTransactionModal();
+                
+                // 🚫 PREVENIR RECARGAS AUTOMÁTICAS POR 3 SEGUNDOS
+                preventAutoReload = true;
+                setTimeout(() => {
+                    preventAutoReload = false;
+                    // Solo recargar estadísticas sin afectar la tabla
+                    loadAccountingStats();
+                }, 3000);
+                
+            } else if (result.success) {
+                // Si el servidor dice que tuvo éxito pero no devuelve el estado correcto,
+                // hacer una verificación adicional
+                console.log('⚠️ Verificando estado en servidor...');
+                await verifyTransactionStatus(transactionId, status);
+            } else {
+                console.error('❌ El backend no confirmó el cambio:', result);
+                showAlert('Error: El cambio no fue confirmado por el servidor', 'error');
+            }
+            
         } else {
             const error = await response.json();
+            console.log('❌ Error del servidor:', error);
             showAlert(error.message || 'Error actualizando estado', 'error');
         }
     } catch (error) {
-        console.error('Error updating transaction status:', error);
+        console.error('❌ Error en updateTransactionStatus:', error);
         showAlert('Error de conexión', 'error');
+    } finally {
+        // Restaurar botones
+        buttons.forEach(btn => {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        });
     }
+}
+
+// 🔧 FUNCIÓN PARA VERIFICAR ESTADO EN SERVIDOR
+async function verifyTransactionStatus(transactionId, expectedStatus) {
+    const token = localStorage.getItem('token');
+    
+    try {
+        console.log('🔍 Verificando estado en servidor...');
+        const verifyResponse = await fetch(`/api/accounting-simple/transactions/${transactionId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (verifyResponse.ok) {
+            const verifyResult = await verifyResponse.json();
+            const serverTransaction = verifyResult.data;
+            
+            console.log('🔍 Estado en servidor:', serverTransaction.status);
+            console.log('🔍 Estado esperado:', expectedStatus);
+            
+            if (serverTransaction.status === expectedStatus) {
+                // El servidor tiene el estado correcto, actualizar UI
+                const transactionIndex = currentTransactions.findIndex(t => t.id === transactionId);
+                if (transactionIndex !== -1) {
+                    currentTransactions[transactionIndex] = serverTransaction;
+                    updateTransactionsTable();
+                    console.log('✅ Estado verificado y UI actualizada');
+                }
+                
+                const statusLabel = getTransactionStatusLabel(expectedStatus);
+                showAlert(`Transacción ${statusLabel.toLowerCase()} exitosamente`, 'success');
+                closeViewTransactionModal();
+                
+            } else {
+                console.error('❌ Estado en servidor no coincide:', {
+                    esperado: expectedStatus,
+                    actual: serverTransaction.status
+                });
+                showAlert(`Error: Estado esperado ${expectedStatus}, pero servidor tiene ${serverTransaction.status}`, 'error');
+                
+                // Forzar sincronización con el estado del servidor
+                const transactionIndex = currentTransactions.findIndex(t => t.id === transactionId);
+                if (transactionIndex !== -1) {
+                    currentTransactions[transactionIndex] = serverTransaction;
+                    updateTransactionsTable();
+                }
+            }
+        } else {
+            console.error('❌ No se pudo verificar el estado en el servidor');
+            showAlert('Error verificando el estado', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error verificando estado:', error);
+    }
+}
+
+// 🔧 FUNCIONES DE APROBACIÓN ACTUALIZADAS
+async function approveTransaction() {
+    if (!viewingTransaction) return;
+    await updateTransactionStatus(viewingTransaction.id, 'APPROVED');
+}
+
+async function rejectTransaction() {
+    if (!viewingTransaction) return;
+    await updateTransactionStatus(viewingTransaction.id, 'REJECTED');
+}
+
+async function approveTransactionFromTable(transactionId) {
+    await updateTransactionStatus(transactionId, 'APPROVED');
+}
+
+// 🔧 FUNCIÓN DE DEBUG PARA VERIFICAR ESTADO
+async function debugTransactionStatus(transactionId) {
+    const token = localStorage.getItem('token');
+    
+    try {
+        const response = await fetch(`/api/accounting-simple/transactions/${transactionId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('🔍 DEBUG - Estado actual en servidor:', result.data.status);
+            console.log('🔍 DEBUG - Transacción completa:', result.data);
+            
+            // Comparar con el estado local
+            const localTransaction = currentTransactions.find(t => t.id === transactionId);
+            console.log('🔍 DEBUG - Estado local:', localTransaction?.status);
+            
+            return result.data;
+        }
+    } catch (error) {
+        console.error('❌ DEBUG - Error:', error);
+    }
+}
+
+// 🔧 FUNCIÓN PARA FORZAR SINCRONIZACIÓN
+async function forceSyncTransaction(transactionId) {
+    console.log('🔄 Forzando sincronización de transacción:', transactionId);
+    
+    const serverData = await debugTransactionStatus(transactionId);
+    if (serverData) {
+        const transactionIndex = currentTransactions.findIndex(t => t.id === transactionId);
+        if (transactionIndex !== -1) {
+            currentTransactions[transactionIndex] = serverData;
+            updateTransactionsTable();
+            console.log('✅ Transacción sincronizada');
+        }
+    }
+}
+
+// 🔧 FUNCIÓN PARA PROBAR EL BACKEND
+async function testBackendApproval(transactionId) {
+    const token = localStorage.getItem('token');
+    
+    console.log('🧪 TESTING - Estado antes de aprobar');
+    await debugTransactionStatus(transactionId);
+    
+    console.log('🧪 TESTING - Enviando aprobación...');
+    const response = await fetch(`/api/accounting-simple/transactions/${transactionId}/approve`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'APPROVED' })
+    });
+    
+    const result = await response.json();
+    console.log('🧪 TESTING - Respuesta del servidor:', result);
+    
+    console.log('🧪 TESTING - Estado después de aprobar');
+    setTimeout(async () => {
+        await debugTransactionStatus(transactionId);
+    }, 500);
 }
 
 async function deleteTransaction(transactionId) {
@@ -735,7 +1440,7 @@ async function deleteTransaction(transactionId) {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await fetch(`/api/accounting/transactions/${transactionId}`, {
+        const response = await fetch(`/api/accounting-simple/transactions/${transactionId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -771,7 +1476,7 @@ async function generateBalanceSheet() {
     document.getElementById('reports-loading').style.display = 'flex';
 
     try {
-        const response = await fetch(`/api/accounting/reports/balance-sheet?date=${reportDate}`, {
+        const response = await fetch(`/api/accounting-simple/reports/balance-sheet?date=${reportDate}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -802,7 +1507,7 @@ async function generateIncomeStatement() {
     document.getElementById('reports-loading').style.display = 'flex';
 
     try {
-        const response = await fetch(`/api/accounting/reports/income-statement?date=${reportDate}`, {
+        const response = await fetch(`/api/accounting-simple/reports/income-statement?date=${reportDate}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -902,9 +1607,66 @@ function generateAccountSection(accounts) {
 }
 
 // ===================================
+// BÚSQUEDA EN TIEMPO REAL
+// ===================================
+
+// 🔧 FIX: Búsqueda en tiempo real para transacciones
+function setupRealTimeTransactionSearch() {
+    const searchInput = document.getElementById('transaction-search-input');
+    const dateFromFilter = document.getElementById('date-from-filter');
+    const dateToFilter = document.getElementById('date-to-filter');
+    const typeFilter = document.getElementById('transaction-type-filter');
+    const statusFilter = document.getElementById('transaction-status-filter');
+
+    // Búsqueda en tiempo real con debounce
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(() => {
+            console.log('🔍 Búsqueda en tiempo real activada:', searchInput.value);
+            loadTransactions(1, true); // true = isSearch
+        }, 300));
+    }
+
+    // Filtros en tiempo real
+    [dateFromFilter, dateToFilter, typeFilter, statusFilter].forEach(filter => {
+        if (filter) {
+            filter.addEventListener('change', () => {
+                console.log('🔍 Filtro cambiado:', filter.id, filter.value);
+                loadTransactions(1, true);
+            });
+        }
+    });
+}
+
+// 🔧 FIX: Búsqueda en tiempo real para cuentas
+function setupRealTimeAccountSearch() {
+    const searchInput = document.getElementById('account-search-input');
+    const typeFilter = document.getElementById('account-type-filter');
+    const levelFilter = document.getElementById('account-level-filter');
+
+    // Búsqueda en tiempo real con debounce
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(() => {
+            console.log('🔍 Búsqueda de cuentas en tiempo real:', searchInput.value);
+            loadAccounts();
+        }, 300));
+    }
+
+    // Filtros en tiempo real
+    [typeFilter, levelFilter].forEach(filter => {
+        if (filter) {
+            filter.addEventListener('change', () => {
+                console.log('🔍 Filtro de cuentas cambiado:', filter.id, filter.value);
+                loadAccounts();
+            });
+        }
+    });
+}
+
+// ===================================
 // FORMULARIOS
 // ===================================
 
+// 🔧 FIX: setupEventListeners actualizado con búsqueda en tiempo real
 function setupEventListeners() {
     // Account form
     const accountForm = document.getElementById('account-form');
@@ -934,16 +1696,12 @@ function setupEventListeners() {
         });
     }
 
-    // Search inputs with debounce
-    const accountSearchInput = document.getElementById('account-search-input');
-    if (accountSearchInput) {
-        accountSearchInput.addEventListener('input', debounce(() => loadAccounts(), 300));
-    }
-
-    const transactionSearchInput = document.getElementById('transaction-search-input');
-    if (transactionSearchInput) {
-        transactionSearchInput.addEventListener('input', debounce(() => loadTransactions(1, true), 300));
-    }
+    // 🔧 NUEVO: Configurar búsqueda en tiempo real
+    setTimeout(() => {
+        setupRealTimeAccountSearch();
+        setupRealTimeTransactionSearch();
+        console.log('✅ Búsqueda en tiempo real configurada');
+    }, 1000);
 
     // Close modals when clicking outside
     document.addEventListener('click', function(e) {
@@ -957,6 +1715,8 @@ function setupEventListeners() {
             }
         }
     });
+
+    console.log('✅ Event listeners configurados');
 }
 
 async function handleAccountSubmit(e) {
@@ -994,7 +1754,7 @@ async function handleAccountSubmit(e) {
 
     try {
         const isEditing = editingAccount !== null;
-        const url = isEditing ? `/api/accounting/accounts/${editingAccount.id}` : '/api/accounting/accounts';
+        const url = isEditing ? `/api/accounting-simple/accounts/${editingAccount.id}` : '/api/accounting-simple/accounts';
         const method = isEditing ? 'PUT' : 'POST';
 
         const response = await fetch(url, {
@@ -1053,7 +1813,7 @@ async function handleTransactionSubmit(e) {
 
     try {
         const isEditing = editingTransaction !== null;
-        const url = isEditing ? `/api/accounting/transactions/${editingTransaction.id}` : '/api/accounting/transactions';
+        const url = isEditing ? `/api/accounting-simple/transactions/${editingTransaction.id}` : '/api/accounting-simple/transactions';
         const method = isEditing ? 'PUT' : 'POST';
 
         const response = await fetch(url, {
@@ -1087,6 +1847,46 @@ async function handleTransactionSubmit(e) {
 }
 
 // ===================================
+// FUNCIONES DE INTERACCIÓN
+// ===================================
+
+function toggleCategory(categoryType) {
+    const accountsContainer = document.getElementById(`accounts-${categoryType}`);
+    const toggleButton = document.getElementById(`toggle-${categoryType}`);
+
+    if (accountsContainer && toggleButton) {
+        const isExpanded = accountsContainer.style.display !== 'none';
+
+        accountsContainer.style.display = isExpanded ? 'none' : 'block';
+        toggleButton.classList.toggle('expanded', !isExpanded);
+        
+        // Rotar el ícono
+        const chevronIcon = toggleButton.querySelector('.chevron-icon');
+        if (chevronIcon) {
+            chevronIcon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+    }
+}
+
+function toggleAccountChildren(accountId) {
+    const childrenContainer = document.getElementById(`children-${accountId}`);
+    const toggleButton = document.querySelector(`[onclick="toggleAccountChildren('${accountId}')"]`);
+
+    if (childrenContainer && toggleButton) {
+        const isExpanded = childrenContainer.style.display !== 'none';
+
+        childrenContainer.style.display = isExpanded ? 'none' : 'block';
+        toggleButton.classList.toggle('expanded', !isExpanded);
+        
+        // Rotar el ícono
+        const toggleIcon = toggleButton.querySelector('.toggle-icon');
+        if (toggleIcon) {
+            toggleIcon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+    }
+}
+
+// ===================================
 // UTILIDADES
 // ===================================
 
@@ -1110,14 +1910,28 @@ function formatDate(dateString) {
 }
 
 function showAlert(message, type = 'success') {
+    console.log('🚨 showAlert llamada:', { message, type });
+    
     const alert = document.getElementById('alert');
     const alertMessage = document.getElementById('alert-message');
+    
+    console.log('🔍 Elementos encontrados:', { alert: !!alert, alertMessage: !!alertMessage });
+
+    if (!alert || !alertMessage) {
+        console.error('❌ Elementos de alerta no encontrados');
+        // Fallback: usar alert del navegador
+        window.alert(message);
+        return;
+    }
 
     alert.className = `alert ${type} show`;
     alertMessage.textContent = message;
+    
+    console.log('✅ Alerta mostrada:', { className: alert.className, text: alertMessage.textContent });
 
     setTimeout(() => {
         alert.classList.remove('show');
+        console.log('⏰ Alerta ocultada después de 5 segundos');
     }, 5000);
 }
 
@@ -1132,3 +1946,378 @@ function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
+
+// ===================================
+// CSS ADICIONAL PARA FIXES
+// ===================================
+
+// 🔧 FIX: Agregar CSS para animaciones de búsqueda y estados
+const additionalCSS = `
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.status-badge.status-approved {
+    background-color: var(--success);
+    color: white;
+}
+
+.status-badge.status-rejected {
+    background-color: var(--danger);
+    color: white;
+}
+
+.status-badge.status-pending {
+    background-color: var(--warning);
+    color: var(--text-dark);
+}
+
+tr[data-transaction-id] {
+    transition: background-color 0.3s ease;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilos para indicadores de búsqueda */
+.form-input[style*="shimmer"] {
+    position: relative;
+    overflow: hidden;
+}
+
+.form-input[style*="shimmer"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+/* Mejoras visuales para estados de transacciones */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.2s ease-in-out;
+}
+
+.status-badge:hover {
+    transform: scale(1.05);
+}
+
+/* Animación para filas actualizadas */
+.transaction-updated {
+    background-color: var(--success-light) !important;
+    animation: highlightUpdate 2s ease-in-out;
+}
+
+@keyframes highlightUpdate {
+    0% { background-color: var(--success); }
+    100% { background-color: transparent; }
+}
+
+/* Mejoras para botones de acción */
+.btn-text {
+    margin-left: 0.25rem;
+}
+
+@media (max-width: 768px) {
+    .btn-text {
+        display: none;
+    }
+}
+
+/* Indicadores de carga mejorados */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.loading-overlay .loading {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid var(--border);
+    border-top: 2px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+`;
+
+// Agregar el CSS al documento si no existe
+if (!document.getElementById('transaction-fixes-css')) {
+    const style = document.createElement('style');
+    style.id = 'transaction-fixes-css';
+    style.textContent = additionalCSS;
+    document.head.appendChild(style);
+    console.log('✅ CSS de fixes aplicado');
+}
+
+// ===================================
+// INICIALIZACIÓN DE FIXES
+// ===================================
+
+// 🔧 EJECUTAR FIXES AL CARGAR
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔧 Aplicando fixes para transacciones...');
+    
+    // Re-configurar event listeners cuando el DOM esté listo
+    setTimeout(() => {
+        // Solo configurar si los elementos existen
+        const transactionSearchInput = document.getElementById('transaction-search-input');
+        const accountSearchInput = document.getElementById('account-search-input');
+        
+        if (transactionSearchInput || accountSearchInput) {
+            setupRealTimeAccountSearch();
+            setupRealTimeTransactionSearch();
+            console.log('✅ Fixes aplicados correctamente');
+        } else {
+            console.log('⚠️ Elementos de búsqueda no encontrados, reintentando...');
+            // Reintentar después de 2 segundos
+            setTimeout(() => {
+                setupRealTimeAccountSearch();
+                setupRealTimeTransactionSearch();
+                console.log('✅ Fixes aplicados en segundo intento');
+            }, 2000);
+        }
+    }, 1000);
+});
+
+// ===================================
+// FUNCIONES GLOBALES ADICIONALES
+// ===================================
+
+// Función para recargar datos manualmente
+function refreshData() {
+    console.log('🔄 Recargando todos los datos...');
+    loadAccountingStats();
+    
+    if (activeTab === 'accounts') {
+        loadAccounts();
+    } else if (activeTab === 'transactions') {
+        loadTransactions(currentPage);
+    }
+}
+
+// Función para exportar datos (placeholder)
+function exportData(type) {
+    console.log(`📄 Exportando datos de ${type}...`);
+    showAlert(`Función de exportación de ${type} en desarrollo`, 'info');
+}
+
+// Función para mostrar estadísticas rápidas
+function showQuickStats() {
+    const stats = {
+        accounts: currentAccounts.length,
+        transactions: currentTransactions.length,
+        pendingTransactions: currentTransactions.filter(t => t.status === 'PENDING').length
+    };
+    
+    showAlert(`Cuentas: ${stats.accounts} | Transacciones: ${stats.transactions} | Pendientes: ${stats.pendingTransactions}`, 'info');
+}
+
+// Función para limpiar filtros
+function clearAllFilters() {
+    // Limpiar filtros de cuentas
+    const accountSearch = document.getElementById('account-search-input');
+    const accountType = document.getElementById('account-type-filter');
+    const accountLevel = document.getElementById('account-level-filter');
+    
+    if (accountSearch) accountSearch.value = '';
+    if (accountType) accountType.value = '';
+    if (accountLevel) accountLevel.value = '';
+    
+    // Limpiar filtros de transacciones
+    const transactionSearch = document.getElementById('transaction-search-input');
+    const dateFrom = document.getElementById('date-from-filter');
+    const dateTo = document.getElementById('date-to-filter');
+    const transactionType = document.getElementById('transaction-type-filter');
+    const transactionStatus = document.getElementById('transaction-status-filter');
+    
+    if (transactionSearch) transactionSearch.value = '';
+    if (dateFrom) dateFrom.value = '';
+    if (dateTo) dateTo.value = '';
+    if (transactionType) transactionType.value = '';
+    if (transactionStatus) transactionStatus.value = '';
+    
+    // Recargar datos
+    refreshData();
+    
+    showAlert('Filtros limpiados', 'success');
+}
+
+// Atajos de teclado
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + R para recargar datos
+    if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+        e.preventDefault();
+        refreshData();
+    }
+    
+    // Ctrl/Cmd + N para nueva transacción/cuenta según la pestaña activa
+    if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        if (activeTab === 'accounts') {
+            openAccountModal();
+        } else if (activeTab === 'transactions') {
+            openTransactionModal();
+        }
+    }
+    
+    // Ctrl/Cmd + F para enfocar búsqueda
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        if (activeTab === 'accounts') {
+            const accountSearch = document.getElementById('account-search-input');
+            if (accountSearch) accountSearch.focus();
+        } else if (activeTab === 'transactions') {
+            const transactionSearch = document.getElementById('transaction-search-input');
+            if (transactionSearch) transactionSearch.focus();
+        }
+    }
+});
+
+console.log('🔧 Fixes para transacciones cargados correctamente');
+// ===================================
+// FUNCIONES DE DIAGNÓSTICO PARA TEMAS
+// ===================================
+
+function diagnoseThemeSystem() {
+    console.log('🔍 DIAGNÓSTICO DEL SISTEMA DE TEMA:');
+    
+    const elements = {
+        'light-label': document.getElementById('light-label'),
+        'dark-label': document.getElementById('dark-label'),
+        'theme-toggle': document.querySelector('.theme-toggle'),
+        'theme-container': document.querySelector('.theme-toggle-container')
+    };
+    
+    Object.entries(elements).forEach(([name, element]) => {
+        console.log(`  ${name}:`, element ? '✅ Encontrado' : '❌ NO encontrado');
+        if (element && name.includes('label')) {
+            console.log(`    - Clases:`, element.classList.toString());
+            console.log(`    - Texto:`, element.textContent);
+        }
+    });
+    
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const savedTheme = localStorage.getItem('theme');
+    
+    console.log('📊 ESTADO DEL TEMA:');
+    console.log('  Tema actual:', currentTheme);
+    console.log('  Tema guardado:', savedTheme);
+    console.log('  Elementos .theme-label:', document.querySelectorAll('.theme-label').length);
+    
+    return elements;
+}
+
+function testThemeToggle() {
+    console.log('🧪 PROBANDO TOGGLE DE TEMA:');
+    
+    // Estado inicial
+    diagnoseThemeSystem();
+    
+    console.log('🔄 Haciendo toggle...');
+    toggleTheme();
+    
+    // Verificar después del toggle
+    setTimeout(() => {
+        console.log('📊 Estado después del toggle:');
+        diagnoseThemeSystem();
+    }, 100);
+}
+
+function forceThemeSync() {
+    console.log('🔧 Forzando sincronización de tema...');
+    
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    // Forzar actualización de labels
+    updateThemeLabelsForced(savedTheme);
+    
+    console.log(`✅ Tema sincronizado a: ${savedTheme}`);
+}
+
+function emergencyThemeToggle() {
+    console.log('🚨 TOGGLE DE EMERGENCIA - FORZANDO CAMBIO');
+    
+    const current = localStorage.getItem('theme') || 'light';
+    const newTheme = current === 'dark' ? 'light' : 'dark';
+    
+    console.log(`🚨 Cambio forzado: ${current} → ${newTheme}`);
+    
+    // Aplicar en TODO
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    // Forzar labels inmediatamente
+    updateThemeLabelsForced(newTheme);
+    
+    console.log('🚨 CAMBIO DE EMERGENCIA COMPLETADO');
+}
+
+function forceReloadThemeCSS() {
+    console.log('🔄 Forzando recarga de CSS de tema...');
+    
+    // Eliminar CSS existente
+    const existingCSS = document.getElementById('contabilidad-theme-css');
+    if (existingCSS) {
+        existingCSS.remove();
+        console.log('🗑️ CSS anterior eliminado');
+    }
+    
+    // Recrear CSS
+    ensureThemeCSS();
+    
+    // Forzar reflow del navegador
+    document.body.offsetHeight;
+    
+    // Aplicar tema actual
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    updateThemeLabelsForced(currentTheme);
+    
+    console.log('✅ CSS de tema recargado y aplicado');
+}
+
+// Hacer las funciones disponibles globalmente para debugging
+window.diagnoseThemeSystem = diagnoseThemeSystem;
+window.testThemeToggle = testThemeToggle;
+window.forceThemeSync = forceThemeSync;
+window.emergencyThemeToggle = emergencyThemeToggle;
+window.updateThemeLabelsForced = updateThemeLabelsForced;
+window.forceReloadThemeCSS = forceReloadThemeCSS;
+
+console.log('✅ Archivo accounting.js completamente corregido y optimizado');
+console.log('🎨 Fix de tema integrado - Funciones de debug disponibles:');
+console.log('  - diagnoseThemeSystem(): Verificar estado del tema');
+console.log('  - testThemeToggle(): Probar cambio de tema');
+console.log('  - forceThemeSync(): Forzar sincronización');
+console.log('  - debugTransactionStatus(id): Verificar estado de transacción');
+console.log('  - forceSyncTransaction(id): Forzar sincronización de transacción');

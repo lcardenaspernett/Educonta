@@ -103,6 +103,14 @@ try {
   console.log('⚠️ Accounting routes not found:', error.message);
 }
 
+try {
+  const accountingSimpleRoutes = require('./routes/accounting-simple');
+  app.use('/api/accounting-simple', accountingSimpleRoutes);
+  console.log('✅ Accounting simple routes loaded');
+} catch (error) {
+  console.log('⚠️ Accounting simple routes not found:', error.message);
+}
+
 // 404 handler para API routes
 app.use('/api/*', (req, res) => {
   res.status(404).json({ error: 'API route not found' });

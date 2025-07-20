@@ -206,9 +206,21 @@ function updateStatsDisplay(stats) {
     updateElement('total-balance', formatCurrency(stats.totalBalance || 0));
     updateElement('pending-transactions', stats.pendingTransactions || 0);
     
-    // Actualizar gráficos si existen
-    if (window.AccountingDashboard) {
-        window.AccountingDashboard.updateCharts(stats);
+    // Disparar evento para el dashboard
+    window.dispatchEvent(new CustomEvent('dataLoaded', { 
+        detail: { 
+            stats: stats,
+            accounts: window.currentAccounts || []
+        } 
+    }));
+    
+    // Actualizar dashboard si está inicializado
+    if (window.accountingDashboard) {
+        window.accountingDashboard.updateMetrics(stats);
+        window.accountingDashboard.updateCharts({
+            accounts: window.currentAccounts || [],
+            stats: stats
+        });
     }
 }
 
