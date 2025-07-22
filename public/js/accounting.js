@@ -810,7 +810,7 @@ async function deleteAccount(accountId) {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await fetch(`/api/accounting-simple/accounts/${accountId}`, {
+        const response = await fetch(`/api/accounting/accounts/${accountId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -889,7 +889,7 @@ async function loadTransactions(page = 1, isSearch = false, forceReload = false)
             params: params.toString() 
         });
 
-        const response = await fetch(`/api/accounting-simple/transactions?${params}`, {
+        const response = await fetch(`/api/accounting/transactions?${params}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -1186,9 +1186,9 @@ async function updateTransactionStatus(transactionId, status) {
         };
         const endpoint = statusMap[status] || status.toLowerCase();
         
-        console.log('📡 Enviando petición a:', `/api/accounting-simple/transactions/${transactionId}/${endpoint}`);
+        console.log('📡 Enviando petición a:', `/api/accounting/transactions/${transactionId}`);
         
-        const response = await fetch(`/api/accounting-simple/transactions/${transactionId}/${endpoint}`, {
+        const response = await fetch(`/api/accounting/transactions/${transactionId}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -1250,7 +1250,13 @@ async function updateTransactionStatus(transactionId, status) {
         } else {
             const error = await response.json();
             console.log('❌ Error del servidor:', error);
-            showAlert(error.message || 'Error actualizando estado', 'error');
+            console.log('❌ Status code:', response.status);
+            console.log('❌ Request body enviado:', { status });
+            console.log('❌ Headers enviados:', {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            });
+            showAlert(error.error || error.message || 'Error actualizando estado', 'error');
         }
     } catch (error) {
         console.error('❌ Error en updateTransactionStatus:', error);
@@ -1270,7 +1276,7 @@ async function verifyTransactionStatus(transactionId, expectedStatus) {
     
     try {
         console.log('🔍 Verificando estado en servidor...');
-        const verifyResponse = await fetch(`/api/accounting-simple/transactions/${transactionId}`, {
+        const verifyResponse = await fetch(`/api/accounting/transactions/${transactionId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -1337,7 +1343,7 @@ async function debugTransactionStatus(transactionId) {
     const token = localStorage.getItem('token');
     
     try {
-        const response = await fetch(`/api/accounting-simple/transactions/${transactionId}`, {
+        const response = await fetch(`/api/accounting/transactions/${transactionId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         

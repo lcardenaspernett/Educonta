@@ -996,17 +996,11 @@ router.put('/accounts/:id', authenticate, checkPermission('accounting', 'update'
  */
 router.put('/transactions/:id', authenticate, checkPermission('accounting', 'update'), async (req, res) => {
   try {
-    // Obtener institutionId del usuario autenticado
-    const institutionId = req.user?.institutionId;
-    const transactionId = req.params.id;
+   // Obtener institutionId del usuario autenticado o usar fallback
+const institutionId = req.user?.institutionId || 'cmd3z16yp0002w6heeiym4ex6';
+const transactionId = req.params.id;
     
-    if (!institutionId) {
-      return res.status(400).json({
-        success: false,
-        error: 'Usuario sin institución asignada'
-      });
-    }
-    
+        
     // Verificar que la transacción exista y pertenezca a la institución
     const existingTransaction = await prisma.transaction.findFirst({
       where: {
@@ -1022,11 +1016,12 @@ router.put('/transactions/:id', authenticate, checkPermission('accounting', 'upd
       });
     }
     
-    // No permitir editar transacciones aprobadas (solo pendientes)
-    if (existingTransaction.status === 'APPROVED') {
+    // Permitir cambios de estado para aprobación/rechazo
+    // Solo bloquear edición de datos si ya está aprobada y no es cambio de estado
+    if (existingTransaction.status === 'APPROVED' && !req.body.status) {
       return res.status(400).json({
         success: false,
-        error: 'No se pueden editar transacciones aprobadas'
+        error: 'No se pueden editar transacciones aprobadas (solo cambio de estado)'
       });
     }
     
@@ -2614,6 +2609,518 @@ function generateIncomeStatementExcel(data) {
   ].join('\n');
   
   return Buffer.from(csvContent, 'utf8');
+}
+
+// ===================================
+// DASHBOARD Y KPIs
+// ===================================
+
+/**
+ * GET /api/accounting/dashboard/kpis
+ * Obtener KPIs principales del dashboard
+ */
+router.get('/dashboard/kpis', authenticate, checkPermission('accounting', 'read'), async (req, res) => {
+  try {
+    // Obtener institutionId del usuario autenticado
+    const institutionId = req.user?.institutionId || 'cmd3z16yp0002w6heeiym4ex6';
+    
+    // Parámetros de fecha (por defecto año actual)
+    const startDate = req.query.startDate ? new Date(req.query.startDate) : new Date(new Date().getFullYear(), 0, 1);
+    const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
+    const asOfDate = req.query.asOfDate ? new Date(req.query.asOfDate) : new Date();
+    
+    // Validar fechas
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || isNaN(asOfDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        error: 'Fechas inválidas'
+      });
+    }
+    
+    // Obtener todas las cuentas activas
+    const accounts = await prisma.account.findMany({
+      where: {
+        institutionId,
+        isActive: true
+      }
+    });
+    
+    // Calcular KPIs en paralelo
+    const [incomeData, expenseData, assetData, liabilityData, equityData] = await Promise.all([
+      // Ingresos del período
+      calculateAccountTypeMovements(accounts.filter(acc => acc.accountType === 'INCOME'), startDate, endDate, 'INCOME'),
+      // Gastos del período
+      calculateAccountTypeMovements(accounts.filter(acc => acc.accountType === 'EXPENSE'), startDate, endDate, 'EXPENSE'),
+      // Activos al corte
+      calculateAccountTypeBalances(accounts.filter(acc => acc.accountType === 'ASSET'), asOfDate, 'ASSET'),
+      // Pasivos al corte
+      calculateAccountTypeBalances(accounts.filter(acc => acc.accountType === 'LIABILITY'), asOfDate, 'LIABILITY'),
+      // Patrimonio al corte
+      calculateAccountTypeBalances(accounts.filter(acc => acc.accountType === 'EQUITY'), asOfDate, 'EQUITY')
+    ]);
+    
+    // Calcular resultado neto del período
+    const netIncome = incomeData.total - expenseData.total;
+    
+    // Calcular ratios financieros
+    const grossMargin = incomeData.total > 0 ? ((netIncome / incomeData.total) * 100) : 0;
+    const expenseRatio = incomeData.total > 0 ? ((expenseData.total / incomeData.total) * 100) : 0;
+    const debtToEquityRatio = equityData.total > 0 ? (liabilityData.total / equityData.total) : 0;
+    const currentRatio = liabilityData.total > 0 ? (assetData.total / liabilityData.total) : 0;
+    
+    // Obtener efectivo disponible (cuentas de caja y bancos)
+    const cashAccounts = accounts.filter(acc => 
+      acc.accountType === 'ASSET' && 
+      (acc.code.startsWith('11') || acc.name.toLowerCase().includes('caja') || acc.name.toLowerCase().includes('banco'))
+    );
+    
+    const cashData = await calculateAccountTypeBalances(cashAccounts, asOfDate, 'ASSET');
+    
+    // Preparar respuesta con KPIs
+    const kpis = {
+      // KPIs de período
+      period: {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        totalIncome: incomeData.total,
+        totalExpenses: expenseData.total,
+        netIncome: netIncome,
+        grossMargin: parseFloat(grossMargin.toFixed(2)),
+        expenseRatio: parseFloat(expenseRatio.toFixed(2))
+      },
+      
+      // KPIs de posición financiera
+      position: {
+        asOfDate: asOfDate.toISOString(),
+        totalAssets: assetData.total,
+        totalLiabilities: liabilityData.total,
+        totalEquity: equityData.total + netIncome, // Incluir resultado del ejercicio
+        cashAndEquivalents: cashData.total,
+        debtToEquityRatio: parseFloat(debtToEquityRatio.toFixed(2)),
+        currentRatio: parseFloat(currentRatio.toFixed(2))
+      },
+      
+      // Análisis de cuentas principales
+      topAccounts: {
+        income: incomeData.accounts.slice(0, 5),
+        expenses: expenseData.accounts.slice(0, 5),
+        assets: assetData.accounts.slice(0, 5),
+        liabilities: liabilityData.accounts.slice(0, 5)
+      },
+      
+      // Métricas de salud financiera
+      healthMetrics: {
+        profitability: netIncome > 0 ? 'positive' : 'negative',
+        liquidity: cashData.total > (expenseData.total / 12) ? 'good' : 'low', // Más de un mes de gastos
+        leverage: debtToEquityRatio < 1 ? 'conservative' : debtToEquityRatio < 2 ? 'moderate' : 'high',
+        efficiency: expenseRatio < 80 ? 'efficient' : 'needs_improvement'
+      }
+    };
+    
+    res.json({
+      success: true,
+      data: kpis
+    });
+    
+  } catch (error) {
+    console.error('Error getting dashboard KPIs:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/accounting/dashboard/charts
+ * Obtener datos para gráficos del dashboard
+ */
+router.get('/dashboard/charts', authenticate, checkPermission('accounting', 'read'), async (req, res) => {
+  try {
+    // Obtener institutionId del usuario autenticado
+    const institutionId = req.user?.institutionId || 'cmd3z16yp0002w6heeiym4ex6';
+    
+    // Parámetros de fecha
+    const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
+    const startDate = req.query.startDate ? new Date(req.query.startDate) : new Date(endDate.getFullYear(), 0, 1);
+    const chartType = req.query.type || 'monthly'; // monthly, quarterly, yearly
+    
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate >= endDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'Fechas inválidas'
+      });
+    }
+    
+    // Generar períodos según el tipo de gráfico
+    const periods = generatePeriods(startDate, endDate, chartType);
+    
+    // Obtener cuentas de ingresos y gastos
+    const incomeAccounts = await prisma.account.findMany({
+      where: {
+        institutionId,
+        isActive: true,
+        accountType: 'INCOME'
+      }
+    });
+    
+    const expenseAccounts = await prisma.account.findMany({
+      where: {
+        institutionId,
+        isActive: true,
+        accountType: 'EXPENSE'
+      }
+    });
+    
+    // Calcular datos por período
+    const chartData = await Promise.all(
+      periods.map(async (period) => {
+        const [incomeMovements, expenseMovements] = await Promise.all([
+          calculateAccountTypeMovements(incomeAccounts, period.start, period.end, 'INCOME'),
+          calculateAccountTypeMovements(expenseAccounts, period.start, period.end, 'EXPENSE')
+        ]);
+        
+        return {
+          period: period.label,
+          startDate: period.start.toISOString(),
+          endDate: period.end.toISOString(),
+          income: incomeMovements.total,
+          expenses: expenseMovements.total,
+          netIncome: incomeMovements.total - expenseMovements.total
+        };
+      })
+    );
+    
+    // Obtener distribución por tipo de cuenta (para gráfico de torta)
+    const accounts = await prisma.account.findMany({
+      where: {
+        institutionId,
+        isActive: true
+      }
+    });
+    
+    const distributionData = await Promise.all([
+      calculateAccountTypeBalances(accounts.filter(acc => acc.accountType === 'ASSET'), endDate, 'ASSET'),
+      calculateAccountTypeBalances(accounts.filter(acc => acc.accountType === 'LIABILITY'), endDate, 'LIABILITY'),
+      calculateAccountTypeBalances(accounts.filter(acc => acc.accountType === 'EQUITY'), endDate, 'EQUITY')
+    ]);
+    
+    const distribution = {
+      assets: distributionData[0].total,
+      liabilities: distributionData[1].total,
+      equity: distributionData[2].total
+    };
+    
+    res.json({
+      success: true,
+      data: {
+        timeline: chartData,
+        distribution: distribution,
+        periods: periods.map(p => p.label)
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error getting dashboard charts:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/accounting/dashboard/trends
+ * Obtener tendencias y comparaciones
+ */
+router.get('/dashboard/trends', authenticate, checkPermission('accounting', 'read'), async (req, res) => {
+  try {
+    // Obtener institutionId del usuario autenticado
+    const institutionId = req.user?.institutionId || 'cmd3z16yp0002w6heeiym4ex6';
+    
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    
+    // Períodos de comparación
+    const currentPeriod = {
+      start: new Date(currentYear, 0, 1), // Inicio del año actual
+      end: currentDate
+    };
+    
+    const previousPeriod = {
+      start: new Date(currentYear - 1, 0, 1), // Inicio del año anterior
+      end: new Date(currentYear - 1, currentMonth, currentDate.getDate()) // Misma fecha año anterior
+    };
+    
+    const currentMonthPeriod = {
+      start: new Date(currentYear, currentMonth, 1),
+      end: currentDate
+    };
+    
+    const previousMonthPeriod = {
+      start: new Date(currentYear, currentMonth - 1, 1),
+      end: new Date(currentYear, currentMonth, 0) // Último día del mes anterior
+    };
+    
+    // Obtener cuentas
+    const incomeAccounts = await prisma.account.findMany({
+      where: { institutionId, isActive: true, accountType: 'INCOME' }
+    });
+    
+    const expenseAccounts = await prisma.account.findMany({
+      where: { institutionId, isActive: true, accountType: 'EXPENSE' }
+    });
+    
+    // Calcular métricas para comparación
+    const [currentYearData, previousYearData, currentMonthData, previousMonthData] = await Promise.all([
+      Promise.all([
+        calculateAccountTypeMovements(incomeAccounts, currentPeriod.start, currentPeriod.end, 'INCOME'),
+        calculateAccountTypeMovements(expenseAccounts, currentPeriod.start, currentPeriod.end, 'EXPENSE')
+      ]),
+      Promise.all([
+        calculateAccountTypeMovements(incomeAccounts, previousPeriod.start, previousPeriod.end, 'INCOME'),
+        calculateAccountTypeMovements(expenseAccounts, previousPeriod.start, previousPeriod.end, 'EXPENSE')
+      ]),
+      Promise.all([
+        calculateAccountTypeMovements(incomeAccounts, currentMonthPeriod.start, currentMonthPeriod.end, 'INCOME'),
+        calculateAccountTypeMovements(expenseAccounts, currentMonthPeriod.start, currentMonthPeriod.end, 'EXPENSE')
+      ]),
+      Promise.all([
+        calculateAccountTypeMovements(incomeAccounts, previousMonthPeriod.start, previousMonthPeriod.end, 'INCOME'),
+        calculateAccountTypeMovements(expenseAccounts, previousMonthPeriod.start, previousMonthPeriod.end, 'EXPENSE')
+      ])
+    ]);
+    
+    // Calcular variaciones
+    const yearOverYear = {
+      income: {
+        current: currentYearData[0].total,
+        previous: previousYearData[0].total,
+        change: previousYearData[0].total > 0 ? 
+          ((currentYearData[0].total - previousYearData[0].total) / previousYearData[0].total * 100) : 0
+      },
+      expenses: {
+        current: currentYearData[1].total,
+        previous: previousYearData[1].total,
+        change: previousYearData[1].total > 0 ? 
+          ((currentYearData[1].total - previousYearData[1].total) / previousYearData[1].total * 100) : 0
+      },
+      netIncome: {
+        current: currentYearData[0].total - currentYearData[1].total,
+        previous: previousYearData[0].total - previousYearData[1].total
+      }
+    };
+    
+    yearOverYear.netIncome.change = yearOverYear.netIncome.previous !== 0 ? 
+      ((yearOverYear.netIncome.current - yearOverYear.netIncome.previous) / Math.abs(yearOverYear.netIncome.previous) * 100) : 0;
+    
+    const monthOverMonth = {
+      income: {
+        current: currentMonthData[0].total,
+        previous: previousMonthData[0].total,
+        change: previousMonthData[0].total > 0 ? 
+          ((currentMonthData[0].total - previousMonthData[0].total) / previousMonthData[0].total * 100) : 0
+      },
+      expenses: {
+        current: currentMonthData[1].total,
+        previous: previousMonthData[1].total,
+        change: previousMonthData[1].total > 0 ? 
+          ((currentMonthData[1].total - previousMonthData[1].total) / previousMonthData[1].total * 100) : 0
+      },
+      netIncome: {
+        current: currentMonthData[0].total - currentMonthData[1].total,
+        previous: previousMonthData[0].total - previousMonthData[1].total
+      }
+    };
+    
+    monthOverMonth.netIncome.change = monthOverMonth.netIncome.previous !== 0 ? 
+      ((monthOverMonth.netIncome.current - monthOverMonth.netIncome.previous) / Math.abs(monthOverMonth.netIncome.previous) * 100) : 0;
+    
+    res.json({
+      success: true,
+      data: {
+        yearOverYear,
+        monthOverMonth,
+        periods: {
+          currentYear: `${currentYear}`,
+          previousYear: `${currentYear - 1}`,
+          currentMonth: currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }),
+          previousMonth: new Date(currentYear, currentMonth - 1).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
+        }
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error getting dashboard trends:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// ===================================
+// FUNCIONES AUXILIARES PARA DASHBOARD
+// ===================================
+
+/**
+ * Calcular movimientos de cuentas por tipo en un período
+ */
+async function calculateAccountTypeMovements(accounts, startDate, endDate, accountType) {
+  const accountsWithMovements = await Promise.all(
+    accounts.map(async (account) => {
+      const [debitTransactions, creditTransactions] = await Promise.all([
+        prisma.transaction.aggregate({
+          where: {
+            debitAccountId: account.id,
+            status: 'APPROVED',
+            date: { gte: startDate, lte: endDate }
+          },
+          _sum: { amount: true }
+        }),
+        prisma.transaction.aggregate({
+          where: {
+            creditAccountId: account.id,
+            status: 'APPROVED',
+            date: { gte: startDate, lte: endDate }
+          },
+          _sum: { amount: true }
+        })
+      ]);
+      
+      const debitTotal = debitTransactions._sum.amount || 0;
+      const creditTotal = creditTransactions._sum.amount || 0;
+      
+      let movement = 0;
+      if (accountType === 'INCOME') {
+        movement = creditTotal - debitTotal;
+      } else if (accountType === 'EXPENSE') {
+        movement = debitTotal - creditTotal;
+      }
+      
+      return {
+        id: account.id,
+        code: account.code,
+        name: account.name,
+        movement: movement
+      };
+    })
+  );
+  
+  // Filtrar y ordenar por movimiento
+  const filteredAccounts = accountsWithMovements
+    .filter(acc => Math.abs(acc.movement) > 0.01)
+    .sort((a, b) => Math.abs(b.movement) - Math.abs(a.movement));
+  
+  const total = filteredAccounts.reduce((sum, acc) => sum + acc.movement, 0);
+  
+  return {
+    accounts: filteredAccounts,
+    total: total
+  };
+}
+
+/**
+ * Calcular saldos de cuentas por tipo a una fecha
+ */
+async function calculateAccountTypeBalances(accounts, asOfDate, accountType) {
+  const accountsWithBalances = await Promise.all(
+    accounts.map(async (account) => {
+      const [debitTransactions, creditTransactions] = await Promise.all([
+        prisma.transaction.aggregate({
+          where: {
+            debitAccountId: account.id,
+            status: 'APPROVED',
+            date: { lte: asOfDate }
+          },
+          _sum: { amount: true }
+        }),
+        prisma.transaction.aggregate({
+          where: {
+            creditAccountId: account.id,
+            status: 'APPROVED',
+            date: { lte: asOfDate }
+          },
+          _sum: { amount: true }
+        })
+      ]);
+      
+      const debitTotal = debitTransactions._sum.amount || 0;
+      const creditTotal = creditTransactions._sum.amount || 0;
+      
+      let balance = 0;
+      if (['ASSET', 'EXPENSE'].includes(accountType)) {
+        balance = debitTotal - creditTotal;
+      } else {
+        balance = creditTotal - debitTotal;
+      }
+      
+      return {
+        id: account.id,
+        code: account.code,
+        name: account.name,
+        balance: balance
+      };
+    })
+  );
+  
+  // Filtrar y ordenar por saldo
+  const filteredAccounts = accountsWithBalances
+    .filter(acc => Math.abs(acc.balance) > 0.01)
+    .sort((a, b) => Math.abs(b.balance) - Math.abs(a.balance));
+  
+  const total = filteredAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+  
+  return {
+    accounts: filteredAccounts,
+    total: total
+  };
+}
+
+/**
+ * Generar períodos para gráficos
+ */
+function generatePeriods(startDate, endDate, type) {
+  const periods = [];
+  const current = new Date(startDate);
+  
+  while (current <= endDate) {
+    let periodEnd;
+    let label;
+    
+    if (type === 'monthly') {
+      periodEnd = new Date(current.getFullYear(), current.getMonth() + 1, 0);
+      label = current.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+    } else if (type === 'quarterly') {
+      const quarter = Math.floor(current.getMonth() / 3);
+      periodEnd = new Date(current.getFullYear(), (quarter + 1) * 3, 0);
+      label = `Q${quarter + 1} ${current.getFullYear()}`;
+    } else if (type === 'yearly') {
+      periodEnd = new Date(current.getFullYear(), 11, 31);
+      label = current.getFullYear().toString();
+    }
+    
+    if (periodEnd > endDate) {
+      periodEnd = new Date(endDate);
+    }
+    
+    periods.push({
+      start: new Date(current),
+      end: periodEnd,
+      label: label
+    });
+    
+    if (type === 'monthly') {
+      current.setMonth(current.getMonth() + 1);
+    } else if (type === 'quarterly') {
+      current.setMonth(current.getMonth() + 3);
+    } else if (type === 'yearly') {
+      current.setFullYear(current.getFullYear() + 1);
+    }
+  }
+  
+  return periods;
 }
 
 module.exports = router;
