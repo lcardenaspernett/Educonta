@@ -81,6 +81,152 @@ router.get('/health', async (req, res) => {
 });
 
 // ===================================
+// ENDPOINTS TEMPORALES DE DIAGNÓSTICO (PÚBLICOS)
+// ===================================
+
+// GET /api/institutions/debug - Diagnóstico completo
+router.get('/debug', async (req, res) => {
+  try {
+    console.log('🔍 DEBUG - Iniciando diagnóstico...');
+    
+    const stats = {
+      total: await req.prisma.institution.count(),
+      active: await req.prisma.institution.count({ where: { isActive: true } }),
+      inactive: await req.prisma.institution.count({ where: { isActive: false } }),
+      nullActive: await req.prisma.institution.count({ where: { isActive: null } })
+    };
+
+    console.log('📊 DEBUG - Estadísticas:', stats);
+
+    // Obtener muestra de instituciones con su estado
+    const sample = await req.prisma.institution.findMany({
+      take: 10,
+      select: {
+        id: true,
+        name: true,
+        nit: true,
+        isActive: true,
+        city: true,
+        department: true
+      },
+      orderBy: { name: 'asc' }
+    });
+
+    console.log('📄 DEBUG - Muestra:', sample);
+
+    res.json({
+      success: true,
+      message: 'Diagnóstico completado',
+      stats,
+      sample,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('❌ DEBUG - Error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: error.stack
+    });
+  }
+});
+
+// POST /api/institutions/activate-all - Activar todas las instituciones
+router.post('/activate-all', async (req, res) => {
+  try {
+    console.log('🔄 ACTIVATE - Iniciando activación masiva...');
+    
+    // Estadísticas antes
+    const before = {
+      total: await req.prisma.institution.count(),
+      active: await req.prisma.institution.count({ where: { isActive: true } }),
+      inactive: await req.prisma.institution.count({ where: { isActive: false } }),
+      nullActive: await req.prisma.institution.count({ where: { isActive: null } })
+    };
+
+    console.log('📊 ACTIVATE - Estado inicial:', before);
+
+    // Activar todas las instituciones que no estén activas
+    const updateResult = await req.prisma.institution.updateMany({
+      where: {
+        OR: [
+          { isActive: false },
+          { isActive: null }
+        ]
+      },
+      data: {
+        isActive: true
+      }
+    });
+
+    console.log(`✅ ACTIVATE - ${updateResult.count} instituciones actualizadas`);
+
+    // Estadísticas después
+    const after = {
+      total: await req.prisma.institution.count(),
+      active: await req.prisma.institution.count({ where: { isActive: true } }),
+      inactive: await req.prisma.institution.count({ where: { isActive: false } }),
+      nullActive: await req.prisma.institution.count({ where: { isActive: null } })
+    };
+
+    console.log('📊 ACTIVATE - Estado final:', after);
+
+    res.json({
+      success: true,
+      message: `${updateResult.count} instituciones activadas correctamente`,
+      before,
+      after,
+      updated: updateResult.count
+    });
+
+  } catch (error) {
+    console.error('❌ ACTIVATE - Error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// GET /api/institutions/test-public - Probar endpoint público sin filtros
+router.get('/test-public', async (req, res) => {
+  try {
+    console.log('🧪 TEST - Probando instituciones sin filtro isActive...');
+    
+    // Obtener TODAS las instituciones sin filtro de isActive
+    const allInstitutions = await req.prisma.institution.findMany({
+      select: {
+        id: true,
+        name: true,
+        nit: true,
+        city: true,
+        department: true,
+        educationLevel: true,
+        isActive: true
+      },
+      orderBy: { name: 'asc' }
+    });
+
+    console.log(`📋 TEST - ${allInstitutions.length} instituciones encontradas (sin filtro)`);
+
+    res.json({
+      success: true,
+      data: allInstitutions,
+      total: allInstitutions.length,
+      message: `${allInstitutions.length} instituciones encontradas (todas, sin filtro isActive)`
+    });
+
+  } catch (error) {
+    console.error('❌ TEST - Error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// ===================================
 // MIDDLEWARE DE AUTENTICACIÓN PARA RUTAS PROTEGIDAS
 // ===================================
 
