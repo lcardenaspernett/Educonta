@@ -98,6 +98,26 @@ router.get('/debug', async (req, res) => {
 
     console.log('📊 DEBUG - Estadísticas:', stats);
 
+    // Si se pasa el parámetro activate=true, activar todas las instituciones
+    let updateResult = null;
+    if (req.query.activate === 'true') {
+      console.log('🔄 DEBUG - Activando instituciones...');
+      
+      updateResult = await req.prisma.institution.updateMany({
+        where: {
+          OR: [
+            { isActive: false },
+            { isActive: null }
+          ]
+        },
+        data: {
+          isActive: true
+        }
+      });
+
+      console.log(`✅ DEBUG - ${updateResult.count} instituciones activadas`);
+    }
+
     // Obtener muestra de instituciones con su estado
     const sample = await req.prisma.institution.findMany({
       take: 10,
@@ -114,12 +134,24 @@ router.get('/debug', async (req, res) => {
 
     console.log('📄 DEBUG - Muestra:', sample);
 
+    // Estadísticas finales (después de activar si se solicitó)
+    const finalStats = {
+      total: await req.prisma.institution.count(),
+      active: await req.prisma.institution.count({ where: { isActive: true } }),
+      inactive: await req.prisma.institution.count({ where: { isActive: false } }),
+      nullActive: await req.prisma.institution.count({ where: { isActive: null } })
+    };
+
     res.json({
       success: true,
-      message: 'Diagnóstico completado',
-      stats,
+      message: updateResult ? 
+        `Diagnóstico completado y ${updateResult.count} instituciones activadas` : 
+        'Diagnóstico completado',
+      stats: finalStats,
       sample,
-      timestamp: new Date().toISOString()
+      activated: updateResult ? updateResult.count : 0,
+      timestamp: new Date().toISOString(),
+      instructions: 'Para activar instituciones, usa: ?activate=true'
     });
 
   } catch (error) {
@@ -225,6 +257,20 @@ router.get('/test-public', async (req, res) => {
     });
   }
 });
+
+// ===================================
+// IMPORTAR CONTROLADORES
+// ===================================
+
+const {
+  getInstitutions,
+  getInstitutionById,
+  createInstitution,
+  updateInstitution,
+  deleteInstitution,
+  getInstitutionStats,
+  getInstitutionOptions
+} = require('../controllers/institutionController');
 
 // ===================================
 // MIDDLEWARE DE AUTENTICACIÓN PARA RUTAS PROTEGIDAS
