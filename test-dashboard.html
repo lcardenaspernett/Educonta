@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dashboard Contable - Educonta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        
+        .test-card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0.5rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-success {
+            background: #10b981;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .feature-list li:before {
+            content: "✅ ";
+            margin-right: 0.5rem;
+        }
+        
+        .status {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-card">
+        <h1>🧮 Dashboard Contable - Educonta</h1>
+        <p>Sistema de contabilidad modular y completo para instituciones educativas</p>
+        
+        <div class="status success">
+            ✅ Sistema implementado y listo para usar
+        </div>
+    </div>
+
+    <div class="test-card">
+        <h2>🚀 Acceso al Dashboard</h2>
+        <p>Puedes acceder al dashboard de diferentes maneras:</p>
+        
+        <a href="accounting-dashboard.html?demo=true" class="btn btn-success">
+            🎭 Modo Demo (Sin autenticación)
+        </a>
+        
+        <a href="accounting-dashboard.html" class="btn">
+            🔐 Modo Producción (Con autenticación)
+        </a>
+        
+        <a href="accounting.html" class="btn">
+            📊 Sistema Completo de Contabilidad
+        </a>
+    </div>
+
+    <div class="test-card">
+        <h2>✨ Funcionalidades Implementadas</h2>
+        <ul class="feature-list">
+            <li><strong>Dashboard Principal</strong> - Métricas en tiempo real y operaciones rápidas</li>
+            <li><strong>Registro de Ingresos</strong> - Formulario completo con validación</li>
+            <li><strong>Registro de Gastos</strong> - Categorización y seguimiento de gastos</li>
+            <li><strong>Generador de Facturas</strong> - Creación rápida de facturas para estudiantes</li>
+            <li><strong>Lista de Transacciones</strong> - Visualización de movimientos recientes</li>
+            <li><strong>Navegación SPA</strong> - Cambio fluido entre secciones</li>
+            <li><strong>Tema Claro/Oscuro</strong> - Toggle de tema con persistencia</li>
+            <li><strong>Diseño Responsivo</strong> - Adaptable a diferentes dispositivos</li>
+            <li><strong>Sistema de Estado</strong> - Gestión centralizada de datos</li>
+            <li><strong>Validación de Formularios</strong> - Validación en tiempo real</li>
+            <li><strong>Datos de Demo</strong> - Funciona sin backend para pruebas</li>
+            <li><strong>Auto-refresh</strong> - Actualización automática de datos</li>
+        </ul>
+    </div>
+
+    <div class="test-card">
+        <h2>🏗️ Arquitectura Modular</h2>
+        <p>El sistema está construido con una arquitectura modular que incluye:</p>
+        
+        <ul class="feature-list">
+            <li><strong>state.js</strong> - Gestión centralizada de estado con suscripciones</li>
+            <li><strong>forms.js</strong> - Sistema de formularios con validación avanzada</li>
+            <li><strong>navigation.js</strong> - Navegación SPA con historial del navegador</li>
+            <li><strong>controller.js</strong> - Controlador principal que coordina módulos</li>
+            <li><strong>globals.js</strong> - Funciones globales de compatibilidad</li>
+            <li><strong>dashboard.js</strong> - Gráficos y visualizaciones interactivas</li>
+            <li><strong>init.js</strong> - Inicializador que coordina todo el sistema</li>
+            <li><strong>demo-data.js</strong> - Datos de ejemplo para desarrollo</li>
+        </ul>
+    </div>
+
+    <div class="test-card">
+        <h2>🎯 Próximos Pasos</h2>
+        <p>El dashboard está listo para:</p>
+        
+        <ul class="feature-list">
+            <li>Conectar con el backend real de contabilidad</li>
+            <li>Implementar gráficos avanzados con Chart.js</li>
+            <li>Agregar más tipos de reportes</li>
+            <li>Implementar notificaciones push</li>
+            <li>Agregar exportación de datos</li>
+            <li>Implementar filtros avanzados</li>
+        </ul>
+    </div>
+
+    <div class="test-card">
+        <h2>🔧 Información Técnica</h2>
+        <div class="status info">
+            <strong>Tecnologías:</strong> HTML5, CSS3, JavaScript ES6+, Fetch API<br>
+            <strong>Patrón:</strong> Arquitectura modular con estado centralizado<br>
+            <strong>Compatibilidad:</strong> Navegadores modernos (Chrome, Firefox, Safari, Edge)<br>
+            <strong>Responsive:</strong> Diseño adaptable para móviles y tablets
+        </div>
+    </div>
+
+    <script>
+        // Verificar que todos los módulos estén disponibles
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🧪 Verificando módulos del dashboard...');
+            
+            const modules = [
+                'DemoData',
+                'AccountingState', 
+                'AccountingForms',
+                'AccountingNavigation',
+                'DashboardInitializer'
+            ];
+            
+            modules.forEach(module => {
+                if (window[module]) {
+                    console.log(`✅ ${module} disponible`);
+                } else {
+                    console.log(`❌ ${module} no disponible`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

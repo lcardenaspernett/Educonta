@@ -14,17 +14,17 @@ let editingTransaction = null;
 let viewingTransaction = null;
 let activeTab = 'accounts';
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('📄 DOM cargado, iniciando verificación de autenticación');
     initializeTheme();
-    
+
     // CONFIGURAR EVENT LISTENER PARA EL BOTÓN DE TEMA
     setupThemeToggleListener();
-    
+
     // Verificar si venimos de otra página con usuario ya autenticado
     const urlParams = new URLSearchParams(window.location.search);
     const token = localStorage.getItem('token');
-    
+
     if (urlParams.get('skipAuth') === 'true' && token) {
         console.log('🔄 Saltando verificación de auth, usuario ya verificado');
         // Crear un usuario básico para evitar errores
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('❌ No hay token, redirigiendo a login');
         window.location.href = '/login.html';
     }
-    
+
     setupEventListeners();
 });
 
@@ -51,36 +51,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeTheme() {
     console.log('🎨 Inicializando tema...');
-    
+
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
-    
+
     // Usar setTimeout para asegurar que el DOM esté completamente cargado
     setTimeout(() => {
         updateThemeLabels();
     }, 50);
-    
+
     console.log(`✅ Tema inicializado: ${savedTheme}`);
 }
 
 function toggleTheme() {
     console.log('🔄 Toggle tema iniciado...');
-    
+
     try {
         const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        
+
         console.log(`Cambiando de ${currentTheme} a ${newTheme}`);
-        
+
         // Aplicar cambios
         document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
-        
+
         // Actualizar UI
         updateThemeLabels();
-        
+
         console.log(`✅ Tema cambiado exitosamente a: ${newTheme}`);
-        
+
     } catch (error) {
         console.error('❌ Error en toggleTheme:', error);
     }
@@ -88,22 +88,22 @@ function toggleTheme() {
 
 function updateThemeLabels() {
     console.log('🏷️ Actualizando labels...');
-    
+
     try {
         const theme = document.documentElement.getAttribute('data-theme') || 'light';
-        
+
         const lightLabel = document.getElementById('light-label');
         const darkLabel = document.getElementById('dark-label');
-        
+
         if (!lightLabel || !darkLabel) {
             console.warn('⚠️ Labels no encontrados');
             return;
         }
-        
+
         // Limpiar clases
         lightLabel.classList.remove('active');
         darkLabel.classList.remove('active');
-        
+
         // Aplicar clase activa
         if (theme === 'dark') {
             darkLabel.classList.add('active');
@@ -112,7 +112,7 @@ function updateThemeLabels() {
             lightLabel.classList.add('active');
             console.log('☀️ Modo claro activado');
         }
-        
+
     } catch (error) {
         console.error('❌ Error actualizando labels:', error);
     }
@@ -132,26 +132,26 @@ function debugTheme() {
 // Configurar event listener para el botón de tema
 function setupThemeToggleListener() {
     console.log('🌎 Configurando event listener para tema...');
-    
+
     // Buscar el botón de tema
     const themeButton = document.querySelector('.theme-toggle');
-    
+
     if (themeButton) {
         // Remover cualquier event listener existente
         themeButton.removeEventListener('click', toggleTheme);
-        
+
         // Agregar nuevo event listener
-        themeButton.addEventListener('click', function(e) {
+        themeButton.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
             console.log('💆 Clic en botón de tema detectado');
             toggleTheme();
         });
-        
+
         console.log('✅ Event listener configurado correctamente');
     } else {
         console.warn('⚠️ Botón de tema no encontrado');
-        
+
         // Intentar configurar después de un delay
         setTimeout(() => {
             setupThemeToggleListener();
@@ -236,12 +236,12 @@ function ensureThemeCSS() {
             --border: rgba(255, 255, 255, 0.1);
         }
         `;
-        
+
         const style = document.createElement('style');
         style.id = 'contabilidad-theme-css';
         style.textContent = css;
         document.head.appendChild(style);
-        
+
         console.log('✅ CSS de tema para contabilidad agregado');
     }
 }
@@ -274,7 +274,7 @@ async function checkAuth() {
         if (response.ok) {
             const data = await response.json();
             console.log('📄 Datos recibidos:', data);
-            
+
             if (data.success && data.user) {
                 currentUser = data.user;
                 console.log('👤 Usuario autenticado:', currentUser);
@@ -287,7 +287,7 @@ async function checkAuth() {
             }
         } else {
             console.log('❌ Error HTTP:', response.status);
-            
+
             // Intentar leer el error del servidor
             try {
                 const errorData = await response.json();
@@ -295,7 +295,7 @@ async function checkAuth() {
             } catch (e) {
                 console.log('❌ No se pudo leer el error del servidor');
             }
-            
+
             localStorage.removeItem('token');
             window.location.href = '/login.html';
         }
@@ -313,7 +313,7 @@ async function checkAuth() {
 
 async function initializePage() {
     console.log('🏗️ Inicializando página de contabilidad');
-    
+
     // Inicializar dashboard si está disponible
     if (window.AccountingDashboard) {
         try {
@@ -325,9 +325,9 @@ async function initializePage() {
     } else {
         console.warn('⚠️ AccountingDashboard no está disponible');
     }
-    
+
     setDefaultDate();
-    
+
     // Cargar datos en secuencia para asegurar que el dashboard reciba todo
     await loadAccountingStats();
     await loadAccounts();
@@ -354,7 +354,7 @@ function showTab(tabName) {
 
     // Show selected tab
     document.getElementById(`${tabName}-tab`).classList.add('active');
-    
+
     // Add active class to clicked button
     event.target.classList.add('active');
 
@@ -376,7 +376,7 @@ async function loadAccountingStats() {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await fetch('/api/accounting-simple/stats', {
+        const response = await fetch('/api/accounting/stats', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -402,7 +402,7 @@ async function loadAccountingStats() {
 
 function updateAccountingStats(stats) {
     console.log('📊 Actualizando estadísticas:', stats);
-    
+
     // Solo actualizar dashboard si está disponible, sino actualizar DOM directamente
     if (window.accountingDashboard) {
         console.log('📊 Actualizando a través del dashboard');
@@ -419,13 +419,13 @@ function updateAccountingStats(stats) {
         document.getElementById('total-balance').textContent = formatCurrency(stats.totalBalance || 0);
         document.getElementById('pending-transactions').textContent = stats.pendingTransactions || 0;
     }
-    
+
     // Disparar evento para otros componentes que puedan estar escuchando
-    window.dispatchEvent(new CustomEvent('dataLoaded', { 
-        detail: { 
+    window.dispatchEvent(new CustomEvent('dataLoaded', {
+        detail: {
             stats: stats,
             accounts: currentAccounts || []
-        } 
+        }
     }));
 }
 
@@ -454,7 +454,7 @@ async function loadAccounts() {
             params.append('level', levelFilter.value);
         }
 
-        const response = await fetch(`/api/accounting-simple/accounts?${params}`, {
+        const response = await fetch(`/api/accounting/accounts?${params}&includeBalance=true`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -472,7 +472,7 @@ async function loadAccounts() {
             updateAccountsTree();
             loadParentAccountOptions();
             loadAccountOptions();
-            
+
             // Actualizar dashboard con las cuentas cargadas
             if (window.accountingDashboard) {
                 window.accountingDashboard.updateCharts({
@@ -523,14 +523,24 @@ function renderHierarchicalAccountsStructure() {
         }
     });
 
-    // Calcular totales por tipo (SOLO cuentas hijas, NO cuentas padre)
+    // Calcular totales por tipo correctamente
     const typeTotals = {};
     Object.keys(accountsByType).forEach(type => {
-        typeTotals[type] = accountsByType[type].reduce((sum, account) => {
-            // Solo sumar cuentas HIJAS (que tienen parentId)
-            if (account.parentId) {
+        const accounts = accountsByType[type];
+
+        // Crear mapa de cuentas para identificar padres e hijos
+        const accountMap = new Map();
+        accounts.forEach(acc => accountMap.set(acc.id, acc));
+
+        // Solo sumar cuentas que NO tienen hijos en este tipo, o cuentas padre sin hijos
+        typeTotals[type] = accounts.reduce((sum, account) => {
+            const hasChildrenInThisType = accounts.some(child => child.parentId === account.id);
+
+            // Si no tiene hijos en este tipo, sumar su balance
+            if (!hasChildrenInThisType) {
                 return sum + (account.balance || 0);
             }
+
             return sum;
         }, 0);
     });
@@ -644,12 +654,10 @@ function organizeAccountsByHierarchy(accounts) {
 function renderAccountItemStructure(account, depth = 0) {
     const hasChildren = account.children && account.children.length > 0;
     const hasMovements = account._count && (account._count.debitTransactions > 0 || account._count.creditTransactions > 0);
-    
-    // Calcular balance: si es cuenta padre, sumar hijas; si no, usar balance propio
+
+    // Para cuentas padre: calcular balance SOLO de transacciones directas, NO sumar hijos
+    // Para cuentas hijas: usar su balance calculado
     let balance = account.balance || 0;
-    if (hasChildren && account.children.length > 0) {
-        balance = account.children.reduce((sum, child) => sum + (child.balance || 0), 0);
-    }
 
     let html = `
         <div class="account-item level-${account.level || 1}" data-account-id="${account.id}" style="margin-left: ${depth * 20}px;">
@@ -734,7 +742,7 @@ function loadParentAccountOptions() {
     parentSelect.innerHTML = '<option value="">Sin cuenta padre</option>';
 
     const parentAccounts = currentAccounts.filter(acc => acc.level < 5);
-    
+
     parentAccounts.forEach(account => {
         const option = document.createElement('option');
         option.value = account.id;
@@ -746,10 +754,10 @@ function loadParentAccountOptions() {
 function loadAccountOptions() {
     const debitSelect = document.getElementById('debit-account');
     const creditSelect = document.getElementById('credit-account');
-    
+
     [debitSelect, creditSelect].forEach(select => {
         select.innerHTML = '<option value="">Seleccionar cuenta...</option>';
-        
+
         currentAccounts.forEach(account => {
             const option = document.createElement('option');
             option.value = account.id;
@@ -881,12 +889,12 @@ async function loadTransactions(page = 1, isSearch = false, forceReload = false)
             params.append('status', statusFilter.value);
         }
 
-        console.log('🔍 Cargando transacciones:', { 
-            page, 
-            isSearch, 
-            forceReload, 
+        console.log('🔍 Cargando transacciones:', {
+            page,
+            isSearch,
+            forceReload,
             preventAutoReload,
-            params: params.toString() 
+            params: params.toString()
         });
 
         const response = await fetch(`/api/accounting/transactions?${params}`, {
@@ -903,7 +911,7 @@ async function loadTransactions(page = 1, isSearch = false, forceReload = false)
 
             updateTransactionsTable();
             updateTransactionsPagination();
-            
+
             console.log(`✅ ${currentTransactions.length} transacciones cargadas`);
         } else {
             showAlert('Error cargando transacciones', 'error');
@@ -993,7 +1001,7 @@ function updateTransactionsTable() {
     tbody.querySelectorAll('tr[data-transaction-id]').forEach(row => {
         const transactionId = row.dataset.transactionId;
         const statusBadge = row.querySelector('.status-badge');
-        
+
         // Destacar transacciones recién actualizadas
         if (statusBadge && statusBadge.dataset.status !== 'PENDING') {
             row.style.background = 'var(--success-light)';
@@ -1006,7 +1014,7 @@ function updateTransactionsTable() {
 
 function updateTransactionsPagination() {
     const pagination = document.getElementById('transactions-pagination');
-    
+
     if (totalPages <= 1) {
         pagination.innerHTML = '';
         return;
@@ -1070,10 +1078,10 @@ function openTransactionModal() {
     editingTransaction = null;
     document.getElementById('transaction-modal-title').textContent = 'Nueva Transacción';
     document.getElementById('transaction-form').reset();
-    
+
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('transaction-date').value = today;
-    
+
     document.getElementById('transaction-modal').classList.add('show');
 }
 
@@ -1140,7 +1148,7 @@ function closeViewTransactionModal() {
 
 function editFromViewTransaction() {
     if (!viewingTransaction) return;
-    
+
     closeViewTransactionModal();
     editTransaction(viewingTransaction.id);
 }
@@ -1185,9 +1193,9 @@ async function updateTransactionStatus(transactionId, status) {
             'REJECTED': 'reject'
         };
         const endpoint = statusMap[status] || status.toLowerCase();
-        
+
         console.log('📡 Enviando petición a:', `/api/accounting/transactions/${transactionId}`);
-        
+
         const response = await fetch(`/api/accounting/transactions/${transactionId}`, {
             method: 'PUT',
             headers: {
@@ -1202,11 +1210,11 @@ async function updateTransactionStatus(transactionId, status) {
         if (response.ok) {
             const result = await response.json();
             console.log('✅ Respuesta exitosa del servidor:', result);
-            
+
             // ✅ VERIFICAR QUE EL BACKEND CONFIRMÓ EL CAMBIO
             if (result.success && result.data && result.data.status === status) {
                 console.log('✅ Backend confirmó el cambio de estado');
-                
+
                 // Actualizar la transacción en el array local con los datos del servidor
                 const transactionIndex = currentTransactions.findIndex(t => t.id === transactionId);
                 if (transactionIndex !== -1) {
@@ -1218,17 +1226,17 @@ async function updateTransactionStatus(transactionId, status) {
                     };
                     console.log('🔄 Transacción actualizada con datos del servidor:', currentTransactions[transactionIndex]);
                 }
-                
+
                 // Actualizar la tabla inmediatamente
                 updateTransactionsTable();
-                
+
                 // Mostrar mensaje de éxito
                 const statusLabel = getTransactionStatusLabel(status);
                 showAlert(`Transacción ${statusLabel.toLowerCase()} exitosamente`, 'success');
-                
+
                 // Cerrar modal si está abierto
                 closeViewTransactionModal();
-                
+
                 // 🚫 PREVENIR RECARGAS AUTOMÁTICAS POR 3 SEGUNDOS
                 preventAutoReload = true;
                 setTimeout(() => {
@@ -1236,7 +1244,7 @@ async function updateTransactionStatus(transactionId, status) {
                     // Solo recargar estadísticas sin afectar la tabla
                     loadAccountingStats();
                 }, 3000);
-                
+
             } else if (result.success) {
                 // Si el servidor dice que tuvo éxito pero no devuelve el estado correcto,
                 // hacer una verificación adicional
@@ -1246,7 +1254,7 @@ async function updateTransactionStatus(transactionId, status) {
                 console.error('❌ El backend no confirmó el cambio:', result);
                 showAlert('Error: El cambio no fue confirmado por el servidor', 'error');
             }
-            
+
         } else {
             const error = await response.json();
             console.log('❌ Error del servidor:', error);
@@ -1273,20 +1281,20 @@ async function updateTransactionStatus(transactionId, status) {
 // 🔧 FUNCIÓN PARA VERIFICAR ESTADO EN SERVIDOR
 async function verifyTransactionStatus(transactionId, expectedStatus) {
     const token = localStorage.getItem('token');
-    
+
     try {
         console.log('🔍 Verificando estado en servidor...');
         const verifyResponse = await fetch(`/api/accounting/transactions/${transactionId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        
+
         if (verifyResponse.ok) {
             const verifyResult = await verifyResponse.json();
             const serverTransaction = verifyResult.data;
-            
+
             console.log('🔍 Estado en servidor:', serverTransaction.status);
             console.log('🔍 Estado esperado:', expectedStatus);
-            
+
             if (serverTransaction.status === expectedStatus) {
                 // El servidor tiene el estado correcto, actualizar UI
                 const transactionIndex = currentTransactions.findIndex(t => t.id === transactionId);
@@ -1295,18 +1303,18 @@ async function verifyTransactionStatus(transactionId, expectedStatus) {
                     updateTransactionsTable();
                     console.log('✅ Estado verificado y UI actualizada');
                 }
-                
+
                 const statusLabel = getTransactionStatusLabel(expectedStatus);
                 showAlert(`Transacción ${statusLabel.toLowerCase()} exitosamente`, 'success');
                 closeViewTransactionModal();
-                
+
             } else {
                 console.error('❌ Estado en servidor no coincide:', {
                     esperado: expectedStatus,
                     actual: serverTransaction.status
                 });
                 showAlert(`Error: Estado esperado ${expectedStatus}, pero servidor tiene ${serverTransaction.status}`, 'error');
-                
+
                 // Forzar sincronización con el estado del servidor
                 const transactionIndex = currentTransactions.findIndex(t => t.id === transactionId);
                 if (transactionIndex !== -1) {
@@ -1341,21 +1349,21 @@ async function approveTransactionFromTable(transactionId) {
 // 🔧 FUNCIÓN DE DEBUG PARA VERIFICAR ESTADO
 async function debugTransactionStatus(transactionId) {
     const token = localStorage.getItem('token');
-    
+
     try {
         const response = await fetch(`/api/accounting/transactions/${transactionId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        
+
         if (response.ok) {
             const result = await response.json();
             console.log('🔍 DEBUG - Estado actual en servidor:', result.data.status);
             console.log('🔍 DEBUG - Transacción completa:', result.data);
-            
+
             // Comparar con el estado local
             const localTransaction = currentTransactions.find(t => t.id === transactionId);
             console.log('🔍 DEBUG - Estado local:', localTransaction?.status);
-            
+
             return result.data;
         }
     } catch (error) {
@@ -1366,7 +1374,7 @@ async function debugTransactionStatus(transactionId) {
 // 🔧 FUNCIÓN PARA FORZAR SINCRONIZACIÓN
 async function forceSyncTransaction(transactionId) {
     console.log('🔄 Forzando sincronización de transacción:', transactionId);
-    
+
     const serverData = await debugTransactionStatus(transactionId);
     if (serverData) {
         const transactionIndex = currentTransactions.findIndex(t => t.id === transactionId);
@@ -1381,12 +1389,12 @@ async function forceSyncTransaction(transactionId) {
 // 🔧 FUNCIÓN PARA PROBAR EL BACKEND
 async function testBackendApproval(transactionId) {
     const token = localStorage.getItem('token');
-    
+
     console.log('🧪 TESTING - Estado antes de aprobar');
     await debugTransactionStatus(transactionId);
-    
+
     console.log('🧪 TESTING - Enviando aprobación...');
-    const response = await fetch(`/api/accounting-simple/transactions/${transactionId}/approve`, {
+    const response = await fetch(`/api/accounting/transactions/${transactionId}/approve`, {
         method: 'PUT',
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -1394,10 +1402,10 @@ async function testBackendApproval(transactionId) {
         },
         body: JSON.stringify({ status: 'APPROVED' })
     });
-    
+
     const result = await response.json();
     console.log('🧪 TESTING - Respuesta del servidor:', result);
-    
+
     console.log('🧪 TESTING - Estado después de aprobar');
     setTimeout(async () => {
         await debugTransactionStatus(transactionId);
@@ -1412,7 +1420,7 @@ async function deleteTransaction(transactionId) {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await fetch(`/api/accounting-simple/transactions/${transactionId}`, {
+        const response = await fetch(`/api/accounting/transactions/${transactionId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -1448,7 +1456,7 @@ async function generateBalanceSheet() {
     document.getElementById('reports-loading').style.display = 'flex';
 
     try {
-        const response = await fetch(`/api/accounting-simple/reports/balance-sheet?date=${reportDate}`, {
+        const response = await fetch(`/api/accounting/reports/balance-sheet?date=${reportDate}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -1479,7 +1487,7 @@ async function generateIncomeStatement() {
     document.getElementById('reports-loading').style.display = 'flex';
 
     try {
-        const response = await fetch(`/api/accounting-simple/reports/income-statement?date=${reportDate}`, {
+        const response = await fetch(`/api/accounting/reports/income-statement?date=${reportDate}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -1501,7 +1509,7 @@ async function generateIncomeStatement() {
 
 function displayBalanceSheet(data) {
     document.getElementById('report-title').textContent = `Balance General - ${formatDate(document.getElementById('report-date').value)}`;
-    
+
     const content = document.getElementById('reports-content');
     content.innerHTML = `
         <div style="padding: 2rem;">
@@ -1538,7 +1546,7 @@ function displayBalanceSheet(data) {
 
 function displayIncomeStatement(data) {
     document.getElementById('report-title').textContent = `Estado de Resultados - ${formatDate(document.getElementById('report-date').value)}`;
-    
+
     const content = document.getElementById('reports-content');
     content.innerHTML = `
         <div style="padding: 2rem;">
@@ -1655,7 +1663,7 @@ function setupEventListeners() {
     // Parent account change updates level
     const parentAccountSelect = document.getElementById('parent-account');
     if (parentAccountSelect) {
-        parentAccountSelect.addEventListener('change', function() {
+        parentAccountSelect.addEventListener('change', function () {
             const levelInput = document.getElementById('account-level');
             if (this.value) {
                 const parentAccount = currentAccounts.find(acc => acc.id === this.value);
@@ -1676,7 +1684,7 @@ function setupEventListeners() {
     }, 1000);
 
     // Close modals when clicking outside
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (e.target.classList.contains('modal')) {
             if (e.target.id === 'account-modal') {
                 closeAccountModal();
@@ -1726,7 +1734,7 @@ async function handleAccountSubmit(e) {
 
     try {
         const isEditing = editingAccount !== null;
-        const url = isEditing ? `/api/accounting-simple/accounts/${editingAccount.id}` : '/api/accounting-simple/accounts';
+        const url = isEditing ? `/api/accounting/accounts/${editingAccount.id}` : '/api/accounting/accounts';
         const method = isEditing ? 'PUT' : 'POST';
 
         const response = await fetch(url, {
@@ -1785,7 +1793,7 @@ async function handleTransactionSubmit(e) {
 
     try {
         const isEditing = editingTransaction !== null;
-        const url = isEditing ? `/api/accounting-simple/transactions/${editingTransaction.id}` : '/api/accounting-simple/transactions';
+        const url = isEditing ? `/api/accounting/transactions/${editingTransaction.id}` : '/api/accounting/transactions';
         const method = isEditing ? 'PUT' : 'POST';
 
         const response = await fetch(url, {
@@ -1831,7 +1839,7 @@ function toggleCategory(categoryType) {
 
         accountsContainer.style.display = isExpanded ? 'none' : 'block';
         toggleButton.classList.toggle('expanded', !isExpanded);
-        
+
         // Rotar el ícono
         const chevronIcon = toggleButton.querySelector('.chevron-icon');
         if (chevronIcon) {
@@ -1849,7 +1857,7 @@ function toggleAccountChildren(accountId) {
 
         childrenContainer.style.display = isExpanded ? 'none' : 'block';
         toggleButton.classList.toggle('expanded', !isExpanded);
-        
+
         // Rotar el ícono
         const toggleIcon = toggleButton.querySelector('.toggle-icon');
         if (toggleIcon) {
@@ -1883,10 +1891,10 @@ function formatDate(dateString) {
 
 function showAlert(message, type = 'success') {
     console.log('🚨 showAlert llamada:', { message, type });
-    
+
     const alert = document.getElementById('alert');
     const alertMessage = document.getElementById('alert-message');
-    
+
     console.log('🔍 Elementos encontrados:', { alert: !!alert, alertMessage: !!alertMessage });
 
     if (!alert || !alertMessage) {
@@ -1898,7 +1906,7 @@ function showAlert(message, type = 'success') {
 
     alert.className = `alert ${type} show`;
     alertMessage.textContent = message;
-    
+
     console.log('✅ Alerta mostrada:', { className: alert.className, text: alertMessage.textContent });
 
     setTimeout(() => {
@@ -2055,15 +2063,15 @@ if (!document.getElementById('transaction-fixes-css')) {
 // ===================================
 
 // 🔧 EJECUTAR FIXES AL CARGAR
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('🔧 Aplicando fixes para transacciones...');
-    
+
     // Re-configurar event listeners cuando el DOM esté listo
     setTimeout(() => {
         // Solo configurar si los elementos existen
         const transactionSearchInput = document.getElementById('transaction-search-input');
         const accountSearchInput = document.getElementById('account-search-input');
-        
+
         if (transactionSearchInput || accountSearchInput) {
             setupRealTimeAccountSearch();
             setupRealTimeTransactionSearch();
@@ -2088,7 +2096,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function refreshData() {
     console.log('🔄 Recargando todos los datos...');
     loadAccountingStats();
-    
+
     if (activeTab === 'accounts') {
         loadAccounts();
     } else if (activeTab === 'transactions') {
@@ -2109,7 +2117,7 @@ function showQuickStats() {
         transactions: currentTransactions.length,
         pendingTransactions: currentTransactions.filter(t => t.status === 'PENDING').length
     };
-    
+
     showAlert(`Cuentas: ${stats.accounts} | Transacciones: ${stats.transactions} | Pendientes: ${stats.pendingTransactions}`, 'info');
 }
 
@@ -2119,38 +2127,38 @@ function clearAllFilters() {
     const accountSearch = document.getElementById('account-search-input');
     const accountType = document.getElementById('account-type-filter');
     const accountLevel = document.getElementById('account-level-filter');
-    
+
     if (accountSearch) accountSearch.value = '';
     if (accountType) accountType.value = '';
     if (accountLevel) accountLevel.value = '';
-    
+
     // Limpiar filtros de transacciones
     const transactionSearch = document.getElementById('transaction-search-input');
     const dateFrom = document.getElementById('date-from-filter');
     const dateTo = document.getElementById('date-to-filter');
     const transactionType = document.getElementById('transaction-type-filter');
     const transactionStatus = document.getElementById('transaction-status-filter');
-    
+
     if (transactionSearch) transactionSearch.value = '';
     if (dateFrom) dateFrom.value = '';
     if (dateTo) dateTo.value = '';
     if (transactionType) transactionType.value = '';
     if (transactionStatus) transactionStatus.value = '';
-    
+
     // Recargar datos
     refreshData();
-    
+
     showAlert('Filtros limpiados', 'success');
 }
 
 // Atajos de teclado
-document.addEventListener('keydown', function(e) {
+document.addEventListener('keydown', function (e) {
     // Ctrl/Cmd + R para recargar datos
     if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
         e.preventDefault();
         refreshData();
     }
-    
+
     // Ctrl/Cmd + N para nueva transacción/cuenta según la pestaña activa
     if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
         e.preventDefault();
@@ -2160,7 +2168,7 @@ document.addEventListener('keydown', function(e) {
             openTransactionModal();
         }
     }
-    
+
     // Ctrl/Cmd + F para enfocar búsqueda
     if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
         e.preventDefault();
@@ -2181,14 +2189,14 @@ console.log('🔧 Fixes para transacciones cargados correctamente');
 
 function diagnoseThemeSystem() {
     console.log('🔍 DIAGNÓSTICO DEL SISTEMA DE TEMA:');
-    
+
     const elements = {
         'light-label': document.getElementById('light-label'),
         'dark-label': document.getElementById('dark-label'),
         'theme-toggle': document.querySelector('.theme-toggle'),
         'theme-container': document.querySelector('.theme-toggle-container')
     };
-    
+
     Object.entries(elements).forEach(([name, element]) => {
         console.log(`  ${name}:`, element ? '✅ Encontrado' : '❌ NO encontrado');
         if (element && name.includes('label')) {
@@ -2196,27 +2204,27 @@ function diagnoseThemeSystem() {
             console.log(`    - Texto:`, element.textContent);
         }
     });
-    
+
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const savedTheme = localStorage.getItem('theme');
-    
+
     console.log('📊 ESTADO DEL TEMA:');
     console.log('  Tema actual:', currentTheme);
     console.log('  Tema guardado:', savedTheme);
     console.log('  Elementos .theme-label:', document.querySelectorAll('.theme-label').length);
-    
+
     return elements;
 }
 
 function testThemeToggle() {
     console.log('🧪 PROBANDO TOGGLE DE TEMA:');
-    
+
     // Estado inicial
     diagnoseThemeSystem();
-    
+
     console.log('🔄 Haciendo toggle...');
     toggleTheme();
-    
+
     // Verificar después del toggle
     setTimeout(() => {
         console.log('📊 Estado después del toggle:');
@@ -2226,55 +2234,55 @@ function testThemeToggle() {
 
 function forceThemeSync() {
     console.log('🔧 Forzando sincronización de tema...');
-    
+
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
-    
+
     // Forzar actualización de labels
     updateThemeLabelsForced(savedTheme);
-    
+
     console.log(`✅ Tema sincronizado a: ${savedTheme}`);
 }
 
 function emergencyThemeToggle() {
     console.log('🚨 TOGGLE DE EMERGENCIA - FORZANDO CAMBIO');
-    
+
     const current = localStorage.getItem('theme') || 'light';
     const newTheme = current === 'dark' ? 'light' : 'dark';
-    
+
     console.log(`🚨 Cambio forzado: ${current} → ${newTheme}`);
-    
+
     // Aplicar en TODO
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
-    
+
     // Forzar labels inmediatamente
     updateThemeLabelsForced(newTheme);
-    
+
     console.log('🚨 CAMBIO DE EMERGENCIA COMPLETADO');
 }
 
 function forceReloadThemeCSS() {
     console.log('🔄 Forzando recarga de CSS de tema...');
-    
+
     // Eliminar CSS existente
     const existingCSS = document.getElementById('contabilidad-theme-css');
     if (existingCSS) {
         existingCSS.remove();
         console.log('🗑️ CSS anterior eliminado');
     }
-    
+
     // Recrear CSS
     ensureThemeCSS();
-    
+
     // Forzar reflow del navegador
     document.body.offsetHeight;
-    
+
     // Aplicar tema actual
     const currentTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', currentTheme);
     updateThemeLabelsForced(currentTheme);
-    
+
     console.log('✅ CSS de tema recargado y aplicado');
 }
 
@@ -2292,4 +2300,1200 @@ console.log('  - diagnoseThemeSystem(): Verificar estado del tema');
 console.log('  - testThemeToggle(): Probar cambio de tema');
 console.log('  - forceThemeSync(): Forzar sincronización');
 console.log('  - debugTransactionStatus(id): Verificar estado de transacción');
-console.log('  - forceSyncTransaction(id): Forzar sincronización de transacción');
+console.log('  - forceSyncTransaction(id): Forzar sincronización de transacción');// 
+
+// FUNCIONES DE DESCARGA DE PDFs
+// ===================================
+
+/**
+ * Descargar Balance General en PDF
+ */
+async function downloadBalanceSheetPDF() {
+    try {
+        const reportDate = document.getElementById('report-date').value;
+        const date = reportDate || new Date().toISOString().split('T')[0];
+
+        showAlert('Generando Balance General en PDF...', 'info');
+
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/accounting/export/balance-sheet?format=pdf&date=${date}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Error generando PDF');
+        }
+
+        // Descargar el archivo
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `balance-general-${date}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        showAlert('Balance General descargado exitosamente', 'success');
+
+    } catch (error) {
+        console.error('Error downloading balance sheet PDF:', error);
+        showAlert('Error descargando Balance General: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Descargar Estado de Resultados en PDF
+ */
+async function downloadIncomeStatementPDF() {
+    try {
+        const reportDate = document.getElementById('report-date').value;
+        const endDate = reportDate || new Date().toISOString().split('T')[0];
+        const startDate = new Date(new Date(endDate).getFullYear(), 0, 1).toISOString().split('T')[0];
+
+        showAlert('Generando Estado de Resultados en PDF...', 'info');
+
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/accounting/export/income-statement?format=pdf&startDate=${startDate}&endDate=${endDate}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Error generando PDF');
+        }
+
+        // Descargar el archivo
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `estado-resultados-${startDate}-${endDate}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        showAlert('Estado de Resultados descargado exitosamente', 'success');
+
+    } catch (error) {
+        console.error('Error downloading income statement PDF:', error);
+        showAlert('Error descargando Estado de Resultados: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Descargar Reporte de Transacciones por Período en PDF
+ */
+async function downloadTransactionsPeriodReport() {
+    try {
+        const startDateInput = document.getElementById('report-start-date');
+        const endDateInput = document.getElementById('report-end-date');
+
+        // Validar fechas
+        if (!startDateInput.value || !endDateInput.value) {
+            showAlert('Por favor selecciona las fechas de inicio y fin', 'error');
+            return;
+        }
+
+        const startDate = startDateInput.value;
+        const endDate = endDateInput.value;
+
+        if (new Date(startDate) > new Date(endDate)) {
+            showAlert('La fecha de inicio debe ser anterior a la fecha final', 'error');
+            return;
+        }
+
+        showAlert('Generando Reporte de Transacciones en PDF...', 'info');
+
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/transactions/period-report?format=pdf&startDate=${startDate}&endDate=${endDate}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Error generando PDF');
+        }
+
+        // Descargar el archivo
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `reporte-transacciones-${startDate}-${endDate}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        showAlert('Reporte de Transacciones descargado exitosamente', 'success');
+
+    } catch (error) {
+        console.error('Error downloading transactions report PDF:', error);
+        showAlert('Error descargando Reporte de Transacciones: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Descargar comprobante de transacción específica
+ */
+async function downloadTransactionVoucher(transactionId) {
+    try {
+        showAlert('Generando comprobante de transacción...', 'info');
+
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/transactions/${transactionId}/voucher`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Error generando comprobante');
+        }
+
+        // Descargar el archivo
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `comprobante-${transactionId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        showAlert('Comprobante descargado exitosamente', 'success');
+
+    } catch (error) {
+        console.error('Error downloading transaction voucher:', error);
+        showAlert('Error descargando comprobante: ' + error.message, 'error');
+    }
+}
+
+// Hacer las funciones disponibles globalmente
+window.downloadBalanceSheetPDF = downloadBalanceSheetPDF;
+window.downloadIncomeStatementPDF = downloadIncomeStatementPDF;
+window.downloadTransactionsPeriodReport = downloadTransactionsPeriodReport;
+window.downloadTransactionVoucher = downloadTransactionVoucher;
+// ===================================
+// FIX PARA BALANCE Y TRANSACCIONES PENDIENTES
+// ===================================
+
+// 1. Función mejorada para cargar estadísticas
+async function loadAccountingStats() {
+    const token = localStorage.getItem('token');
+    console.log('📊 Cargando estadísticas de contabilidad...');
+
+    try {
+        const response = await fetch('/api/accounting/stats', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('📄 Datos recibidos completos:', data);
+
+            // Verificar estructura de datos
+            const stats = data.data || data.stats || data;
+            console.log('📊 Stats procesados:', stats);
+
+            updateAccountingStatsFixed(stats);
+        } else {
+            console.error('❌ Error HTTP:', response.status);
+            const errorText = await response.text();
+            console.error('❌ Error body:', errorText);
+
+            // Usar datos de fallback
+            updateAccountingStatsFixed({
+                totalAccounts: 0,
+                activeAccounts: 0,
+                totalBalance: { netWorth: 0 },
+                pendingTransactions: 0
+            });
+        }
+    } catch (error) {
+        console.error('❌ Error cargando estadísticas:', error);
+
+        // Datos de fallback con estructura correcta
+        updateAccountingStatsFixed({
+            totalAccounts: 0,
+            activeAccounts: 0,
+            totalBalance: { netWorth: 0 },
+            pendingTransactions: 0
+        });
+    }
+}
+
+// 2. Función corregida para actualizar estadísticas
+function updateAccountingStatsFixed(stats) {
+    console.log('📊 Actualizando estadísticas con datos:', stats);
+
+    // Procesar balance total correctamente
+    let totalBalanceValue = 0;
+    if (stats.totalBalance) {
+        if (typeof stats.totalBalance === 'number') {
+            totalBalanceValue = stats.totalBalance;
+        } else if (stats.totalBalance.netWorth !== undefined) {
+            totalBalanceValue = stats.totalBalance.netWorth;
+        } else if (stats.totalBalance.totalAssets !== undefined) {
+            totalBalanceValue = stats.totalBalance.totalAssets - (stats.totalBalance.totalLiabilities || 0);
+        }
+    }
+
+    // Mapeo seguro de elementos
+    const elements = {
+        'total-accounts': stats.totalAccounts || 0,
+        'active-accounts': stats.activeAccounts || stats.totalAccounts || 0,
+        'total-balance': formatCurrency(totalBalanceValue),
+        'pending-transactions': stats.pendingTransactions || 0
+    };
+
+    console.log('📊 Elementos a actualizar:', elements);
+
+    // Actualizar cada elemento individualmente
+    Object.entries(elements).forEach(([id, value]) => {
+        updateElementSafely(id, value);
+    });
+
+    // Actualizar dashboard si está disponible
+    if (window.accountingDashboard) {
+        console.log('📊 Actualizando dashboard');
+        window.accountingDashboard.updateMetrics(stats);
+    }
+
+    // Disparar evento personalizado
+    window.dispatchEvent(new CustomEvent('statsUpdated', {
+        detail: { stats: stats }
+    }));
+}
+
+// 3. Función segura para actualizar elementos del DOM
+function updateElementSafely(id, value) {
+    const element = document.getElementById(id);
+    console.log(`🔧 Actualizando ${id}:`, element ? 'encontrado' : 'NO encontrado', 'valor:', value);
+
+    if (element) {
+        // Remover indicadores de carga
+        const loadingSpan = element.querySelector('.loading');
+        if (loadingSpan) {
+            loadingSpan.remove();
+        }
+
+        element.classList.remove('loading');
+
+        // Actualizar contenido
+        if (typeof value === 'number' && id !== 'total-balance') {
+            // Para números, usar animación
+            animateNumber(element, 0, value, 1000);
+        } else {
+            element.textContent = value;
+        }
+
+        console.log(`✅ Elemento ${id} actualizado exitosamente`);
+    } else {
+        console.error(`❌ Elemento ${id} no encontrado en el DOM`);
+    }
+}
+
+// 4. Función para animar números
+function animateNumber(element, start, end, duration) {
+    const startTime = performance.now();
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Función de easing
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(start + (end - start) * easeOut);
+
+        element.textContent = current.toLocaleString();
+
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            element.textContent = end.toLocaleString();
+        }
+    }
+
+    requestAnimationFrame(update);
+}
+
+// 5. Función específica para cargar transacciones pendientes
+async function loadPendingTransactionsCount() {
+    const token = localStorage.getItem('token');
+    console.log('⏳ Cargando contador de transacciones pendientes...');
+
+    try {
+        const response = await fetch('/api/accounting/transactions?status=PENDING&limit=1', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const count = data.pagination?.total || data.total || data.data?.length || 0;
+
+            console.log('⏳ Transacciones pendientes encontradas:', count);
+            updateElementSafely('pending-transactions', count);
+
+            return count;
+        } else {
+            console.error('❌ Error cargando transacciones pendientes:', response.status);
+            updateElementSafely('pending-transactions', 0);
+            return 0;
+        }
+    } catch (error) {
+        console.error('❌ Error en loadPendingTransactionsCount:', error);
+        updateElementSafely('pending-transactions', 0);
+        return 0;
+    }
+}
+
+// 6. Función específica para calcular balance total
+async function loadTotalBalance() {
+    const token = localStorage.getItem('token');
+    console.log('💰 Calculando balance total...');
+
+    try {
+        // Obtener todas las cuentas con balance
+        const response = await fetch('/api/accounting/accounts?includeBalance=true', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const accounts = data.data || [];
+
+            // Calcular balance total por tipo de cuenta
+            const balanceByType = accounts.reduce((acc, account) => {
+                const type = account.accountType;
+                const balance = account.balance || 0;
+
+                if (!acc[type]) acc[type] = 0;
+                acc[type] += balance;
+
+                return acc;
+            }, {});
+
+            // Calcular patrimonio neto (Activos - Pasivos)
+            const assets = balanceByType.ASSET || 0;
+            const liabilities = balanceByType.LIABILITY || 0;
+            const netWorth = assets - liabilities;
+
+            console.log('💰 Balance calculado:', {
+                assets,
+                liabilities,
+                netWorth,
+                balanceByType
+            });
+
+            updateElementSafely('total-balance', formatCurrency(netWorth));
+
+            return netWorth;
+        } else {
+            console.error('❌ Error cargando cuentas para balance:', response.status);
+            updateElementSafely('total-balance', formatCurrency(0));
+            return 0;
+        }
+    } catch (error) {
+        console.error('❌ Error en loadTotalBalance:', error);
+        updateElementSafely('total-balance', formatCurrency(0));
+        return 0;
+    }
+}
+
+// 7. Función principal de inicialización corregida
+async function initializeAccountingStatsFixed() {
+    console.log('🚀 Inicializando estadísticas de contabilidad (versión corregida)');
+
+    // Mostrar indicadores de carga
+    showLoadingIndicators();
+
+    try {
+        // Cargar datos en paralelo para mejor rendimiento
+        const [stats, pendingCount, totalBalance] = await Promise.allSettled([
+            loadAccountingStats(),
+            loadPendingTransactionsCount(),
+            loadTotalBalance()
+        ]);
+
+        console.log('📊 Resultados de carga paralela:', {
+            stats: stats.status,
+            pendingCount: pendingCount.status,
+            totalBalance: totalBalance.status
+        });
+
+        // Si alguna petición falló, usar valores por defecto
+        if (stats.status === 'rejected') {
+            console.warn('⚠️ Stats principal falló, usando valores calculados individualmente');
+        }
+
+        console.log('✅ Inicialización de estadísticas completada');
+
+    } catch (error) {
+        console.error('❌ Error en inicialización:', error);
+    } finally {
+        // Ocultar indicadores de carga
+        hideLoadingIndicators();
+    }
+}
+
+// 8. Funciones auxiliares para indicadores de carga
+function showLoadingIndicators() {
+    const indicators = ['total-accounts', 'active-accounts', 'total-balance', 'pending-transactions'];
+
+    indicators.forEach(id => {
+        const element = document.getElementById(id);
+        if (element && !element.querySelector('.loading')) {
+            element.innerHTML = '<span class="loading"></span>';
+            element.classList.add('loading');
+        }
+    });
+}
+
+function hideLoadingIndicators() {
+    const indicators = ['total-accounts', 'active-accounts', 'total-balance', 'pending-transactions'];
+
+    indicators.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.classList.remove('loading');
+        }
+    });
+}
+
+// 9. Función de diagnóstico
+function diagnoseLoadingIssues() {
+    console.log('🔍 DIAGNÓSTICO DE PROBLEMAS DE CARGA:');
+
+    const elements = {
+        'total-accounts': document.getElementById('total-accounts'),
+        'active-accounts': document.getElementById('active-accounts'),
+        'total-balance': document.getElementById('total-balance'),
+        'pending-transactions': document.getElementById('pending-transactions')
+    };
+
+    Object.entries(elements).forEach(([id, element]) => {
+        if (element) {
+            console.log(`✅ ${id}: encontrado, contenido: "${element.textContent}"`);
+            console.log(`   - Clases: ${element.classList.toString()}`);
+            console.log(`   - Loading span: ${element.querySelector('.loading') ? 'SÍ' : 'NO'}`);
+        } else {
+            console.log(`❌ ${id}: NO encontrado`);
+        }
+    });
+
+    // Verificar token
+    const token = localStorage.getItem('token');
+    console.log('🔑 Token disponible:', token ? 'SÍ' : 'NO');
+
+    // Probar conectividad con la API
+    testAPIConnectivity();
+}
+
+// 10. Función para probar conectividad de la API
+async function testAPIConnectivity() {
+    const token = localStorage.getItem('token');
+
+    console.log('🔗 Probando conectividad con la API...');
+
+    try {
+        const response = await fetch('/api/accounting/stats', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log(`📡 Estado de respuesta: ${response.status} ${response.statusText}`);
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('📄 Datos recibidos:', data);
+        } else {
+            const errorText = await response.text();
+            console.log('❌ Error del servidor:', errorText);
+        }
+
+    } catch (error) {
+        console.error('❌ Error de conectividad:', error);
+    }
+}
+
+// ===================================
+// INTEGRACIÓN CON EL SISTEMA EXISTENTE
+// ===================================
+
+// Reemplazar la función original al cargar
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('🔧 Aplicando fix para balance y transacciones pendientes...');
+
+    // Reemplazar función original después de 2 segundos
+    setTimeout(() => {
+        if (typeof loadAccountingStats === 'function') {
+            console.log('🔄 Reemplazando loadAccountingStats original...');
+
+            // Backup de la función original
+            window.loadAccountingStatsOriginal = loadAccountingStats;
+
+            // Reemplazar con la versión corregida
+            window.loadAccountingStats = loadAccountingStats;
+
+            // Ejecutar la versión corregida
+            initializeAccountingStatsFixed();
+        }
+    }, 2000);
+
+    // Agregar función de diagnóstico al objeto window para debugging
+    window.diagnoseLoadingIssues = diagnoseLoadingIssues;
+    window.initializeAccountingStatsFixed = initializeAccountingStatsFixed;
+    window.loadPendingTransactionsCount = loadPendingTransactionsCount;
+    window.loadTotalBalance = loadTotalBalance;
+});
+
+console.log('✅ Fix para balance y transacciones pendientes cargado');
+console.log('🔧 Funciones de diagnóstico disponibles:');
+console.log('   - diagnoseLoadingIssues(): Verificar problemas');
+console.log('   - initializeAccountingStatsFixed(): Recargar estadísticas');
+console.log('   - loadPendingTransactionsCount(): Cargar solo pendientes');
+console.log('   - loadTotalBalance(): Calcular solo balance');
+
+// ===================================
+// DEBUG DETALLADO DE LA RESPUESTA DE LA API
+// ===================================
+
+// Función para inspeccionar la respuesta completa del API
+async function inspectAPIResponse() {
+    const token = localStorage.getItem('token');
+    console.log('🔍 INSPECCIONANDO RESPUESTA COMPLETA DE LA API:');
+
+    try {
+        const response = await fetch('/api/accounting/stats', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+
+            console.log('📄 ESTRUCTURA COMPLETA DE DATOS:');
+            console.log('data:', data);
+            console.log('data.data:', data.data);
+            console.log('data.success:', data.success);
+            console.log('data.message:', data.message);
+
+            if (data.data) {
+                console.log('📊 CONTENIDO DE data.data:');
+                Object.keys(data.data).forEach(key => {
+                    console.log(`  ${key}:`, data.data[key]);
+                });
+
+                // Inspeccionar específicamente balance y transacciones
+                console.log('💰 BALANCE ESPECÍFICO:');
+                console.log('  totalBalance:', data.data.totalBalance);
+                console.log('  tipo:', typeof data.data.totalBalance);
+
+                if (data.data.totalBalance && typeof data.data.totalBalance === 'object') {
+                    Object.keys(data.data.totalBalance).forEach(key => {
+                        console.log(`    ${key}:`, data.data.totalBalance[key]);
+                    });
+                }
+
+                console.log('⏳ TRANSACCIONES PENDIENTES:');
+                console.log('  pendingTransactions:', data.data.pendingTransactions);
+                console.log('  tipo:', typeof data.data.pendingTransactions);
+
+                // Buscar otras propiedades que puedan contener esta información
+                console.log('🔍 PROPIEDADES QUE CONTIENEN "balance":');
+                Object.keys(data.data).forEach(key => {
+                    if (key.toLowerCase().includes('balance')) {
+                        console.log(`  ${key}:`, data.data[key]);
+                    }
+                });
+
+                console.log('🔍 PROPIEDADES QUE CONTIENEN "transaction":');
+                Object.keys(data.data).forEach(key => {
+                    if (key.toLowerCase().includes('transaction')) {
+                        console.log(`  ${key}:`, data.data[key]);
+                    }
+                });
+
+                console.log('🔍 PROPIEDADES QUE CONTIENEN "pending":');
+                Object.keys(data.data).forEach(key => {
+                    if (key.toLowerCase().includes('pending')) {
+                        console.log(`  ${key}:`, data.data[key]);
+                    }
+                });
+            }
+
+            return data;
+        } else {
+            console.error('❌ Error HTTP:', response.status);
+            return null;
+        }
+    } catch (error) {
+        console.error('❌ Error inspeccionando API:', error);
+        return null;
+    }
+}
+
+// Función para probar carga directa de transacciones pendientes
+async function testPendingTransactionsAPI() {
+    const token = localStorage.getItem('token');
+    console.log('⏳ PROBANDO API DE TRANSACCIONES PENDIENTES:');
+
+    try {
+        // Probar diferentes endpoints posibles
+        const endpoints = [
+            '/api/accounting/transactions?status=PENDING',
+            '/api/accounting/transactions?status=PENDING&limit=50',
+            '/api/transactions?status=PENDING',
+            '/api/accounting/transactions'
+        ];
+
+        for (const endpoint of endpoints) {
+            console.log(`🔗 Probando: ${endpoint}`);
+
+            try {
+                const response = await fetch(endpoint, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log(`  Status: ${response.status} ${response.statusText}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(`  Datos:`, data);
+
+                    if (data.data && Array.isArray(data.data)) {
+                        const pendingCount = data.data.filter(t => t.status === 'PENDING').length;
+                        console.log(`  ✅ Transacciones pendientes encontradas: ${pendingCount}`);
+                        console.log(`  Total transacciones: ${data.data.length}`);
+
+                        // Mostrar estados de las primeras 5 transacciones
+                        console.log('  Estados de transacciones (primeras 5):');
+                        data.data.slice(0, 5).forEach((t, i) => {
+                            console.log(`    ${i + 1}. ID: ${t.id}, Status: ${t.status}, Amount: ${t.amount}`);
+                        });
+                    }
+
+                    if (data.pagination) {
+                        console.log(`  Paginación:`, data.pagination);
+                    }
+                }
+            } catch (err) {
+                console.log(`  ❌ Error: ${err.message}`);
+            }
+        }
+
+    } catch (error) {
+        console.error('❌ Error probando transacciones:', error);
+    }
+}
+
+// Función para probar cálculo de balance desde cuentas
+async function testBalanceCalculation() {
+    const token = localStorage.getItem('token');
+    console.log('💰 PROBANDO CÁLCULO DE BALANCE DESDE CUENTAS:');
+
+    try {
+        const response = await fetch('/api/accounting/accounts?includeBalance=true', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('📊 Respuesta de cuentas:', data);
+
+            if (data.data && Array.isArray(data.data)) {
+                console.log(`📈 Total de cuentas: ${data.data.length}`);
+
+                // Agrupar por tipo y calcular balances
+                const balancesByType = {};
+                let totalBalance = 0;
+
+                data.data.forEach(account => {
+                    const type = account.accountType || account.type;
+                    const balance = parseFloat(account.balance) || 0;
+
+                    if (!balancesByType[type]) {
+                        balancesByType[type] = { count: 0, total: 0, accounts: [] };
+                    }
+
+                    balancesByType[type].count++;
+                    balancesByType[type].total += balance;
+                    balancesByType[type].accounts.push({
+                        code: account.code,
+                        name: account.name,
+                        balance: balance
+                    });
+
+                    totalBalance += balance;
+                });
+
+                console.log('💰 BALANCES POR TIPO:');
+                Object.entries(balancesByType).forEach(([type, info]) => {
+                    console.log(`  ${type}:`);
+                    console.log(`    Cuentas: ${info.count}`);
+                    console.log(`    Total: ${formatCurrency(info.total)}`);
+                    console.log(`    Cuentas principales:`, info.accounts.slice(0, 3));
+                });
+
+                console.log(`💰 BALANCE TOTAL CALCULADO: ${formatCurrency(totalBalance)}`);
+
+                // Calcular patrimonio neto (Activos - Pasivos)
+                const assets = balancesByType.ASSET?.total || 0;
+                const liabilities = balancesByType.LIABILITY?.total || 0;
+                const netWorth = assets - liabilities;
+
+                console.log(`📊 PATRIMONIO NETO (Activos - Pasivos): ${formatCurrency(netWorth)}`);
+
+                return {
+                    totalBalance,
+                    netWorth,
+                    balancesByType
+                };
+            }
+        } else {
+            console.error('❌ Error cargando cuentas:', response.status);
+        }
+    } catch (error) {
+        console.error('❌ Error calculando balance:', error);
+    }
+}
+
+// Función para actualizar manualmente los valores
+function updateValuesManually() {
+    console.log('🔧 ACTUALIZANDO VALORES MANUALMENTE...');
+
+    Promise.all([
+        inspectAPIResponse(),
+        testPendingTransactionsAPI(),
+        testBalanceCalculation()
+    ]).then(([apiData, , balanceData]) => {
+        console.log('📊 APLICANDO VALORES CALCULADOS:');
+
+        if (balanceData) {
+            // Actualizar balance total
+            const balanceElement = document.getElementById('total-balance');
+            if (balanceElement) {
+                balanceElement.textContent = formatCurrency(balanceData.netWorth);
+                console.log(`✅ Balance actualizado a: ${formatCurrency(balanceData.netWorth)}`);
+            }
+        }
+
+        // Si encontramos transacciones pendientes en alguna respuesta, actualizarlas
+        // (esto se haría basado en los resultados de las pruebas)
+
+    }).catch(error => {
+        console.error('❌ Error en actualización manual:', error);
+    });
+}
+
+// Función auxiliar para formatear moneda (asegurar que existe)
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount || 0);
+}
+
+// Hacer funciones disponibles globalmente
+window.inspectAPIResponse = inspectAPIResponse;
+window.testPendingTransactionsAPI = testPendingTransactionsAPI;
+window.testBalanceCalculation = testBalanceCalculation;
+window.updateValuesManually = updateValuesManually;
+
+console.log('🔍 Funciones de debug cargadas:');
+console.log('  - inspectAPIResponse(): Ver estructura completa de datos');
+console.log('  - testPendingTransactionsAPI(): Probar endpoints de transacciones');
+console.log('  - testBalanceCalculation(): Calcular balance desde cuentas');
+console.log('  - updateValuesManually(): Actualizar valores manualmente');
+// ===================================
+// FIX DEFINITIVO PARA BALANCE Y TRANSACCIONES PENDIENTES
+// Agregar al final de accounting.js
+// ===================================
+
+// Función corregida para actualizar estadísticas
+function updateAccountingStatsCorrect(data) {
+    console.log('📊 Actualizando con estructura correcta:', data);
+
+    const summary = data.summary || {};
+    const financial = data.financial || {};
+
+    // Valores correctos según la estructura real del servidor
+    const values = {
+        'total-accounts': summary.totalAccounts || 0,
+        'active-accounts': summary.activeAccounts || summary.totalAccounts || 0,
+        'total-balance': formatCurrencySafe(financial.netIncome || 0),
+        'pending-transactions': summary.pendingTransactions || 0
+    };
+
+    console.log('📊 Valores correctos extraídos:', values);
+
+    // Actualizar cada elemento
+    Object.entries(values).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            const loading = element.querySelector('.loading');
+            if (loading) loading.remove();
+            element.classList.remove('loading');
+            element.textContent = value;
+            console.log(`✅ ${id} actualizado a: ${value}`);
+        }
+    });
+
+    // Actualizar dashboard si existe (con datos seguros)
+    if (window.accountingDashboard) {
+        window.accountingDashboard.updateMetrics({
+            totalAccounts: summary.totalAccounts || 0,
+            activeAccounts: summary.activeAccounts || 0,
+            totalBalance: { netWorth: financial.netIncome || 0 },
+            pendingTransactions: summary.pendingTransactions || 0,
+            monthlyRevenue: financial.totalIncome || 0
+        });
+    }
+
+    // Fix para el NaN después de que dashboard procese
+    setTimeout(fixBalanceNaN, 100);
+}
+
+// Función segura para formatear moneda (evita NaN)
+function formatCurrencySafe(amount) {
+    const safeAmount = (amount == null || isNaN(amount)) ? 0 : Number(amount);
+    return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0
+    }).format(safeAmount);
+}
+
+// Función para corregir NaN en balance
+function fixBalanceNaN() {
+    const balanceElement = document.getElementById('total-balance');
+    if (balanceElement && balanceElement.textContent.includes('NaN')) {
+        balanceElement.textContent = '$ 0';
+        console.log('✅ Balance corregido de NaN a $ 0');
+    }
+}
+
+// Función para cargar estadísticas con estructura correcta
+async function loadAccountingStatsFixed() {
+    const token = localStorage.getItem('token');
+    console.log('📊 Cargando estadísticas con estructura correcta...');
+
+    try {
+        const response = await fetch('/api/accounting/stats', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const responseData = await response.json();
+            const data = responseData.data;
+
+            if (data) {
+                updateAccountingStatsCorrect(data);
+                console.log('✅ Estadísticas actualizadas correctamente');
+            }
+        } else {
+            console.error('❌ Error HTTP:', response.status);
+        }
+    } catch (error) {
+        console.error('❌ Error cargando estadísticas:', error);
+    }
+}
+
+// Aplicar el fix automáticamente cuando se carga la página
+document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(() => {
+        console.log('🔧 Aplicando fix automático para balance y transacciones...');
+
+        // Reemplazar función original si existe
+        if (typeof window.loadAccountingStats === 'function') {
+            window.loadAccountingStatsOriginal = window.loadAccountingStats;
+            window.loadAccountingStats = loadAccountingStatsFixed;
+        }
+
+        // Corregir función de formateo del dashboard si existe
+        if (window.accountingDashboard && window.accountingDashboard.formatCurrency) {
+            const originalFormatCurrency = window.accountingDashboard.formatCurrency;
+            window.accountingDashboard.formatCurrency = function (amount) {
+                const safeAmount = (amount == null || isNaN(amount)) ? 0 : amount;
+                return originalFormatCurrency.call(this, safeAmount);
+            };
+        }
+
+        // Ejecutar carga inicial
+        loadAccountingStatsFixed();
+
+        console.log('✅ Fix automático aplicado');
+    }, 2000);
+});
+
+// Función manual para aplicar el fix si es necesario
+function applyAccountingFixManual() {
+    console.log('🔧 Aplicando fix manual...');
+    loadAccountingStatsFixed();
+}
+
+// Hacer función disponible globalmente para debugging
+window.applyAccountingFixManual = applyAccountingFixManual;
+window.loadAccountingStatsFixed = loadAccountingStatsFixed;
+
+console.log('✅ Fix definitivo para contabilidad cargado');
+console.log('💡 Si necesitas aplicarlo manualmente: applyAccountingFixManual()');
+// ===================================
+// FIX PARA RESTRICCIONES DE SUPER_ADMIN EN CUENTAS
+// Agregar al final de accounting.js
+// ===================================
+
+// Función para aplicar restricciones según el rol del usuario
+function applyRoleBasedRestrictions() {
+    console.log('🔒 Aplicando restricciones basadas en rol de usuario...');
+
+    // Verificar si currentUser está disponible
+    if (!currentUser) {
+        console.warn('⚠️ currentUser no disponible, reintentando en 2 segundos...');
+        setTimeout(applyRoleBasedRestrictions, 2000);
+        return;
+    }
+
+    console.log('👤 Usuario actual:', currentUser.role);
+
+    if (currentUser.role === 'SUPER_ADMIN') {
+        console.log('👑 SUPER_ADMIN detectado - Aplicando restricciones de cuentas...');
+        restrictAccountManagementForSuperAdmin();
+    } else {
+        console.log('✅ Usuario autorizado para gestionar cuentas');
+        enableAccountManagement();
+    }
+}
+
+// Función para restringir gestión de cuentas para SUPER_ADMIN
+function restrictAccountManagementForSuperAdmin() {
+    // Deshabilitar botón de crear cuenta
+    const createButton = document.querySelector('.btn[onclick="openAccountModal()"]');
+    if (createButton) {
+        createButton.disabled = true;
+        createButton.style.opacity = '0.5';
+        createButton.title = 'Solo rectores y contadores pueden gestionar cuentas';
+        createButton.onclick = function (e) {
+            e.preventDefault();
+            showRestrictedAlert();
+        };
+        console.log('🔒 Botón "Nueva Cuenta" deshabilitado');
+    }
+
+    // Deshabilitar botones de edición existentes
+    document.querySelectorAll('button[onclick*="editAccount"], button[onclick*="deleteAccount"]').forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.title = 'Solo rectores y contadores pueden gestionar cuentas';
+        btn.onclick = function (e) {
+            e.preventDefault();
+            showRestrictedAlert();
+        };
+    });
+
+    // Agregar mensaje informativo
+    addSuperAdminMessage();
+
+    console.log('✅ Restricciones aplicadas para SUPER_ADMIN');
+}
+
+// Función para habilitar gestión de cuentas (rectores y contadores)
+function enableAccountManagement() {
+    // Asegurar que los botones funcionen correctamente
+    const createButton = document.querySelector('.btn[onclick="openAccountModal()"]');
+    if (createButton) {
+        createButton.disabled = false;
+        createButton.style.opacity = '1';
+        createButton.title = 'Crear nueva cuenta contable';
+    }
+
+    // Restaurar funcionalidad de botones de edición
+    document.querySelectorAll('button[onclick*="editAccount"], button[onclick*="deleteAccount"]').forEach(btn => {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.title = '';
+    });
+
+    console.log('✅ Gestión de cuentas habilitada para usuario autorizado');
+}
+
+// Función para mostrar alerta de restricción
+function showRestrictedAlert() {
+    if (typeof showAlert === 'function') {
+        showAlert('⚠️ Solo los rectores y auxiliares contables pueden gestionar las cuentas contables de sus instituciones', 'warning');
+    } else {
+        alert('⚠️ Solo los rectores y auxiliares contables pueden gestionar las cuentas contables de sus instituciones');
+    }
+}
+
+// Función para agregar mensaje informativo para SUPER_ADMIN
+function addSuperAdminMessage() {
+    // Verificar si ya existe el mensaje
+    if (document.getElementById('superadmin-account-message')) {
+        return;
+    }
+
+    // Buscar donde insertar el mensaje
+    const accountsTab = document.getElementById('accounts-tab');
+    if (accountsTab && currentUser.role === 'SUPER_ADMIN') {
+        const messageDiv = document.createElement('div');
+        messageDiv.id = 'superadmin-account-message';
+        messageDiv.style.cssText = `
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 1px solid #f59e0b;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #92400e;
+            font-weight: 500;
+        `;
+
+        messageDiv.innerHTML = `
+            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div>
+                <strong>Información para Super Administrador:</strong><br>
+                La gestión de cuentas contables está restringida a rectores y auxiliares contables de cada institución.
+                Como Super Admin, puedes ver las cuentas pero no modificarlas.
+            </div>
+        `;
+
+        accountsTab.insertBefore(messageDiv, accountsTab.firstChild);
+    }
+}
+
+// Función para observar cambios en la tabla y aplicar restricciones
+function observeAccountTableChanges() {
+    if (currentUser && currentUser.role === 'SUPER_ADMIN') {
+        // Usar MutationObserver para detectar cuando se cargan nuevas filas de cuentas
+        const accountsTree = document.getElementById('accounts-tree');
+        if (accountsTree) {
+            const observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (mutation) {
+                    mutation.addedNodes.forEach(function (node) {
+                        if (node.nodeType === 1) { // Element node
+                            // Deshabilitar botones de edición/eliminación en nuevas filas
+                            const actionButtons = node.querySelectorAll('button[onclick*="editAccount"], button[onclick*="deleteAccount"]');
+                            actionButtons.forEach(btn => {
+                                btn.disabled = true;
+                                btn.style.opacity = '0.5';
+                                btn.title = 'Solo rectores y contadores pueden gestionar cuentas';
+                                btn.onclick = function (e) {
+                                    e.preventDefault();
+                                    showRestrictedAlert();
+                                };
+                            });
+                        }
+                    });
+                });
+            });
+
+            observer.observe(accountsTree, {
+                childList: true,
+                subtree: true
+            });
+
+            console.log('👁️ Observer configurado para restricciones dinámicas');
+        }
+    }
+}
+
+// Función principal para inicializar restricciones
+function initializeAccountRestrictions() {
+    console.log('🚀 Inicializando restricciones de cuentas por rol...');
+
+    // Aplicar restricciones iniciales
+    setTimeout(applyRoleBasedRestrictions, 1000);
+
+    // Configurar observer para cambios dinámicos
+    setTimeout(observeAccountTableChanges, 2000);
+
+    // Re-aplicar restricciones cuando cambie de tab
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('tab-btn') || e.target.textContent.includes('Plan de Cuentas')) {
+            setTimeout(applyRoleBasedRestrictions, 500);
+        }
+    });
+}
+
+// Auto-inicializar cuando se carga la página
+document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(initializeAccountRestrictions, 3000);
+});
+
+// También aplicar cuando se actualiza currentUser
+if (typeof window !== 'undefined') {
+    let lastUserRole = null;
+    setInterval(() => {
+        if (currentUser && currentUser.role !== lastUserRole) {
+            lastUserRole = currentUser.role;
+            applyRoleBasedRestrictions();
+        }
+    }, 2000);
+}
+
+// Hacer funciones disponibles globalmente para debugging
+window.applyRoleBasedRestrictions = applyRoleBasedRestrictions;
+window.restrictAccountManagementForSuperAdmin = restrictAccountManagementForSuperAdmin;
+window.enableAccountManagement = enableAccountManagement;
+
+console.log('🔒 Sistema de restricciones de cuentas por rol cargado');
+console.log('💡 Funciones disponibles para debug:');
+console.log('  - applyRoleBasedRestrictions(): Aplicar restricciones manualmente');
+console.log('  - restrictAccountManagementForSuperAdmin(): Restringir para super admin');
+console.log('  - enableAccountManagement(): Habilitar para usuarios autorizados');

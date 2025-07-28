@@ -6,23 +6,88 @@ const express = require('express');
 const { body, param, query } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
-const {
-  getInstitutions,
-  getInstitutionById,
-  createInstitution,
-  updateInstitution,
-  deleteInstitution,
-  getInstitutionStats,
-  getInstitutionOptions
-} = require('../controllers/institutionController');
-
 const router = express.Router();
 
 // ===================================
-// MIDDLEWARE DE AUTENTICACIÓN
+// RUTAS PÚBLICAS - SIN AUTENTICACIÓN
+// ===================================
+
+// IMPORTANTE: Esta ruta DEBE ir PRIMERO, antes de cualquier middleware
+router.get('/public', async (req, res) => {
+  try {
+    console.log('🌐 PUBLIC INSTITUTIONS - Solicitando instituciones públicas');
+    
+    // Obtener instituciones activas (información básica para selección)
+    const institutions = await req.prisma.institution.findMany({
+      where: {
+        isActive: true
+      },
+      select: {
+        id: true,
+        name: true,
+        nit: true,
+        city: true,
+        department: true,
+        educationLevel: true,
+        logo: true,
+        _count: {
+          select: {
+            students: true,
+            users: true
+          }
+        }
+      },
+      orderBy: {
+        name: 'asc'
+      }
+    });
+
+    console.log(`✅ PUBLIC INSTITUTIONS - Encontradas ${institutions.length} instituciones activas`);
+
+    res.json({
+      success: true,
+      data: institutions,
+      total: institutions.length,
+      message: `${institutions.length} instituciones disponibles`
+    });
+
+  } catch (error) {
+    console.error('❌ PUBLIC INSTITUTIONS - Error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Error al obtener instituciones',
+      message: error.message,
+      data: []
+    });
+  }
+});
+
+// Health check para instituciones (también público)
+router.get('/health', async (req, res) => {
+  try {
+    const count = await req.prisma.institution.count();
+    res.json({
+      success: true,
+      service: 'institutions',
+      total: count,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// ===================================
+// MIDDLEWARE DE AUTENTICACIÓN PARA RUTAS PROTEGIDAS
 // ===================================
 
 const { authenticate } = require('../middleware/auth');
+
+// Aplicar autenticación a todas las rutas siguientes
+router.use(authenticate);
 
 // ===================================
 // MIDDLEWARE DE PERMISOS - SOLO SUPER_ADMIN
@@ -39,7 +104,7 @@ const requireSuperAdmin = (req, res, next) => {
 };
 
 // ===================================
-// VALIDACIONES CORREGIDAS
+// VALIDACIONES
 // ===================================
 
 const validateInstitutionCreate = [
@@ -53,7 +118,6 @@ const validateInstitutionCreate = [
     .notEmpty()
     .withMessage('NIT requerido')
     .custom((value) => {
-      // Validación más flexible para NIT
       if (!/^[0-9\-]+$/.test(value)) {
         throw new Error('NIT debe contener solo números y guiones');
       }
@@ -102,13 +166,11 @@ const validateInstitutionCreate = [
     .withMessage('Nivel educativo inválido')
 ];
 
-// VALIDACIONES MUY RELAJADAS PARA ACTUALIZACIÓN
 const validateInstitutionUpdate = [
   param('id')
     .notEmpty()
     .withMessage('ID de institución requerido'),
 
-  // Todos los campos opcionales con validaciones mínimas
   body('name')
     .optional()
     .isLength({ min: 2, max: 150 })
@@ -117,7 +179,6 @@ const validateInstitutionUpdate = [
   body('nit')
     .optional()
     .custom((value) => {
-      // Muy permisivo para evitar errores
       if (value && value.length < 3) {
         throw new Error('NIT muy corto');
       }
@@ -233,25 +294,36 @@ const validateInstitutionQuery = [
 ];
 
 // ===================================
-// RUTAS - ORDEN CORRECTO: ESPECIALES PRIMERO
+// IMPORTAR CONTROLADORES
 // ===================================
 
-// RUTAS ESPECIALES PRIMERO (sin parámetros) - MUY IMPORTANTE EL ORDEN
+const {
+  getInstitutions,
+  getInstitutionById,
+  createInstitution,
+  updateInstitution,
+  deleteInstitution,
+  getInstitutionStats,
+  getInstitutionOptions
+} = require('../controllers/institutionController');
+
+// ===================================
+// RUTAS PROTEGIDAS (requieren autenticación)
+// ===================================
+
+// RUTAS ESPECIALES PRIMERO (sin parámetros)
 router.get('/stats',
-  authenticate,
   requireSuperAdmin,
   getInstitutionStats
 );
 
 router.get('/options',
-  authenticate,
   requireSuperAdmin,
   getInstitutionOptions
 );
 
 // RUTA GENERAL (lista con filtros)
 router.get('/',
-  authenticate,
   requireSuperAdmin,
   validateInstitutionQuery,
   getInstitutions
@@ -259,28 +331,24 @@ router.get('/',
 
 // RUTAS CON PARÁMETROS AL FINAL
 router.get('/:id',
-  authenticate,
   requireSuperAdmin,
   validateInstitutionId,
   getInstitutionById
 );
 
 router.post('/',
-  authenticate,
   requireSuperAdmin,
   validateInstitutionCreate,
   createInstitution
 );
 
 router.put('/:id',
-  authenticate,
   requireSuperAdmin,
   validateInstitutionUpdate,
   updateInstitution
 );
 
 router.delete('/:id',
-  authenticate,
   requireSuperAdmin,
   validateInstitutionId,
   deleteInstitution

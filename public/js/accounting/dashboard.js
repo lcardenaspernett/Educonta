@@ -465,15 +465,55 @@ class AccountingDashboard {
     }
 
     /**
-     * Mostrar notificación
+     * Mostrar notificación mejorada
      */
     showNotification(message, type = 'info') {
-        // Usar la función global si existe, sino crear una básica
-        if (window.showAlert) {
-            window.showAlert(message, type);
+        // Usar siempre la función global mejorada
+        if (typeof showAlert === 'function') {
+            showAlert(message, type);
         } else {
-            alert(message);
+            // Fallback mejorado si no está disponible
+            console.warn('showAlert no disponible, usando fallback');
+            this.createFallbackNotification(message, type);
         }
+    }
+
+    /**
+     * Fallback para notificaciones si showAlert no está disponible
+     */
+    createFallbackNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: var(--card-bg);
+            border: 2px solid ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
+            max-width: 400px;
+            animation: slideInRight 0.3s ease;
+        `;
+        
+        notification.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="font-size: 1.2rem;">${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+                <span style="color: var(--text-primary); font-weight: 500;">${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()" style="
+                    background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-secondary);
+                ">×</button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 4000);
     }
 }
 

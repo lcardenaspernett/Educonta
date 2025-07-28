@@ -262,17 +262,94 @@ function formatCurrency(amount) {
 }
 
 // Inicializar dashboard cuando se carga la página
+// ================= MOVEMENTS SECTION =================
+async function loadMovements() {
+    const list = document.getElementById('movementsList');
+    const loading = document.getElementById('movementsLoading');
+    if (!list) return;
+    loading.style.display = '';
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/accounting-simple/movements', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Error al cargar movimientos');
+        const data = await res.json();
+        renderMovements(data.data || []);
+    } catch (e) {
+        list.innerHTML = `<div class="error-message">No se pudieron cargar los movimientos.</div>`;
+    } finally {
+        loading.style.display = 'none';
+    }
+}
+
+function renderMovements(movements) {
+    const list = document.getElementById('movementsList');
+    if (!list) return;
+    if (!movements.length) {
+        list.innerHTML = '<div class="empty-message">No hay movimientos registrados.</div>';
+        return;
+    }
+    list.innerHTML = movements.map(m => `
+        <div class="movement-row">
+            <div class="movement-info">
+                <span class="movement-date">${new Date(m.date).toLocaleDateString()}</span>
+                <span class="movement-type ${m.type}">${m.type === 'income' ? 'Ingreso' : 'Egreso'}</span>
+                <span class="movement-concept">${m.concept || ''}</span>
+                <span class="movement-amount">${formatCurrency(m.amount)}</span>
+            </div>
+            <div class="movement-actions">
+                <button class="btn btn-invoice btn-sm" data-invoice-id="${m.invoiceId || ''}" data-movement-id="${m.id}" title="Ver Factura">Ver Factura</button>
+                <button class="btn btn-outline btn-sm" data-edit-id="${m.id}" title="Editar">Editar</button>
+            </div>
+        </div>
+    `).join('');
+    // Attach event listeners
+    list.querySelectorAll('.btn-invoice').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const movementId = btn.getAttribute('data-movement-id');
+            const invoiceId = btn.getAttribute('data-invoice-id');
+            viewInvoiceForMovement(movementId, invoiceId);
+        });
+    });
+    list.querySelectorAll('[data-edit-id]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const movementId = btn.getAttribute('data-edit-id');
+            editMovement(movementId);
+        });
+    });
+}
+
+function viewInvoiceForMovement(movementId, invoiceId) {
+    if (!invoiceId) {
+        alert('Este movimiento no tiene factura asociada.');
+        return;
+    }
+    if (window.invoiceViewer && typeof window.invoiceViewer.viewInvoice === 'function') {
+        window.invoiceViewer.viewInvoice(invoiceId);
+    } else {
+        alert('Visualizador de facturas no disponible.');
+    }
+}
+
+function editMovement(movementId) {
+    // Aquí puedes implementar un modal de edición o redirigir a una página de edición
+    alert('Funcionalidad de edición de movimiento en desarrollo. ID: ' + movementId);
+}
+
+function refreshMovements() {
+    loadMovements();
+}
+
+// Inicializar dashboard cuando se carga la página
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📊 Inicializando dashboard de contabilidad con datos reales');
-    
-    // Esperar a que se carguen los datos principales y luego crear gráficos
     setTimeout(() => {
         console.log('🎨 Creando gráficos con datos reales...');
-        createAccountingCharts(); // Crear gráficos iniciales
-        updateAccountingMetrics(); // Actualizar con datos reales de la API
-    }, 2000); // Esperar 2 segundos para que se carguen los datos principales
-    
-    // Actualizar gráficos cada 60 segundos con datos reales
+        createAccountingCharts();
+        updateAccountingMetrics();
+        loadMovements();
+    }, 2000);
     setInterval(() => {
         console.log('🔄 Actualizando gráficos automáticamente...');
         updateAccountingMetrics();

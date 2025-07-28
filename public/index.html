@@ -17,8 +17,8 @@
             --text-light: #6b7280;
             --bg: #ffffff;
             --bg-secondary: #f8fafc;
-            --bg-card: rgba(255, 255, 255, 0.8);
-            --border: rgba(255, 255, 255, 0.2);
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --border: rgba(229, 231, 235, 0.8);
             --shadow: rgba(0, 0, 0, 0.1);
         }
 
@@ -27,12 +27,12 @@
             --primary-dark: #2563eb;
             --secondary: #10b981;
             --accent: #a855f7;
-            --text: #f9fafb;
+            --text: #f8fafc;
             --text-light: #d1d5db;
             --bg: #0f172a;
             --bg-secondary: #1e293b;
-            --bg-card: rgba(15, 23, 42, 0.8);
-            --border: rgba(255, 255, 255, 0.1);
+            --bg-card: rgba(30, 41, 59, 0.95);
+            --border: rgba(71, 85, 105, 0.8);
             --shadow: rgba(0, 0, 0, 0.3);
         }
 
@@ -59,10 +59,11 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            background: linear-gradient(135deg,
-                    var(--primary) 0%,
-                    var(--secondary) 50%,
-                    var(--accent) 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            opacity: 0.03;
+        }
+
+        [data-theme="dark"] .bg-animation {
             opacity: 0.05;
         }
 
@@ -78,23 +79,10 @@
         }
 
         @keyframes float {
-
-            0%,
-            100% {
-                transform: translateX(0px) translateY(0px);
-            }
-
-            25% {
-                transform: translateX(10px) translateY(-10px);
-            }
-
-            50% {
-                transform: translateX(-5px) translateY(10px);
-            }
-
-            75% {
-                transform: translateX(-10px) translateY(-5px);
-            }
+            0%, 100% { transform: translateX(0px) translateY(0px); }
+            25% { transform: translateX(10px) translateY(-10px); }
+            50% { transform: translateX(-5px) translateY(10px); }
+            75% { transform: translateX(-10px) translateY(-5px); }
         }
 
         /* Header */
@@ -198,6 +186,7 @@
             color: var(--text-light);
             transition: all 0.3s ease;
             user-select: none;
+            cursor: pointer;
         }
 
         .theme-label.active {
@@ -239,14 +228,6 @@
         .theme-toggle:hover {
             border-color: var(--primary);
             transform: scale(1.05);
-        }
-
-        .theme-toggle:hover::before {
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
-        }
-
-        [data-theme="dark"] .theme-toggle:hover::before {
-            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
         }
 
         /* Main Content */
@@ -359,6 +340,10 @@
             box-shadow: 0 20px 40px var(--shadow);
         }
 
+        [data-theme="dark"] .feature-card:hover {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
         .feature-icon {
             width: 60px;
             height: 60px;
@@ -415,20 +400,9 @@
         }
 
         @keyframes pulse {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.2);
-                opacity: 0.7;
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         /* Animations */
@@ -437,7 +411,6 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -506,9 +479,7 @@
         }
 
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -529,20 +500,16 @@
                 <a href="#features" class="nav-link">Características</a>
                 <a href="#" class="nav-link">Documentación</a>
                 <a href="#" class="nav-link">Soporte</a>
-                <a href="/login.html" class="btn btn-primary">
+                <a href="/select-institution" class="btn btn-primary">
                     <svg width="20" height="20" fill="currentColor">
                         <path
                             d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                     </svg>
-                    Iniciar Sesión
+                    Acceder al Sistema
                 </a>
             </div>
             
-            <!-- Theme toggle - visible en todas las pantallas -->
-            <div class="theme-toggle-container">
-                <span class="theme-label" id="light-label">CLARO</span>
-                <button class="theme-toggle" onclick="toggleTheme()"></button>
-                <span class="theme-label" id="dark-label">OSCURO</span>
+            <!-- Theme toggle -->
             </div>
         </nav>
     </header>
@@ -564,7 +531,7 @@
             </p>
 
             <div class="hero-buttons">
-                <a href="/login.html" class="btn btn-primary">
+                <a href="/select-institution" class="btn btn-primary">
                     <svg width="20" height="20" fill="currentColor">
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -677,14 +644,12 @@
                 </div>
             </div>
         </section>
-
-
     </main>
 
     <script>
         // Update theme labels
         function updateThemeLabels() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
             const lightLabel = document.getElementById('light-label');
             const darkLabel = document.getElementById('dark-label');
 
@@ -700,7 +665,7 @@
         // Theme toggle
         function toggleTheme() {
             const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
+            const currentTheme = html.getAttribute('data-theme') || 'light';
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
@@ -708,9 +673,11 @@
         }
 
         // Load saved theme
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        updateThemeLabels();
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeLabels();
+        }
 
         // Health check
         async function checkHealth(event) {
@@ -748,9 +715,12 @@
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
             });
         });
 
@@ -763,6 +733,11 @@
             } else {
                 header.style.background = 'var(--bg-card)';
             }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTheme();
         });
     </script>
 </body>

@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleccionar Institución - Educonta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --accent: #8b5cf6;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --bg: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --border: rgba(229, 231, 235, 0.8);
+            --shadow: rgba(0, 0, 0, 0.1);
+            --error: #ef4444;
+            --success: #10b981;
+        }
+
+        [data-theme="dark"] {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #10b981;
+            --accent: #a855f7;
+            --text: #f8fafc;
+            --text-light: #d1d5db;
+            --bg: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: rgba(30, 41, 59, 0.95);
+            --border: rgba(71, 85, 105, 0.8);
+            --shadow: rgba(0, 0, 0, 0.3);
+            --error: #f87171;
+            --success: #34d399;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            opacity: 0.03;
+        }
+
+        [data-theme="dark"] .bg-animation {
+            opacity: 0.05;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23ffffff" stroke-width="0.5" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateX(0px) translateY(0px); }
+            25% { transform: translateX(10px) translateY(-10px); }
+            50% { transform: translateX(-5px) translateY(10px); }
+            75% { transform: translateX(-10px) translateY(-5px); }
+        }
+
+        .selector-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .selector-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px var(--shadow);
+            animation: slideInUp 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .selector-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .institutions-container {
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: var(--bg);
+            color: var(--text);
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-light);
+        }
+
+        /* Nuevo diseño de lista compacta */
+        .institutions-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg);
+        }
+
+        .institutions-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .institutions-list::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        .institutions-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .institutions-list::-webkit-scrollbar-thumb:hover {
+            background: var(--text-light);
+        }
+
+        .institution-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--border);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .institution-item:last-child {
+            border-bottom: none;
+        }
+
+        .institution-item:hover {
+            background: var(--bg-secondary);
+            transform: translateX(4px);
+        }
+
+        .institution-item.selected {
+            background: var(--primary);
+            color: white;
+        }
+
+        .institution-item.selected:hover {
+            background: var(--primary-dark);
+        }
+
+        .institution-logo-small {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .institution-item.selected .institution-logo-small {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .institution-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .institution-name-small {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .institution-item.selected .institution-name-small {
+            color: white;
+        }
+
+        .institution-details {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .institution-item.selected .institution-details {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .institution-level-small {
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .institution-item.selected .institution-level-small {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .institution-location {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .institution-item.selected .institution-location {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-light);
+        }
+
+        .no-results-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            opacity: 0.5;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .login-button.enabled {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .login-button.enabled:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+        }
+
+        .loading {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-light);
+        }
+
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            opacity: 0.5;
+        }
+
+        .back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-card);
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            z-index: 50;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+            transform: translateX(-5px);
+        }
+
+        .theme-toggle-container {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 0.75rem 1.25rem;
+            z-index: 50;
+        }
+
+        .theme-label {
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .theme-label.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        [data-theme="dark"] .theme-toggle::before {
+            transform: translateX(30px);
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .alert.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert.show {
+            display: flex;
+            animation: slideInDown 0.3s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .selector-container {
+                padding: 1rem;
+            }
+
+            .selector-card {
+                padding: 2rem;
+            }
+
+            .institution-item {
+                padding: 0.875rem 1rem;
+            }
+
+            .institution-logo-small {
+                width: 40px;
+                height: 40px;
+                font-size: 0.875rem;
+            }
+
+            .institution-name-small {
+                font-size: 0.9rem;
+            }
+
+            .institution-details {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <a href="/" class="back-link">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke="currentColor" stroke-width="2" fill="none"/>
+        </svg>
+        Volver al inicio
+    </a>
+
+    <div class="theme-toggle-container">
+        <span class="theme-label" id="light-label">CLARO</span>
+        <button class="theme-toggle" onclick="toggleTheme()"></button>
+        <span class="theme-label" id="dark-label">OSCURO</span>
+    </div>
+
+    <div class="selector-container">
+        <div class="selector-card">
+            <div class="selector-header">
+                <a href="/" class="logo">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L2 7v10c0 5.55 3.84 9.739 9 11 5.16-1.261 9-5.45 9-11V7l-10-5z" />
+                    </svg>
+                    Educonta
+                </a>
+                <h1 class="welcome-text">Seleccionar Institución</h1>
+                <p class="subtitle">Elige tu institución educativa para continuar</p>
+            </div>
+
+            <div class="alert" id="alert">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v6a1 1 0 102 0V5zm-1 9a1 1 0 100-2 1 1 0 000 2z" />
+                </svg>
+                <span id="alert-message"></span>
+            </div>
+
+            <div class="institutions-container" id="institutionsContainer">
+                <!-- Buscador -->
+                <div class="search-container">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        class="search-input" 
+                        placeholder="Buscar institución educativa..."
+                        oninput="filterInstitutions()"
+                    >
+                </div>
+
+                <!-- Lista de instituciones -->
+                <div class="institutions-list" id="institutionsList">
+                    <!-- Instituciones se cargarán dinámicamente -->
+                </div>
+
+                <!-- Mensaje cuando no hay resultados -->
+                <div class="no-results" id="noResults" style="display: none;">
+                    <svg class="no-results-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                    <h3>No se encontraron instituciones</h3>
+                    <p>Intenta con un término de búsqueda diferente</p>
+                </div>
+            </div>
+
+            <button class="login-button" id="continueButton" onclick="goToLogin()">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Continuar al Login
+            </button>
+
+            <!-- Botón de diagnóstico temporal -->
+            <button class="login-button" onclick="runDiagnosis()" style="margin-top: 1rem; background: linear-gradient(135deg, #f59e0b, #d97706);">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                Diagnosticar Problema
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let selectedInstitution = null;
+
+        // Función para mostrar alertas
+        function showAlert(message, type = 'error') {
+            const alert = document.getElementById('alert');
+            const alertMessage = document.getElementById('alert-message');
+            
+            alert.className = `alert ${type}`;
+            alertMessage.textContent = message;
+            alert.classList.add('show');
+            
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+
+        // Update theme labels
+        function updateThemeLabels() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const lightLabel = document.getElementById('light-label');
+            const darkLabel = document.getElementById('dark-label');
+
+            if (currentTheme === 'dark') {
+                lightLabel.classList.remove('active');
+                darkLabel.classList.add('active');
+            } else {
+                lightLabel.classList.add('active');
+                darkLabel.classList.remove('active');
+            }
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeLabels();
+        }
+
+        // Load saved theme
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeLabels();
+        }
+
+        // Función para obtener el nombre corto de la institución
+        function getShortName(name) {
+            return name.split(' ').map(word => word.charAt(0).toUpperCase()).join('').substring(0, 3);
+        }
+
+        // Función para formatear nivel educativo
+        function formatEducationLevel(level) {
+            const levels = {
+                'PREESCOLAR': 'Preescolar',
+                'PRIMARIA': 'Primaria',
+                'SECUNDARIA': 'Secundaria',
+                'MEDIA': 'Media',
+                'SUPERIOR': 'Superior',
+                'TECNICA': 'Técnica',
+                'MIXTA': 'Mixta'
+            };
+            return levels[level] || level;
+        }
+
+        // Función para seleccionar institución
+        function selectInstitution(institution) {
+            // Remover selección anterior
+            document.querySelectorAll('.institution-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Seleccionar nueva institución
+            const item = document.querySelector(`[data-institution-id="${institution.id}"]`);
+            if (item) {
+                item.classList.add('selected');
+                selectedInstitution = institution;
+                
+                // Habilitar botón de continuar
+                const continueButton = document.getElementById('continueButton');
+                continueButton.classList.add('enabled');
+            }
+        }
+
+        // Variable global para almacenar todas las instituciones
+        let allInstitutions = [];
+
+        // Función para crear item de institución (diseño compacto)
+        function createInstitutionItem(institution) {
+            const location = institution.city && institution.department ? 
+                `${institution.city}, ${institution.department}` : 
+                institution.city || institution.department || '';
+                
+            return `
+                <div class="institution-item" data-institution-id="${institution.id}" onclick="selectInstitution(${JSON.stringify(institution).replace(/"/g, '&quot;')})">
+                    <div class="institution-logo-small">
+                        ${getShortName(institution.name)}
+                    </div>
+                    <div class="institution-info">
+                        <div class="institution-name-small">${institution.name}</div>
+                        <div class="institution-details">
+                            <span class="institution-level-small">
+                                ${formatEducationLevel(institution.educationLevel)}
+                            </span>
+                            ${location ? `<span class="institution-location">${location}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Función para filtrar instituciones
+        function filterInstitutions() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const list = document.getElementById('institutionsList');
+            const noResults = document.getElementById('noResults');
+
+            if (!allInstitutions.length) {
+                return;
+            }
+
+            const filteredInstitutions = allInstitutions.filter(institution => 
+                institution.name.toLowerCase().includes(searchTerm) ||
+                (institution.city && institution.city.toLowerCase().includes(searchTerm)) ||
+                (institution.department && institution.department.toLowerCase().includes(searchTerm)) ||
+                formatEducationLevel(institution.educationLevel).toLowerCase().includes(searchTerm)
+            );
+
+            if (filteredInstitutions.length > 0) {
+                list.innerHTML = filteredInstitutions.map(createInstitutionItem).join('');
+                list.style.display = 'block';
+                noResults.style.display = 'none';
+            } else {
+                list.style.display = 'none';
+                noResults.style.display = 'block';
+            }
+        }
+
+        // Función para cargar instituciones
+        async function loadInstitutions() {
+            console.log('🔄 Cargando instituciones...');
+            
+            try {
+                console.log('📡 Haciendo fetch a: /api/institutions/public');
+                
+                const response = await fetch('/api/institutions/public');
+                
+                console.log('📡 Response status:', response.status);
+                console.log('📡 Response ok:', response.ok);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('📦 Data received:', data);
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    console.log(`✅ ${data.data.length} instituciones encontradas`);
+                    
+                    // Guardar todas las instituciones
+                    allInstitutions = data.data;
+                    
+                    // Mostrar todas inicialmente
+                    const list = document.getElementById('institutionsList');
+                    list.innerHTML = allInstitutions.map(createInstitutionItem).join('');
+                    list.style.display = 'block';
+                    document.getElementById('noResults').style.display = 'none';
+                } else {
+                    console.log('⚠️ No hay instituciones o estructura de datos incorrecta');
+                    showEmptyState();
+                }
+            } catch (error) {
+                console.error('❌ Error cargando instituciones:', error);
+                showAlert('Error al cargar las instituciones: ' + error.message);
+                showEmptyState();
+            }
+        }
+
+        // Función para mostrar estado vacío
+        function showEmptyState() {
+            const list = document.getElementById('institutionsList');
+            const noResults = document.getElementById('noResults');
+            
+            list.style.display = 'none';
+            noResults.style.display = 'block';
+            noResults.innerHTML = `
+                <svg class="no-results-icon" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 9.739 9 11 5.16-1.261 9-5.45 9-11V7l-10-5z"/>
+                </svg>
+                <h3>No hay instituciones disponibles</h3>
+                <p>Contacta al administrador del sistema para más información.</p>
+            `;
+        }
+
+        // Función para ir al login
+        function goToLogin() {
+            if (!selectedInstitution) {
+                showAlert('Selecciona una institución para continuar');
+                return;
+            }
+            
+            // Guardar institución seleccionada en localStorage
+            localStorage.setItem('selectedInstitution', JSON.stringify(selectedInstitution));
+            
+            // Redirigir al login
+            window.location.href = `/login?institution=${selectedInstitution.id}`;
+        }
+
+        // Función de diagnóstico
+        async function runDiagnosis() {
+            console.log('🔍 INICIANDO DIAGNÓSTICO...');
+            
+            // Test de conectividad básica
+            console.log('1. Probando conectividad básica...');
+            try {
+                const healthResponse = await fetch('/api/health');
+                console.log('   Health check status:', healthResponse.status);
+                const healthData = await healthResponse.json();
+                console.log('   Health data:', healthData);
+            } catch (error) {
+                console.log('   ❌ Health check failed:', error);
+            }
+
+            // Test de la ruta específica
+            console.log('2. Probando ruta de instituciones...');
+            try {
+                const response = await fetch('/api/institutions/public');
+                console.log('   Status:', response.status);
+                console.log('   Headers:', [...response.headers.entries()]);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('   ✅ Data:', data);
+                    
+                    if (data.success && data.data) {
+                        showAlert(`✅ API funcionando: ${data.data.length} instituciones encontradas`, 'success');
+                        
+                        // Intentar cargar las instituciones manualmente
+                        const list = document.getElementById('institutionsList');
+                        list.innerHTML = data.data.map(createInstitutionItem).join('');
+                    } else {
+                        showAlert('❌ API responde pero estructura de datos incorrecta');
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.log('   ❌ Error response:', errorText);
+                    showAlert(`❌ Error ${response.status}: ${errorText}`);
+                }
+            } catch (error) {
+                console.log('   ❌ Fetch error:', error);
+                showAlert('❌ Error de conectividad: ' + error.message);
+            }
+
+            // Test de elementos DOM
+            console.log('3. Verificando elementos DOM...');
+            const list = document.getElementById('institutionsList');
+            const button = document.getElementById('continueButton');
+            
+            console.log('   List element:', list ? '✅ Found' : '❌ Missing');
+            console.log('   Button element:', button ? '✅ Found' : '❌ Missing');
+            
+            console.log('🔍 Diagnóstico completo - revisa la consola');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTheme();
+            loadInstitutions();
+        });
+    </script>
+</body>
+</html>

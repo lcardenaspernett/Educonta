@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Rector - Educonta</title>
+    <style>
+        .theme-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            z-index: 200;
+        }
+        .theme-label {
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            user-select: none;
+            cursor: pointer;
+        }
+        .theme-label.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+        [data-theme="dark"] .theme-toggle::before {
+            transform: translateX(30px);
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+        }
+        .theme-toggle:hover {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --accent: #8b5cf6;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --bg: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --border: rgba(229, 231, 235, 1);
+            --shadow: rgba(0, 0, 0, 0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        [data-theme="dark"] {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #10b981;
+            --accent: #a855f7;
+            --text: #f8fafc;
+            --text-light: #d1d5db;
+            --bg: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: rgba(30, 41, 59, 0.95);
+            --border: rgba(71, 85, 105, 1);
+            --shadow: rgba(0, 0, 0, 0.3);
+            --success: #34d399;
+            --warning: #fbbf24;
+            --error: #f87171;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 2rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            text-decoration: none;
+        }
+
+        .user-info {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .user-role {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .institution-name {
+            font-size: 0.75rem;
+            color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-light);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: var(--bg-secondary);
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .logout-btn {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            right: 2rem;
+            background: var(--error);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            background: var(--bg-secondary);
+        }
+
+        .header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            box-shadow: 0 8px 25px var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        [data-theme="dark"] .dashboard-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .kpi-title {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .kpi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-change {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .kpi-change.positive {
+            color: var(--success);
+        }
+
+        .kpi-change.negative {
+            color: var(--error);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            grid-column: span 2;
+            min-height: 400px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .chart-filters {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text-light);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .chart-placeholder {
+            height: 300px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            border: 2px dashed var(--border);
+        }
+
+        /* Recent Activity */
+        .activity-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-description {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .quick-action {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .quick-action:hover {
+            background: var(--bg-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        [data-theme="dark"] .quick-action:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .quick-action-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .quick-action-content h4 {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .quick-action-content p {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        /* Financial Summary */
+        .financial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .financial-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .financial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .financial-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .amount-positive {
+            color: var(--success);
+        }
+
+        .amount-negative {
+            color: var(--error);
+        }
+
+        .financial-period {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .chart-container {
+                grid-column: span 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading states */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(37, 99, 235, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border) 50%, var(--bg-secondary) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="theme-toggle-container">
+        <span id="light-label" class="theme-label">Claro</span>
+        <div id="theme-toggle" class="theme-toggle" title="Cambiar tema"></div>
+        <span id="dark-label" class="theme-label">Oscuro</span>
+    </div>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="/" class="logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 9.739 9 11 5.16-1.261 9-5.45 9-11V7l-10-5z" />
+                </svg>
+                Educonta
+            </a>
+
+            <div class="user-info" id="userInfo">
+                <div class="user-avatar" id="userAvatar">R</div>
+                <div class="user-name" id="userName">Cargando...</div>
+                <div class="user-role">Rector</div>
+                <div class="institution-name" id="institutionName">Cargando...</div>
+            </div>
+
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-section="dashboard">
+                            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                            </svg>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="students">
+                            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                            </svg>
+                            Estudiantes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="accounting">
+                            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            Contabilidad
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="payments">
+                            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                            </svg>
+                            Pagos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="invoices">
+                            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+                            </svg>
+                            Facturas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="reports">
+                            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                            </svg>
+                            Reportes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="users">
+                            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M16 7c0-2.21-1.79-4-4-4S8 4.79 8 7s1.79 4 4 4 4-1.79 4-4zm-4 7c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                            Usuarios
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <button class="logout-btn" onclick="logout()">
+                <svg width="20" height="20" fill="currentColor" style="margin-right: 0.5rem;">
+                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                </svg>
+                Cerrar Sesión
+            </button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="content-section">
+                <div class="header">
+                    <h1 class="page-title">Dashboard Ejecutivo</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-outline" onclick="refreshDashboard()">
+                            <svg width="20" height="20" fill="currentColor">
+                                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            Actualizar
+                        </button>
+                        <a href="#" class="btn btn-primary" data-section="payments">
+                            <svg width="20" height="20" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            Nuevo Evento de Pago
+                        </a>
+                    </div>
+                </div>
+
+                <!-- KPIs -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Total Estudiantes</span>
+                            <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                                <svg width="20" height="20" fill="currentColor">
+                                    <path d="M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="totalStudents">-</div>
+                        <div class="kpi-change positive">
+                            <svg width="16" height="16" fill="currentColor">
+                                <path d="M3.5 13.5a.5.5 0 01-.3-.1c-.2-.1-.2-.4-.1-.6l6-8c.1-.1.4-.1.5 0l6 8c.1.2.1.5-.1.6-.2.1-.5.1-.6-.1L9 6.1 3.1 13.4c-.1.1-.3.1-.6.1z"/>
+                            </svg>
+                            +5% vs mes anterior
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Ingresos del Mes</span>
+                            <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                <svg width="20" height="20" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="monthlyIncome">-</div>
+                        <div class="kpi-change positive">
+                            <svg width="16" height="16" fill="currentColor">
+                                <path d="M3.5 13.5a.5.5 0 01-.3-.1c-.2-.1-.2-.4-.1-.6l6-8c.1-.1.4-.1.5 0l6 8c.1.2.1.5-.1.6-.2.1-.5.1-.6-.1L9 6.1 3.1 13.4c-.1.1-.3.1-.6.1z"/>
+                            </svg>
+                            +12% vs mes anterior
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Pagos Pendientes</span>
+                            <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                <svg width="20" height="20" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="pendingPayments">-</div>
+                        <div class="kpi-change negative">
+                            <svg width="16" height="16" fill="currentColor">
+                                <path d="M3.5 2.5a.5.5 0 01.3.1c.2.1.2.4.1.6l-6 8c-.1.1-.4.1-.5 0l-6-8c-.1-.2-.1-.5.1-.6.2-.1.5-.1.6.1L9 9.9 14.9 2.6c.1-.1.3-.1.6-.1z"/>
+                            </svg>
+                            -3% vs mes anterior
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Facturas Emitidas</span>
+                            <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                <svg width="20" height="20" fill="currentColor">
+                                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="totalInvoices">-</div>
+                        <div class="kpi-change positive">
+                            <svg width="16" height="16" fill="currentColor">
+                                <path d="M3.5 13.5a.5.5 0 01-.3-.1c-.2-.1-.2-.4-.1-.6l6-8c.1-.1.4-.1.5 0l6 8c.1.2.1.5-.1.6-.2.1-.5.1-.6-.1L9 6.1 3.1 13.4c-.1.1-.3.1-.6.1z"/>
+                            </svg>
+                            +8% vs mes anterior
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts and Analytics -->
+                <div class="dashboard-grid">
+                    <div class="dashboard-card chart-container">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Ingresos vs Gastos (Últimos 6 meses)</h3>
+                            <div class="chart-filters">
+                                <button class="filter-btn active">6M</button>
+                                <button class="filter-btn">3M</button>
+                                <button class="filter-btn">1M</button>
+                            </div>
+                        </div>
+                        <div class="chart-placeholder">
+                            <div>
+                                <svg width="48" height="48" fill="currentColor" style="margin-bottom: 1rem;">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                                </svg>
+                                <p>Gráfico de ingresos y gastos</p>
+                                <small>Los datos se cargarán automáticamente</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3 class="chart-title">Actividad Reciente</h3>
+                        <div class="activity-list" id="recentActivity">
+                            <!-- Activities will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Summary -->
+                <div class="financial-grid">
+                    <div class="financial-card">
+                        <div class="financial-header">
+                            <h4>Balance del Mes</h4>
+                            <svg width="24" height="24" fill="currentColor">
+                                <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                            </svg>
+                        </div>
+                        <div class="financial-amount amount-positive" id="monthBalance">$0</div>
+                        <div class="financial-period">Enero 2025</div>
+                    </div>
+
+                    <div class="financial-card">
+                        <div class="financial-header">
+                            <h4>Cartera Vencida</h4>
+                            <svg width="24" height="24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                        </div>
+                        <div class="financial-amount amount-negative" id="overdueAmount">$0</div>
+                        <div class="financial-period">Más de 30 días</div>
+                    </div>
+
+                    <div class="financial-card">
+                        <div class="financial-header">
+                            <h4>Próximos Vencimientos</h4>
+                            <svg width="24" height="24" fill="currentColor">
+                                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                            </svg>
+                        </div>
+                        <div class="financial-amount" id="upcomingDue">$0</div>
+                        <div class="financial-period">Próximos 7 días</div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dashboard-card">
+                    <h3 class="chart-title">Acciones Rápidas</h3>
+                    <div class="quick-actions">
+                        <a href="#" class="quick-action" data-section="students">
+                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                                <svg width="20" height="20" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            </div>
+                            <div class="quick-action-content">
+                                <h4>Registrar Estudiante</h4>
+                                <p>Agregar nuevo estudiante al sistema</p>
+                            </div>
+                        </a>
+
+                        <a href="#" class="quick-action" data-section="payments">
+                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                <svg width="20" height="20" fill="currentColor">
+                                    <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                                </svg>
+                            </div>
+                            <div class="quick-action-content">
+                                <h4>Crear Evento de Pago</h4>
+                                <p>Nueva matrícula o mensualidad</p>
+                            </div>
+                        </a>
+
+                        <a href="#" class="quick-action" data-section="accounting">
+                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                <svg width="20" height="20" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                            </div>
+                            <div class="quick-action-content">
+                                <h4>Registrar Movimiento</h4>
+                                <p>Ingreso o gasto contable</p>
+                            </div>
+                        </a>
+
+                        <a href="#" class="quick-action" data-section="reports">
+                            <div class="quick-action-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                <svg width="20" height="20" fill="currentColor">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                                </svg>
+                            </div>
+                            <div class="quick-action-content">
+                                <h4>Generar Reporte</h4>
+                                <p>Estados financieros e informes</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other sections (hidden by default) -->
+            <div id="students-section" class="content-section" style="display: none;">
+                <div class="header">
+                    <h1 class="page-title">Gestión de Estudiantes</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-outline">
+                            <svg width="20" height="20" fill="currentColor">
+                                <path d="M3 16.5v2.25A.75.75 0 003.75 19h2.25a.75.75 0 00.53-.22l7.5-7.5a.75.75 0 000-1.06l-2.25-2.25a.75.75 0 00-1.06 0l-7.5 7.5a.75.75 0 00-.22.53z"/>
+                            </svg>
+                            Importar CSV
+                        </button>
+                        <button class="btn btn-primary">
+                            <svg width="20" height="20" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            Nuevo Estudiante
+                        </button>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <p>Funcionalidad de gestión de estudiantes en desarrollo...</p>
+                </div>
+            </div>
+
+            <div id="accounting-section" class="content-section" style="display: none;">
+                <div class="header">
+                    <h1 class="page-title">Contabilidad</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-outline">Ver Plan de Cuentas</button>
+                        <button class="btn btn-primary">Nuevo Movimiento</button>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <p>Módulo contable en desarrollo...</p>
+                </div>
+            </div>
+
+            <div id="payments-section" class="content-section" style="display: none;">
+                <div class="header">
+                    <h1 class="page-title">Gestión de Pagos</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-outline">Ver Eventos</button>
+                        <button class="btn btn-primary">Nuevo Evento de Pago</button>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <p>Sistema de pagos en desarrollo...</p>
+                </div>
+            </div>
+
+            <div id="invoices-section" class="content-section" style="display: none;">
+                <div class="header">
+                    <h1 class="page-title">Facturas</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-outline">Exportar</button>
+                        <button class="btn btn-primary">Nueva Factura</button>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <p>Gestión de facturas en desarrollo...</p>
+                </div>
+            </div>
+
+            <div id="reports-section" class="content-section" style="display: none;">
+                <div class="header">
+                    <h1 class="page-title">Reportes Financieros</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-outline">Configurar</button>
+                        <button class="btn btn-primary">Generar Reporte</button>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <p>Sistema de reportes en desarrollo...</p>
+                </div>
+            </div>
+
+            <div id="users-section" class="content-section" style="display: none;">
+                <div class="header">
+                    <h1 class="page-title">Gestión de Usuarios</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-outline">Permisos</button>
+                        <button class="btn btn-primary">Invitar Usuario</button>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <p>Gestión de usuarios en desarrollo...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Actualizar labels de tema
+        function updateThemeLabels() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const lightLabel = document.getElementById('light-label');
+            const darkLabel = document.getElementById('dark-label');
+            if (currentTheme === 'dark') {
+                lightLabel.classList.remove('active');
+                darkLabel.classList.add('active');
+            } else {
+                lightLabel.classList.add('active');
+                darkLabel.classList.remove('active');
+            }
+        }
+
+        // Toggle de tema
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeLabels();
+        }
+
+        // Cargar tema guardado
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeLabels();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTheme();
+            document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+        });
+        let currentUser = null;
+        let dashboardData = {};
+
+        // Verificar autenticación al cargar
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuthentication();
+            await loadUserInfo();
+            await loadDashboardData();
+            setupNavigation();
+        });
+
+        // Verificar autenticación
+        async function checkAuthentication() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/select-institution';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Token inválido');
+                }
+
+                const data = await response.json();
+                currentUser = data.user;
+
+                // Verificar que es rector
+                if (currentUser.role !== 'RECTOR') {
+                    alert('Acceso denegado. Este dashboard es solo para rectores.');
+                    logout();
+                    return;
+                }
+
+            } catch (error) {
+                console.error('Error de autenticación:', error);
+                logout();
+            }
+        }
+
+        // Cargar información del usuario
+        async function loadUserInfo() {
+            if (!currentUser) return;
+
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const institutionName = document.getElementById('institutionName');
+
+            // Avatar con iniciales
+            const initials = (currentUser.firstName.charAt(0) + currentUser.lastName.charAt(0)).toUpperCase();
+            userAvatar.textContent = initials;
+
+            // Nombre completo
+            userName.textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+
+            // Institución
+            if (currentUser.institution) {
+                institutionName.textContent = currentUser.institution.name;
+            }
+        }
+
+        // Cargar datos del dashboard
+        async function loadDashboardData() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                // Simular carga de datos (implementar endpoints reales)
+                await loadKPIs();
+                await loadRecentActivity();
+                await loadFinancialSummary();
+            } catch (error) {
+                console.error('Error cargando datos del dashboard:', error);
+            }
+        }
+
+        // Cargar KPIs principales
+        async function loadKPIs() {
+            // Simular datos (reemplazar con llamadas reales a la API)
+            document.getElementById('totalStudents').textContent = '342';
+            document.getElementById('monthlyIncome').textContent = '$45,320,000';
+            document.getElementById('pendingPayments').textContent = '23';
+            document.getElementById('totalInvoices').textContent = '156';
+        }
+
+        // Cargar actividad reciente
+        async function loadRecentActivity() {
+            const activities = [
+                {
+                    type: 'payment',
+                    title: 'Pago recibido',
+                    description: 'María García - Mensualidad Enero',
+                    time: 'Hace 2 horas',
+                    icon: '💰',
+                    color: '#10b981'
+                },
+                {
+                    type: 'student',
+                    title: 'Nuevo estudiante',
+                    description: 'Carlos Rodríguez registrado en 5° grado',
+                    time: 'Hace 4 horas',
+                    icon: '👨‍🎓',
+                    color: '#3b82f6'
+                },
+                {
+                    type: 'invoice',
+                    title: 'Factura generada',
+                    description: 'Factura #1547 para evento de grado',
+                    time: 'Hace 6 horas',
+                    icon: '📄',
+                    color: '#8b5cf6'
+                },
+                {
+                    type: 'expense',
+                    title: 'Gasto registrado',
+                    description: 'Pago servicios públicos - $350,000',
+                    time: 'Ayer',
+                    icon: '💸',
+                    color: '#ef4444'
+                }
+            ];
+
+            const container = document.getElementById('recentActivity');
+            container.innerHTML = activities.map(activity => `
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: ${activity.color}20; color: ${activity.color};">
+                        ${activity.icon}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">${activity.title}</div>
+                        <div class="activity-description">${activity.description}</div>
+                        <div class="activity-time">${activity.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Cargar resumen financiero
+        async function loadFinancialSummary() {
+            document.getElementById('monthBalance').textContent = '$12,450,000';
+            document.getElementById('overdueAmount').textContent = '$2,300,000';
+            document.getElementById('upcomingDue').textContent = '$8,750,000';
+        }
+
+        // Configurar navegación
+        function setupNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.content-section');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    const targetSection = link.dataset.section;
+                    
+                    // Remover clase active de todos los links
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    
+                    // Agregar clase active al link clickeado
+                    link.classList.add('active');
+                    
+                    // Ocultar todas las secciones
+                    sections.forEach(section => {
+                        section.style.display = 'none';
+                    });
+                    
+                    // Mostrar sección objetivo
+                    const targetElement = document.getElementById(`${targetSection}-section`);
+                    if (targetElement) {
+                        targetElement.style.display = 'block';
+                    }
+                });
+            });
+
+            // También configurar quick actions
+            const quickActions = document.querySelectorAll('.quick-action');
+            quickActions.forEach(action => {
+                action.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    const targetSection = action.dataset.section;
+                    if (targetSection) {
+                        // Simular click en nav correspondiente
+                        const navLink = document.querySelector(`[data-section="${targetSection}"]`);
+                        if (navLink) {
+                            navLink.click();
+                        }
+                    }
+                });
+            });
+        }
+
+        // Actualizar dashboard
+        async function refreshDashboard() {
+            const button = event.target;
+            const originalContent = button.innerHTML;
+            
+            button.innerHTML = '<div class="loading"></div> Actualizando...';
+            button.disabled = true;
+            
+            try {
+                await loadDashboardData();
+                setTimeout(() => {
+                    button.innerHTML = originalContent;
+                    button.disabled = false;
+                }, 1000);
+            } catch (error) {
+                console.error('Error actualizando dashboard:', error);
+                button.innerHTML = originalContent;
+                button.disabled = false;
+            }
+        }
+
+        // Cerrar sesión
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('selectedInstitution');
+            window.location.href = '/select-institution';
+        }
+
+        // Formatear números como moneda colombiana
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        // Utilidad para mostrar notificaciones
+        function showNotification(message, type = 'info') {
+            // Implementar sistema de notificaciones
+            console.log(`${type.toUpperCase()}: ${message}`);
+        }
+    </script>
+</body>
+</html>

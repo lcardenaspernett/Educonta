@@ -62,7 +62,8 @@ const authenticate = async (req, res, next) => {
 
 const loginValidation = [
   body('email').isEmail().normalizeEmail().withMessage('Email inválido'),
-  body('password').notEmpty().withMessage('Contraseña requerida')
+  body('password').notEmpty().withMessage('Contraseña requerida'),
+  body('institutionId').optional().isString().withMessage('ID de institución inválido')
 ];
 
 router.post('/login', loginValidation, async (req, res) => {
@@ -75,7 +76,7 @@ router.post('/login', loginValidation, async (req, res) => {
       });
     }
 
-    const { email, password } = req.body;
+    const { email, password, institutionId } = req.body;
 
     const user = await req.prisma.user.findUnique({
       where: { email: email.toLowerCase() },
@@ -94,6 +95,30 @@ router.post('/login', loginValidation, async (req, res) => {
         success: false,
         error: 'Usuario inactivo'
       });
+    }
+
+    // Validar que el usuario pertenezca a la institución seleccionada
+    if (institutionId && user.role !== 'SUPER_ADMIN') {
+      if (!user.institutionId || user.institutionId !== institutionId) {
+        return res.status(403).json({
+          success: false,
+          error: 'No tienes permisos para acceder a esta institución'
+        });
+      }
+    }
+
+    // Para SUPER_ADMIN, verificar que la institución existe si se proporciona
+    if (institutionId && user.role === 'SUPER_ADMIN') {
+      const institution = await req.prisma.institution.findUnique({
+        where: { id: institutionId, isActive: true }
+      });
+      
+      if (!institution) {
+        return res.status(404).json({
+          success: false,
+          error: 'Institución no encontrada o inactiva'
+        });
+      }
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);

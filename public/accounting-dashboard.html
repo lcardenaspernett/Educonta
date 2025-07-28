@@ -1,0 +1,1878 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educonta - Dashboard Contable</title>
+    <link rel="stylesheet" href="css/accounting-dashboard.css">
+    <link rel="stylesheet" href="css/approval-status.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Z-Index Hierarchy */
+        :root {
+            --z-modal: 10000;
+            --z-modal-backdrop: 9999;
+            --z-notification: 9998;
+            --z-dropdown: 1000;
+            --z-header: 100;
+            --z-sidebar: 50;
+            --z-content: 1;
+        }
+        
+        /* Sidebar Navigation Improvements */
+        .nav-group {
+            position: relative;
+        }
+        
+        .nav-parent {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+        
+        .nav-arrow {
+            transition: transform 0.2s ease;
+            opacity: 0.6;
+        }
+        
+        .nav-group.expanded .nav-arrow {
+            transform: rotate(90deg);
+        }
+        
+        .nav-submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0 0 8px 8px;
+            margin-top: 2px;
+        }
+        
+        .nav-group.expanded .nav-submenu {
+            max-height: 200px;
+        }
+        
+        .nav-subitem {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px 12px 48px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-subitem:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            border-left-color: var(--primary);
+        }
+        
+        .nav-subitem.active {
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+        
+        .nav-subitem svg {
+            opacity: 0.7;
+        }
+        
+        /* Notification fixes */
+        .notification-dropdown {
+            z-index: var(--z-notification) !important;
+        }
+        
+        /* Header button fixes */
+        .header-actions {
+            z-index: var(--z-header);
+            position: relative;
+        }
+        
+        /* Toast notifications */
+        .toast-container {
+            z-index: var(--z-notification) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- MAIN CONTAINER -->
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg width="32" height="32" fill="currentColor" class="logo-icon">
+                        <path
+                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                    <span class="logo-text">Educonta</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="accounting-dashboard.html" class="nav-item active">
+                    <svg width="20" height="20" fill="currentColor">
+                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="movements-management.html" class="nav-item">
+                    <svg width="20" height="20" fill="currentColor">
+                        <path d="M7 4V2c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2v2h4c.6 0 1 .4 1 1s-.4 1-1 1h-1v16c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6H1c-.6 0-1-.4-1-1s.4-1 1-1h6z" />
+                    </svg>
+                    <span>Movimientos</span>
+                </a>
+                <div class="nav-group">
+                    <a href="invoices-management.html" class="nav-item nav-parent">
+                        <svg width="20" height="20" fill="currentColor">
+                            <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z" />
+                        </svg>
+                        <span>Facturas</span>
+                        <svg width="12" height="12" fill="currentColor" class="nav-arrow">
+                            <path d="M8.5 3L13 7.5 8.5 12 7 10.5 10 7.5 7 4.5 8.5 3z"/>
+                        </svg>
+                    </a>
+                    <div class="nav-submenu">
+                        <a href="pending-invoices.html" class="nav-subitem">
+                            <svg width="16" height="16" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <span>Facturas Pendientes</span>
+                        </a>
+                    </div>
+                </div>
+                <a href="students-management.html" class="nav-item">
+                    <svg width="20" height="20" fill="currentColor">
+                        <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-1c0-1.1.9-2 2-2h2l1.5-4.5L7.91 8.5C7.66 8.04 7.66 7.96 7.91 7.5L9.5 5H8c-.55 0-1-.45-1-1s.45-1 1-1h8c.55 0 1 .45 1 1s-.45 1-1 1h-1.5L12.09 7.5c.25.46.25.54 0 1L10.5 10.5 12 15h2c1.1 0 2 .9 2 2v1H4z" />
+                    </svg>
+                    <span>Estudiantes</span>
+                </a>
+                <a href="events-management.html" class="nav-item">
+                    <svg width="20" height="20" fill="currentColor">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
+                    </svg>
+                    <span>Eventos</span>
+                </a>
+                <a href="clients-management.html" class="nav-item">
+                    <svg width="20" height="20" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
+                    <span>Clientes</span>
+                </a>
+                <a href="reports.html" class="nav-item">
+                    <svg width="20" height="20" fill="currentColor">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
+                    </svg>
+                    <span>Reportes</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <svg width="20" height="20" fill="currentColor">
+                        <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z" />
+                    </svg>
+                    <span>Configuración</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <!-- THEME TOGGLE -->
+                <div class="theme-toggle-container">
+                    <span class="theme-label" id="light-label">CLARO</span>
+                    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Cambiar tema"></button>
+                    <span class="theme-label" id="dark-label">OSCURO</span>
+                </div>
+                
+                <div class="user-section">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <svg width="20" height="20" fill="currentColor">
+                                <path
+                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                            </svg>
+                        </div>
+                        <div class="user-details">
+                            <span class="user-name">Contador</span>
+                            <span class="user-role">Contabilidad</span>
+                        </div>
+                    </div>
+                <button class="logout-btn" onclick="logout()">
+                    <svg width="18" height="18" fill="currentColor">
+                        <path
+                            d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
+                    </svg>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- HEADER - SIN BOTONES MORADOS -->
+            <header class="main-header">
+                <div class="header-left">
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle">Gestión de caja menor - Institución Educativa</p>
+                </div>
+                <div class="header-right">
+                    <div class="header-actions">
+                        <!-- SOLO el botón de Nuevo Movimiento -->
+                        <button class="btn btn-primary" onclick="showMovementModal()">
+                            <svg width="16" height="16" fill="currentColor">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                            </svg>
+                            Nuevo Movimiento
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- CONTENT SECTIONS -->
+            <div class="content-wrapper">
+                <!-- DASHBOARD SECTION -->
+                <section id="dashboard-section" class="content-section active">
+                    <!-- STATS CARDS -->
+                    <div class="stats-grid">
+                        <div class="stat-card income">
+                            <div class="stat-icon">
+                                <svg width="24" height="24" fill="currentColor">
+                                    <path
+                                        d="M7 4V2c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2v2h4c.6 0 1 .4 1 1s-.4 1-1 1h-1v16c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6H1c-.6 0-1-.4-1-1s.4-1 1-1h6z" />
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <h3 class="stat-title">Ingresos del Mes</h3>
+                                <p class="stat-value" id="monthlyIncome">$0</p>
+                                <span class="stat-change positive">+12.5%</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card expense">
+                            <div class="stat-icon">
+                                <svg width="24" height="24" fill="currentColor">
+                                    <path
+                                        d="M19 7h-3V6c0-1.1-.9-2-2-2H10c-1.1 0-2 .9-2 2v1H5c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM10 6h4v1h-4V6zm9 15H5V9h14v12z" />
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <h3 class="stat-title">Egresos del Mes</h3>
+                                <p class="stat-value" id="monthlyExpenses">$0</p>
+                                <span class="stat-change negative">-8.2%</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card balance">
+                            <div class="stat-icon">
+                                <svg width="24" height="24" fill="currentColor">
+                                    <path
+                                        d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <h3 class="stat-title">Balance Neto</h3>
+                                <p class="stat-value" id="netBalance">$0</p>
+                                <span class="stat-change positive">+4.3%</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card transactions">
+                            <div class="stat-icon">
+                                <svg width="24" height="24" fill="currentColor">
+                                    <path
+                                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <h3 class="stat-title">Transacciones Pendientes</h3>
+                                <p class="stat-value" id="totalTransactions">0</p>
+                                <span class="stat-change neutral" title="Transacciones de ingreso esperando aprobación contable">Esperando aprobación</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RECENT ACTIVITY -->
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3 class="card-title">Actividad Reciente</h3>
+                                <button class="btn btn-ghost btn-sm" onclick="showSection('movements')">Ver Todo</button>
+                            </div>
+                            <div class="card-content">
+                                <div class="activity-list" id="recentActivity">
+                                    <div class="activity-item">
+                                        <div class="activity-icon income">💰</div>
+                                        <div class="activity-content">
+                                            <p class="activity-title">Pago de matrícula</p>
+                                            <p class="activity-meta">Juan Pérez • Hace 2 horas</p>
+                                        </div>
+                                        <div class="activity-amount income">+$500.000</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3 class="card-title">Acciones Rápidas</h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="quick-actions">
+                                    <button class="quick-action-btn" onclick="showMovementModal('income')">
+                                        <svg width="20" height="20" fill="currentColor">
+                                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                                        </svg>
+                                        <span>Registrar Ingreso</span>
+                                    </button>
+                                    <button class="quick-action-btn" onclick="showMovementModal('expense')">
+                                        <svg width="20" height="20" fill="currentColor">
+                                            <path d="M19 13H5v-2h14v2z" />
+                                        </svg>
+                                        <span>Registrar Egreso</span>
+                                    </button>
+                                    <button class="quick-action-btn" onclick="showSection('invoices')">
+                                        <svg width="20" height="20" fill="currentColor">
+                                            <path
+                                                d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6z" />
+                                        </svg>
+                                        <span>Generar Factura</span>
+                                    </button>
+                                    <button class="quick-action-btn" onclick="showSection('reports')">
+                                        <svg width="20" height="20" fill="currentColor">
+                                            <path
+                                                d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" />
+                                        </svg>
+                                        <span>Ver Reportes</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- MOVEMENTS SECTION -->
+                <section id="movements-section" class="content-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2>Movimientos Contables</h2>
+                            <p>Gestión de ingresos y egresos</p>
+                        </div>
+                        <div class="section-actions">
+                            <button class="btn btn-outline" onclick="refreshMovements()">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Actualizar
+                            </button>
+                            <button class="btn btn-primary" onclick="showMovementModal()">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                                </svg>
+                                Nuevo Movimiento
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- FILTERS -->
+                    <div class="filters-bar">
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label class="filter-label">Tipo:</label>
+                                <select class="filter-select" id="typeFilter">
+                                    <option value="">Todos</option>
+                                    <option value="income">Ingresos</option>
+                                    <option value="expense">Egresos</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Fecha:</label>
+                                <input type="date" class="filter-input" id="dateFilter">
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Buscar:</label>
+                                <input type="text" class="filter-input" id="searchFilter"
+                                    placeholder="Concepto, referencia...">
+                            </div>
+                        </div>
+                        
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label class="filter-label" data-tooltip="Buscar movimientos con valor mayor o igual a este monto">Valor mínimo:</label>
+                                <input type="number" class="filter-input" id="minAmountFilter" 
+                                    placeholder="$0" min="0" step="1000">
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label" data-tooltip="Buscar movimientos con valor menor o igual a este monto">Valor máximo:</label>
+                                <input type="number" class="filter-input" id="maxAmountFilter" 
+                                    placeholder="Sin límite" min="0" step="1000">
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label" data-tooltip="Buscar movimientos con este valor exacto (desactiva min/max)">Valor exacto:</label>
+                                <input type="number" class="filter-input" id="exactAmountFilter" 
+                                    placeholder="Buscar valor específico" min="0" step="1000">
+                            </div>
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button class="btn btn-ghost" onclick="clearFilters()">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                </svg>
+                                Limpiar Filtros
+                            </button>
+                            <button class="btn btn-outline" onclick="applyAdvancedFilters()">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                                </svg>
+                                Buscar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- MOVEMENTS LIST -->
+                    <div class="movements-container">
+                        <div class="movements-list" id="movementsList">
+                            <!-- Los movimientos se cargarán aquí dinámicamente -->
+                            <div class="loading-state" id="movementsLoading">
+                                <div class="loading-spinner"></div>
+                                <p>Cargando movimientos...</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- INVOICES SECTION -->
+                <section id="invoices-section" class="content-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2>Gestión de Facturas</h2>
+                            <p>Generación y seguimiento de facturas</p>
+                        </div>
+                        <div class="section-actions">
+                            <button class="btn btn-outline" onclick="refreshInvoices()">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Actualizar
+                            </button>
+                            <button class="btn btn-invoice" onclick="showInvoiceModal()">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path
+                                        d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6z" />
+                                </svg>
+                                Nueva Factura
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="invoices-container">
+                        <div class="invoices-list" id="invoicesList">
+                            <!-- Las facturas se cargarán aquí -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- EVENTS SECTION -->
+                <section id="events-section" class="content-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2>Gestión de Eventos</h2>
+                            <p>Rifas, bingos, arriendos y otros eventos</p>
+                        </div>
+                        <div class="section-actions">
+                            <button class="btn btn-primary" onclick="showEventModal()">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                                </svg>
+                                Nuevo Evento
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="events-container">
+                        <div class="events-grid" id="eventsList">
+                            <!-- Los eventos se cargarán aquí -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CLIENTS SECTION -->
+                <section id="clients-section" class="content-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2>👥 Gestión de Clientes</h2>
+                            <p>Administra estudiantes, proveedores y otros clientes</p>
+                        </div>
+                        <div class="section-actions">
+                            <button class="btn btn-outline" onclick="clientManager.downloadStudentTemplate()">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6z"/>
+                                </svg>
+                                Plantilla Estudiantes
+                            </button>
+                            <button class="btn btn-secondary" onclick="clientManager.showBulkUploadModal()">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6z"/>
+                                </svg>
+                                Cargar Masivo
+                            </button>
+                            <button class="btn btn-primary" onclick="clientManager.showNewClientForm()">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                </svg>
+                                Nuevo Cliente
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="clients-container">
+                        <div class="clients-stats">
+                            <div class="stat-item">
+                                <span class="stat-number" id="totalClients">0</span>
+                                <span class="stat-label">Total Clientes</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="totalStudents">0</span>
+                                <span class="stat-label">Estudiantes</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="totalSuppliers">0</span>
+                                <span class="stat-label">Proveedores</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="pendingPayments">0</span>
+                                <span class="stat-label">Con Deudas</span>
+                            </div>
+                        </div>
+
+                        <div class="clients-filters">
+                            <div class="filter-group">
+                                <label>Tipo:</label>
+                                <select id="clientTypeFilter" onchange="clientManager.filterClients()">
+                                    <option value="">Todos</option>
+                                    <option value="STUDENT">🎓 Estudiantes</option>
+                                    <option value="SUPPLIER">🏢 Proveedores</option>
+                                    <option value="OTHER">👤 Otros</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Grado:</label>
+                                <select id="gradeFilter" onchange="clientManager.filterClients()">
+                                    <option value="">Todos los grados</option>
+                                    <option value="11°">11° (Derecho a Grado)</option>
+                                    <option value="10°">10°</option>
+                                    <option value="9°">9°</option>
+                                    <option value="8°">8°</option>
+                                    <option value="7°">7°</option>
+                                    <option value="6°">6°</option>
+                                    <option value="5°">5°</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Estado:</label>
+                                <select id="statusFilter" onchange="clientManager.filterClients()">
+                                    <option value="">Todos</option>
+                                    <option value="active">Activos</option>
+                                    <option value="with-debt">Con Deudas</option>
+                                    <option value="paid">Al Día</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Buscar:</label>
+                                <input type="text" id="clientSearchFilter" placeholder="Nombre, documento..." 
+                                       onkeyup="clientManager.filterClients()">
+                            </div>
+                        </div>
+
+                        <div class="clients-grid" id="clientsMainGrid">
+                            <!-- Los clientes se cargarán aquí -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STUDENTS SECTION -->
+                <section id="students-section" class="content-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2>Gestión de Estudiantes</h2>
+                            <p>Carga masiva y organización por cursos</p>
+                        </div>
+                        <div class="section-actions">
+                            <button class="btn btn-outline" onclick="downloadStudentTemplate()">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path
+                                        d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6z" />
+                                </svg>
+                                Descargar Plantilla
+                            </button>
+                            <button class="btn btn-primary" onclick="showStudentUploadModal()">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path
+                                        d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6z" />
+                                </svg>
+                                Cargar CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="students-container">
+                        <div class="students-stats">
+                            <div class="stat-item">
+                                <span class="stat-number" id="totalStudents">0</span>
+                                <span class="stat-label">Total Estudiantes</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="totalCourses">0</span>
+                                <span class="stat-label">Cursos</span>
+                            </div>
+                        </div>
+
+                        <div class="students-list" id="studentsList">
+                            <!-- Los estudiantes se cargarán aquí -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- REPORTS SECTION -->
+                <section id="reports-section" class="content-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2>Reportes y Análisis</h2>
+                            <p>Informes mensuales y análisis financiero</p>
+                        </div>
+                    </div>
+
+                    <div class="reports-container">
+                        <div class="report-filters">
+                            <div class="filter-group">
+                                <label>Período:</label>
+                                <select id="reportPeriod">
+                                    <option value="month">Este mes</option>
+                                    <option value="quarter">Este trimestre</option>
+                                    <option value="year">Este año</option>
+                                    <option value="custom">Personalizado</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Tipo:</label>
+                                <select id="reportType">
+                                    <option value="summary">Resumen general</option>
+                                    <option value="detailed">Detallado</option>
+                                    <option value="by-category">Por categoría</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" onclick="generateReport()">Generar Reporte</button>
+                        </div>
+
+                        <div class="reports-grid">
+                            <div class="report-card">
+                                <h3>Reporte Mensual</h3>
+                                <p>Resumen de ingresos y egresos del mes actual</p>
+                                <button class="btn btn-outline" onclick="downloadReport('monthly')">
+                                    <svg width="16" height="16" fill="currentColor">
+                                        <path
+                                            d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6z" />
+                                    </svg>
+                                    Descargar PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- DEBTS SECTION -->
+                <section id="debts-section" class="content-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2>Gestión de Deudas y Abonos</h2>
+                            <p>Control de pagos y seguimiento de estudiantes</p>
+                        </div>
+                        <div class="section-actions">
+                            <button class="btn btn-outline" onclick="debtManagement.refreshDebts()">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                Actualizar
+                            </button>
+                            <button class="btn btn-primary" onclick="debtManagement.showNewDebtForm()">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                </svg>
+                                Nueva Deuda
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="debts-page-container" id="debtsPageContainer">
+                        <!-- El contenido se cargará aquí -->
+                    </div>
+                </section>
+
+                <!-- SETTINGS SECTION -->
+                <section id="settings-section" class="content-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2>Configuración</h2>
+                            <p>Configuración de la institución y sistema</p>
+                        </div>
+                    </div>
+
+                    <div class="settings-container">
+                        <div class="settings-tabs">
+                            <button class="tab-btn active" data-tab="institution">Institución</button>
+                            <button class="tab-btn" data-tab="accounts">Cuentas</button>
+                            <button class="tab-btn" data-tab="categories">Categorías</button>
+                            <button class="tab-btn" data-tab="users">Usuarios</button>
+                        </div>
+
+                        <div class="settings-content">
+                            <div id="institution-tab" class="tab-content active">
+                                <form class="settings-form">
+                                    <div class="form-group">
+                                        <label>Nombre de la Institución</label>
+                                        <input type="text" id="institutionName" placeholder="Nombre completo">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>NIT</label>
+                                        <input type="text" id="institutionNIT" placeholder="000000000-0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Dirección</label>
+                                        <textarea id="institutionAddress" placeholder="Dirección completa"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Movement Modal -->
+    <div id="movementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Nuevo Movimiento</h3>
+                <button class="modal-close" onclick="closeModal('movementModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="movementForm" class="form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tipo de Movimiento</label>
+                            <select id="movementType" required>
+                                <option value="">Seleccionar tipo</option>
+                                <option value="income">Ingreso</option>
+                                <option value="expense">Egreso</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha</label>
+                            <input type="date" id="movementDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Concepto</label>
+                        <input type="text" id="movementConcept" placeholder="Descripción del movimiento" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Valor</label>
+                            <input type="number" id="movementAmount" placeholder="0" min="0" step="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Categoría</label>
+                            <select id="movementCategory">
+                                <option value="">Seleccionar categoría</option>
+                                <option value="matriculas">Matrículas</option>
+                                <option value="eventos">Eventos</option>
+                                <option value="servicios">Servicios</option>
+                                <option value="materiales">Materiales</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Observaciones</label>
+                        <textarea id="movementNotes" placeholder="Observaciones adicionales (opcional)"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="generateInvoice" checked>
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">
+                                <strong>Generar factura automáticamente</strong>
+                                <small>Se creará un PDF de factura que se descargará automáticamente</small>
+                            </span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('movementModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveMovement()">Guardar Movimiento</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/accounting/demo-data.js"></script>
+    <script src="js/accounting/state.js"></script>
+    <script src="js/accounting/invoice-manager.js"></script>
+    <script src="js/accounting/pdf-generator.js"></script>
+    <script src="js/accounting/approval-system.js"></script>
+    <script src="js/accounting/pending-invoices.js"></script>
+    <script src="js/accounting/approval-status.js"></script>
+    <script src="js/accounting/client-manager.js"></script>
+    <script src="js/accounting/notification-system.js"></script>
+    <script src="js/accounting/debt-management.js"></script>
+    <script src="js/accounting/invoice-viewer.js"></script>
+    <script src="force-update-dashboard.js"></script>
+
+    <script>
+        // THEME MANAGEMENT
+        function toggleTheme() {
+            console.log('🔄 Toggle theme clicked');
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            console.log(`🎨 Cambiando tema de ${currentTheme} a ${newTheme}`);
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+
+            console.log(`✅ Tema cambiado exitosamente a: ${newTheme}`);
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            console.log(`🎨 Inicializando tema: ${savedTheme}`);
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // Verificar que el toggle esté presente
+            setTimeout(() => {
+                const toggle = document.getElementById('themeToggle');
+                if (toggle) {
+                    console.log('✅ Toggle de tema encontrado y listo');
+                    
+                    // Test de funcionalidad
+                    console.log('🧪 Probando funcionalidad del toggle...');
+                    const currentTheme = document.documentElement.getAttribute('data-theme');
+                    console.log(`📋 Tema actual: ${currentTheme}`);
+                    
+                    // Verificar que las etiquetas cambien de color
+                    const lightLabel = document.getElementById('light-label');
+                    const darkLabel = document.getElementById('dark-label');
+                    if (lightLabel && darkLabel) {
+                        console.log('✅ Etiquetas de tema encontradas');
+                    }
+                } else {
+                    console.error('❌ Toggle de tema no encontrado');
+                }
+            }, 100);
+        }
+
+        // NAVIGATION MANAGEMENT
+        class NavigationManager {
+            constructor() {
+                this.currentSection = 'dashboard';
+                this.init();
+            }
+
+            init() {
+                this.setupNavigation();
+                this.showSection('dashboard');
+            }
+
+            setupNavigation() {
+                document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const section = item.getAttribute('data-section');
+                        this.showSection(section);
+                    });
+                });
+            }
+
+            showSection(sectionName) {
+                // Hide all sections
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+
+                // Show target section
+                const targetSection = document.getElementById(`${sectionName}-section`);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+
+                // Update navigation
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                const activeNav = document.querySelector(`[data-section="${sectionName}"]`);
+                if (activeNav) {
+                    activeNav.classList.add('active');
+                }
+
+                // Update page title
+                this.updatePageTitle(sectionName);
+                this.currentSection = sectionName;
+
+                // Cargar datos específicos de la sección
+                this.loadSectionData(sectionName);
+            }
+
+            loadSectionData(sectionName) {
+                switch (sectionName) {
+                    case 'movements':
+                        if (window.movementsManager) {
+                            window.movementsManager.loadMovements();
+                        }
+                        break;
+                    case 'dashboard':
+                        if (window.dashboardManager) {
+                            window.dashboardManager.updateStats();
+                        }
+                        break;
+                }
+            }
+
+            updatePageTitle(section) {
+                const titles = {
+                    dashboard: 'Dashboard',
+                    movements: 'Movimientos Contables',
+                    invoices: 'Gestión de Facturas',
+                    events: 'Gestión de Eventos',
+                    students: 'Gestión de Estudiantes',
+                    reports: 'Reportes y Análisis',
+                    settings: 'Configuración'
+                };
+
+                const titleElement = document.querySelector('.page-title');
+                if (titleElement) {
+                    titleElement.textContent = titles[section] || 'Dashboard';
+                }
+            }
+        }
+
+        // NOTIFICATION SYSTEM
+        class NotificationManager {
+            constructor() {
+                this.container = document.getElementById('notificationContainer');
+            }
+
+            show(message, type = 'info', duration = 5000) {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+
+                const icons = {
+                    success: '✓',
+                    error: '✕',
+                    warning: '⚠',
+                    info: 'ℹ'
+                };
+
+                notification.innerHTML = `
+                <div class="notification-icon">${icons[type] || icons.info}</div>
+                <div class="notification-content">
+                    <p class="notification-message">${message}</p>
+                </div>
+                <button class="notification-close" onclick="this.parentElement.remove()">&times;</button>
+            `;
+
+                this.container.appendChild(notification);
+
+                // Auto remove
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, duration);
+
+                // Animate in
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 100);
+            }
+        }
+
+        // MODAL MANAGEMENT
+        class ModalManager {
+            static show(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.add('active');
+                    document.body.classList.add('modal-open');
+                }
+            }
+
+            static close(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('active');
+                    document.body.classList.remove('modal-open');
+                }
+            }
+
+            static closeAll() {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+                document.body.classList.remove('modal-open');
+            }
+        }
+
+        // MOVEMENTS MANAGEMENT
+        class MovementsManager {
+            constructor() {
+                this.movements = [];
+                this.init();
+            }
+
+            init() {
+                this.loadMovements();
+                this.setupFilters();
+            }
+
+            async loadMovements() {
+                const container = document.getElementById('movementsList');
+                const loading = document.getElementById('movementsLoading');
+
+                if (loading) loading.style.display = 'flex';
+
+                try {
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    if (window.DemoData && window.DemoData.transactions) {
+                        this.movements = [...window.DemoData.transactions]; // Crear copia
+                        this.renderMovements();
+                    } else {
+                        // Crear datos de prueba si no existen
+                        this.movements = this.createTestMovements();
+                        this.renderMovements();
+                    }
+                } catch (error) {
+                    console.error('Error loading movements:', error);
+                    notifications.show('Error al cargar movimientos', 'error');
+                } finally {
+                    if (loading) loading.style.display = 'none';
+                }
+            }
+
+            createTestMovements() {
+                return [
+                    {
+                        id: '1',
+                        date: new Date().toISOString(),
+                        reference: 'ING-001',
+                        description: 'Pago de matrícula - Juan Pérez',
+                        amount: 500000,
+                        type: 'INCOME'
+                    },
+                    {
+                        id: '2',
+                        date: new Date(Date.now() - 86400000).toISOString(),
+                        reference: 'GAS-001',
+                        description: 'Pago de servicios públicos',
+                        amount: 150000,
+                        type: 'EXPENSE'
+                    },
+                    {
+                        id: '3',
+                        date: new Date(Date.now() - 172800000).toISOString(),
+                        reference: 'ING-002',
+                        description: 'Pago de mensualidad - María García',
+                        amount: 300000,
+                        type: 'INCOME'
+                    },
+                    {
+                        id: '4',
+                        date: new Date(Date.now() - 259200000).toISOString(),
+                        reference: 'GAS-002',
+                        description: 'Compra de materiales de oficina',
+                        amount: 80000,
+                        type: 'EXPENSE'
+                    },
+                    {
+                        id: '5',
+                        date: new Date(Date.now() - 345600000).toISOString(),
+                        reference: 'ING-003',
+                        description: 'Pago de evento especial - Carlos López',
+                        amount: 120000,
+                        type: 'INCOME'
+                    }
+                ];
+            }
+
+            renderMovements(movements = this.movements) {
+                const container = document.getElementById('movementsList');
+                if (!container) return;
+
+                if (!movements || movements.length === 0) {
+                    container.innerHTML = `
+                    <div class="empty-state">
+                        <svg width="64" height="64" fill="currentColor" class="empty-icon">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+                        </svg>
+                        <h3>No hay movimientos</h3>
+                        <p>Comienza registrando tu primer ingreso o egreso</p>
+                        <button class="btn btn-primary" onclick="showMovementModal()">Nuevo Movimiento</button>
+                    </div>
+                `;
+                    return;
+                }
+
+                const html = movements.map(movement => {
+                    const isIncome = movement.type === 'INCOME';
+                    const typeClass = isIncome ? 'income' : 'expense';
+                    const icon = isIncome ? '💰' : '💸';
+                    const sign = isIncome ? '+' : '-';
+
+                    // Verificar si tiene factura asociada
+                    const hasInvoice = this.checkIfMovementHasInvoice(movement.id);
+                    const hasInvoiceClass = hasInvoice ? 'has-invoice' : '';
+
+                    const formattedAmount = new Intl.NumberFormat('es-CO', {
+                        style: 'currency',
+                        currency: 'COP',
+                        minimumFractionDigits: 0
+                    }).format(movement.amount);
+
+                    const formattedDate = new Date(movement.date).toLocaleDateString('es-CO', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+
+                    return `
+                    <div class="movement-item ${typeClass} ${hasInvoiceClass}">
+                        <div class="movement-icon" style="position: relative;">${icon}</div>
+                        <div class="movement-content">
+                            <h4 class="movement-title">${movement.description || 'Sin descripción'}</h4>
+                            <p class="movement-meta">
+                                <span class="movement-ref">Ref: ${movement.reference || movement.id}</span>
+                                <span class="movement-date">${formattedDate}</span>
+                                ${hasInvoice ? '<span class="invoice-indicator">📄 Con factura</span>' : ''}
+                            </p>
+                        </div>
+                        <div class="movement-amount ${typeClass}">
+                            ${sign}${formattedAmount}
+                        </div>
+                        <div class="movement-actions">
+                            <button class="btn btn-ghost btn-sm" onclick="editMovement('${movement.id}')">
+                                <svg width="16" height="16" fill="currentColor">
+                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                </svg>
+                            </button>
+                            ${hasInvoice ? 
+                                `<button class="btn btn-invoice btn-sm" onclick="viewInvoice('${movement.id}')">
+                                    <svg width="16" height="16" fill="currentColor">
+                                        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6z"/>
+                                    </svg>
+                                    Ver Factura
+                                </button>` :
+                                `<button class="btn btn-outline btn-sm" onclick="generateInvoiceForMovement('${movement.id}')">
+                                    <svg width="16" height="16" fill="currentColor">
+                                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                    </svg>
+                                    Generar Factura
+                                </button>`
+                            }
+                        </div>
+                    </div>
+                `;
+                }).join('');
+
+                container.innerHTML = html;
+            }
+
+            setupFilters() {
+                const filters = [
+                    'typeFilter',
+                    'dateFilter', 
+                    'searchFilter',
+                    'minAmountFilter',
+                    'maxAmountFilter',
+                    'exactAmountFilter'
+                ];
+
+                filters.forEach(filterId => {
+                    const filter = document.getElementById(filterId);
+                    if (filter) {
+                        filter.addEventListener('change', () => this.applyFilters());
+                        filter.addEventListener('input', () => this.applyFilters());
+                    }
+                });
+
+                // Lógica especial para valor exacto vs rango
+                const exactAmountFilter = document.getElementById('exactAmountFilter');
+                const minAmountFilter = document.getElementById('minAmountFilter');
+                const maxAmountFilter = document.getElementById('maxAmountFilter');
+
+                if (exactAmountFilter) {
+                    exactAmountFilter.addEventListener('input', () => {
+                        if (exactAmountFilter.value) {
+                            if (minAmountFilter) minAmountFilter.disabled = true;
+                            if (maxAmountFilter) maxAmountFilter.disabled = true;
+                        } else {
+                            if (minAmountFilter) minAmountFilter.disabled = false;
+                            if (maxAmountFilter) maxAmountFilter.disabled = false;
+                        }
+                    });
+                }
+            }
+
+            applyFilters() {
+                const typeFilter = document.getElementById('typeFilter')?.value;
+                const dateFilter = document.getElementById('dateFilter')?.value;
+                const searchFilter = document.getElementById('searchFilter')?.value.toLowerCase();
+                const minAmountFilter = document.getElementById('minAmountFilter')?.value;
+                const maxAmountFilter = document.getElementById('maxAmountFilter')?.value;
+                const exactAmountFilter = document.getElementById('exactAmountFilter')?.value;
+
+                if (!this.movements || this.movements.length === 0) {
+                    this.renderMovements([]);
+                    return;
+                }
+
+                let filtered = [...this.movements];
+
+                // Filtro por tipo
+                if (typeFilter) {
+                    const filterType = typeFilter === 'income' ? 'INCOME' : 'EXPENSE';
+                    filtered = filtered.filter(m => m.type === filterType);
+                }
+
+                // Filtro por fecha
+                if (dateFilter) {
+                    filtered = filtered.filter(m => {
+                        const movementDate = new Date(m.date).toISOString().split('T')[0];
+                        return movementDate === dateFilter;
+                    });
+                }
+
+                // Filtro por texto (concepto, referencia)
+                if (searchFilter) {
+                    filtered = filtered.filter(m =>
+                        (m.description || '').toLowerCase().includes(searchFilter) ||
+                        (m.reference || '').toLowerCase().includes(searchFilter)
+                    );
+                }
+
+                // Filtro por valor exacto (tiene prioridad sobre min/max)
+                if (exactAmountFilter && exactAmountFilter.trim() !== '') {
+                    const exactAmount = parseFloat(exactAmountFilter.replace(/[^\d.]/g, ''));
+                    if (!isNaN(exactAmount)) {
+                        filtered = filtered.filter(m => m.amount === exactAmount);
+                    }
+                } else {
+                    // Filtros por rango de valores
+                    if (minAmountFilter && minAmountFilter.trim() !== '') {
+                        const minAmount = parseFloat(minAmountFilter.replace(/[^\d.]/g, ''));
+                        if (!isNaN(minAmount)) {
+                            filtered = filtered.filter(m => m.amount >= minAmount);
+                        }
+                    }
+
+                    if (maxAmountFilter && maxAmountFilter.trim() !== '') {
+                        const maxAmount = parseFloat(maxAmountFilter.replace(/[^\d.]/g, ''));
+                        if (!isNaN(maxAmount)) {
+                            filtered = filtered.filter(m => m.amount <= maxAmount);
+                        }
+                    }
+                }
+
+                this.renderMovements(filtered);
+                
+                // Mostrar estadísticas de filtrado
+                this.showFilterStats(filtered.length, this.movements.length);
+            }
+
+            showFilterStats(filteredCount, totalCount) {
+                const existingStats = document.querySelector('.filter-stats');
+                if (existingStats) {
+                    existingStats.remove();
+                }
+
+                if (filteredCount !== totalCount) {
+                    const statsElement = document.createElement('div');
+                    statsElement.className = 'filter-stats';
+                    statsElement.innerHTML = `
+                        <div class="filter-stats-content">
+                            <svg width="16" height="16" fill="currentColor">
+                                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                            </svg>
+                            <span>Mostrando ${filteredCount} de ${totalCount} movimientos</span>
+                        </div>
+                    `;
+
+                    const container = document.querySelector('.movements-container');
+                    container.insertBefore(statsElement, container.firstChild);
+                }
+            }
+
+            async saveMovement(data) {
+                try {
+                    console.log('💾 Guardando movimiento:', data);
+                    
+                    if (window.DemoData) {
+                        const transactionData = {
+                            date: data.date,
+                            reference: `REF-${Date.now()}`,
+                            description: data.concept,
+                            amount: parseFloat(data.amount),
+                            type: data.type === 'income' ? 'INCOME' : 'EXPENSE',
+                            debitAccountId: '1',
+                            creditAccountId: '5',
+                            category: data.category,
+                            notes: data.notes
+                        };
+
+                        // Crear la transacción
+                        const result = await window.DemoData.createTransaction(transactionData);
+                        const createdTransaction = result.data;
+                        
+                        console.log('✅ Transacción creada:', createdTransaction);
+
+                        // Generar factura si está marcado el checkbox
+                        if (data.generateInvoice) {
+                            console.log('🧾 Generando factura automáticamente...');
+                            await this.generateInvoiceForMovement(createdTransaction, data);
+                        }
+
+                        // Recargar movimientos
+                        await this.loadMovements();
+
+                        notifications.show('Movimiento registrado exitosamente', 'success');
+                        ModalManager.close('movementModal');
+
+                        // Update dashboard stats
+                        if (window.dashboardManager) {
+                            window.dashboardManager.updateStats();
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error saving movement:', error);
+                    notifications.show('Error al guardar el movimiento', 'error');
+                }
+            }
+
+            async generateInvoiceForMovement(transaction, movementData) {
+                try {
+                    console.log('🧾 Iniciando generación de factura para transacción:', transaction.id);
+                    
+                    // Verificar que los managers estén disponibles
+                    if (!window.invoiceManager) {
+                        console.log('🔧 Inicializando InvoiceManager...');
+                        window.invoiceManager = new InvoiceManager();
+                    }
+
+                    if (!window.invoicePDFGenerator) {
+                        console.log('🔧 Inicializando InvoicePDFGenerator...');
+                        window.invoicePDFGenerator = new InvoicePDFGenerator();
+                    }
+
+                    // Preparar datos de la factura
+                    const invoiceData = {
+                        invoiceNumber: `FAC-${Date.now()}`,
+                        date: transaction.date,
+                        dueDate: this.calculateDueDate(transaction.date),
+                        amount: transaction.amount,
+                        concept: transaction.description,
+                        type: transaction.type,
+                        category: movementData.category || 'general',
+                        notes: movementData.notes || '',
+                        customerName: this.extractCustomerName(transaction.description),
+                        customerEmail: 'cliente@ejemplo.com', // Placeholder
+                        customerPhone: '300-000-0000' // Placeholder
+                    };
+
+                    console.log('📋 Datos de factura preparados:', invoiceData);
+
+                    // Generar PDF con notificación especial
+                    const loadingNotification = this.showInvoiceGenerationProgress();
+                    
+                    const pdfInfo = await window.invoicePDFGenerator.generateInvoicePDF(invoiceData);
+                    console.log('📄 PDF generado:', pdfInfo);
+
+                    // Guardar en historial
+                    const savedInvoice = window.invoiceManager.saveInvoice(invoiceData, pdfInfo, transaction.id);
+                    console.log('💾 Factura guardada en historial:', savedInvoice);
+
+                    // Remover notificación de carga y mostrar éxito
+                    if (loadingNotification) {
+                        loadingNotification.remove();
+                    }
+                    
+                    notifications.show(`Factura ${invoiceData.invoiceNumber} generada exitosamente`, 'success');
+                    
+                    return savedInvoice;
+
+                } catch (error) {
+                    console.error('❌ Error generando factura:', error);
+                    notifications.show('Error al generar la factura: ' + error.message, 'error');
+                    throw error;
+                }
+            }
+
+            calculateDueDate(transactionDate) {
+                const date = new Date(transactionDate);
+                date.setDate(date.getDate() + 30); // 30 días por defecto
+                return date.toISOString().split('T')[0];
+            }
+
+            extractCustomerName(description) {
+                // Intentar extraer nombre del cliente de la descripción
+                const match = description.match(/(?:pago|factura|cliente).*?[-–]\s*([^-–]+)/i);
+                if (match && match[1]) {
+                    return match[1].trim();
+                }
+                
+                // Si no se encuentra, usar un nombre genérico
+                return 'Cliente General';
+            }
+
+            showInvoiceGenerationProgress() {
+                const notification = document.createElement('div');
+                notification.className = 'notification invoice generating-invoice show';
+                notification.innerHTML = `
+                    <div class="notification-icon">📄</div>
+                    <div class="notification-content">
+                        <p class="notification-message">Generando factura PDF...</p>
+                        <div class="progress-bar" style="
+                            width: 100%;
+                            height: 4px;
+                            background: rgba(255,255,255,0.3);
+                            border-radius: 2px;
+                            margin-top: 8px;
+                            overflow: hidden;
+                        ">
+                            <div class="progress-fill" style="
+                                height: 100%;
+                                background: white;
+                                width: 0%;
+                                border-radius: 2px;
+                                animation: progressFill 3s ease-in-out infinite;
+                            "></div>
+                        </div>
+                    </div>
+                `;
+
+                const container = document.getElementById('notificationContainer');
+                if (container) {
+                    container.appendChild(notification);
+                }
+
+                return notification;
+            }
+
+            checkIfMovementHasInvoice(movementId) {
+                if (!window.invoiceManager || !window.invoiceManager.invoices) {
+                    return false;
+                }
+                
+                return window.invoiceManager.invoices.some(invoice => 
+                    invoice.transactionId === movementId
+                );
+            }
+        }
+
+        // DASHBOARD MANAGEMENT
+        class DashboardManager {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.updateStats();
+                this.loadRecentActivity();
+            }
+
+            async updateStats() {
+                try {
+                    if (window.DemoData) {
+                        await window.DemoData.getStats();
+                        const stats = window.DemoData.stats;
+
+                        this.updateStatCard('monthlyIncome', stats.totalIncome || 0);
+                        this.updateStatCard('monthlyExpenses', stats.totalExpenses || 0);
+                        this.updateStatCard('netBalance', stats.netBalance || 0);
+                        this.updateStatCard('totalTransactions', stats.totalTransactions || 0);
+                    }
+                } catch (error) {
+                    console.error('Error updating stats:', error);
+                }
+            }
+
+            updateStatCard(elementId, value) {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+
+                if (elementId === 'totalTransactions') {
+                    element.textContent = value;
+                } else {
+                    const formatted = new Intl.NumberFormat('es-CO', {
+                        style: 'currency',
+                        currency: 'COP',
+                        minimumFractionDigits: 0
+                    }).format(value);
+                    element.textContent = formatted;
+                }
+            }
+
+            async loadRecentActivity() {
+                const container = document.getElementById('recentActivity');
+                if (!container) return;
+
+                try {
+                    if (window.DemoData && window.DemoData.transactions) {
+                        const recent = window.DemoData.transactions.slice(0, 5);
+
+                        const html = recent.map(transaction => {
+                            const isIncome = transaction.type === 'INCOME';
+                            const typeClass = isIncome ? 'income' : 'expense';
+                            const icon = isIncome ? '💰' : '💸';
+                            const sign = isIncome ? '+' : '-';
+
+                            const formattedAmount = new Intl.NumberFormat('es-CO', {
+                                style: 'currency',
+                                currency: 'COP',
+                                minimumFractionDigits: 0
+                            }).format(transaction.amount);
+
+                            return `
+                            <div class="activity-item">
+                                <div class="activity-icon ${typeClass}">${icon}</div>
+                                <div class="activity-content">
+                                    <p class="activity-title">${transaction.description}</p>
+                                    <p class="activity-meta">Ref: ${transaction.reference} • Hace 2 horas</p>
+                                </div>
+                                <div class="activity-amount ${typeClass}">${sign}${formattedAmount}</div>
+                            </div>
+                        `;
+                        }).join('');
+
+                        container.innerHTML = html;
+                    }
+                } catch (error) {
+                    console.error('Error loading recent activity:', error);
+                }
+            }
+        }
+
+        // GLOBAL FUNCTIONS
+        function showSection(sectionName) {
+            if (window.navigationManager) {
+                window.navigationManager.showSection(sectionName);
+            }
+        }
+
+        function showMovementModal(type = '') {
+            const modal = document.getElementById('movementModal');
+            const typeSelect = document.getElementById('movementType');
+            const dateInput = document.getElementById('movementDate');
+
+            // Set default date to today
+            if (dateInput) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+
+            // Set type if provided
+            if (type && typeSelect) {
+                typeSelect.value = type;
+            }
+
+            ModalManager.show('movementModal');
+        }
+
+        function closeModal(modalId) {
+            ModalManager.close(modalId);
+        }
+
+        function saveMovement() {
+            const form = document.getElementById('movementForm');
+            const formData = new FormData(form);
+
+            const data = {
+                type: document.getElementById('movementType').value,
+                date: document.getElementById('movementDate').value,
+                concept: document.getElementById('movementConcept').value,
+                amount: document.getElementById('movementAmount').value,
+                category: document.getElementById('movementCategory').value,
+                notes: document.getElementById('movementNotes').value,
+                generateInvoice: document.getElementById('generateInvoice').checked
+            };
+
+            // Validate required fields
+            if (!data.type || !data.date || !data.concept || !data.amount) {
+                notifications.show('Por favor completa todos los campos requeridos', 'warning');
+                return;
+            }
+
+            if (window.movementsManager) {
+                window.movementsManager.saveMovement(data);
+            }
+        }
+
+        function refreshMovements() {
+            if (window.movementsManager) {
+                window.movementsManager.loadMovements();
+            }
+        }
+
+        function clearFilters() {
+            // Limpiar todos los filtros
+            const filterIds = [
+                'typeFilter',
+                'dateFilter', 
+                'searchFilter',
+                'minAmountFilter',
+                'maxAmountFilter',
+                'exactAmountFilter'
+            ];
+
+            filterIds.forEach(filterId => {
+                const filter = document.getElementById(filterId);
+                if (filter) {
+                    filter.value = '';
+                    filter.disabled = false; // Rehabilitar campos deshabilitados
+                }
+            });
+
+            // Remover estadísticas de filtrado
+            const existingStats = document.querySelector('.filter-stats');
+            if (existingStats) {
+                existingStats.remove();
+            }
+
+            if (window.movementsManager) {
+                window.movementsManager.applyFilters();
+            }
+
+            notifications.show('Filtros limpiados', 'info');
+        }
+
+        function applyAdvancedFilters() {
+            if (window.movementsManager) {
+                window.movementsManager.applyFilters();
+            }
+            notifications.show('Filtros aplicados', 'success');
+        }
+
+        // Función para formatear valores en tiempo real
+        function setupAmountFormatting() {
+            const amountInputs = [
+                'minAmountFilter',
+                'maxAmountFilter', 
+                'exactAmountFilter'
+            ];
+
+            amountInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    // Solo permitir números
+                    input.addEventListener('input', function(e) {
+                        // Remover caracteres no numéricos
+                        let value = e.target.value.replace(/[^\d]/g, '');
+                        e.target.value = value;
+                        
+                        console.log(`💰 Valor ingresado en ${inputId}:`, value);
+                    });
+                }
+            });
+        }
+
+        function editMovement(id) {
+            notifications.show('Función de edición en desarrollo', 'info');
+        }
+
+        function viewInvoice(id) {
+            notifications.show('Abriendo factura...', 'info');
+        }
+
+        function logout() {
+            if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+                window.location.href = '/login.html';
+            }
+        }
+
+        // FUNCIONES ADICIONALES PARA COMPLETAR LA FUNCIONALIDAD
+
+        function showInvoiceModal() {
+            notifications.show('Función de facturas en desarrollo', 'info');
+            // TODO: Implementar modal de facturas
+        }
+
+        function refreshInvoices() {
+            notifications.show('Actualizando facturas...', 'info');
+            // TODO: Implementar recarga de facturas
+        }
+
+        function showEventModal() {
+            notifications.show('Función de eventos en desarrollo', 'info');
+            // TODO: Implementar modal de eventos
+        }
+
+        function showStudentUploadModal() {
+            notifications.show('Función de carga de estudiantes en desarrollo', 'info');
+            // TODO: Implementar modal de carga CSV
+        }
+
+        function downloadStudentTemplate() {
+            notifications.show('Descargando plantilla CSV...', 'info');
+            // TODO: Implementar descarga de plantilla
+        }
+
+        function generateReport() {
+            notifications.show('Generando reporte...', 'info');
+            // TODO: Implementar generación de reportes
+        }
+
+        function downloadReport(type) {
+            notifications.show(`Descargando reporte ${type}...`, 'info');
+            // TODO: Implementar descarga de reportes
+        }
+
+        function generateInvoiceForMovement(movementId) {
+            console.log('🧾 Generando factura para movimiento:', movementId);
+            
+            if (window.movementsManager) {
+                // Buscar el movimiento
+                const movement = window.movementsManager.movements.find(m => m.id === movementId);
+                if (movement) {
+                    // Crear datos simulados para la factura
+                    const movementData = {
+                        type: movement.type.toLowerCase(),
+                        date: movement.date,
+                        concept: movement.description,
+                        amount: movement.amount,
+                        category: 'general',
+                        notes: '',
+                        generateInvoice: true
+                    };
+                    
+                    // Usar la función existente
+                    window.movementsManager.generateInvoiceForMovement(movement, movementData)
+                        .then(() => {
+                            // Recargar la lista para mostrar el indicador de factura
+                            window.movementsManager.renderMovements();
+                        })
+                        .catch(error => {
+                            console.error('Error generando factura:', error);
+                        });
+                } else {
+                    notifications.show('Movimiento no encontrado', 'error');
+                }
+            } else {
+                notifications.show('Sistema no disponible', 'error');
+            }
+        }
+
+        // SIDEBAR MANAGEMENT
+        function initializeSidebar() {
+            // Manejar submenús
+            const navGroups = document.querySelectorAll('.nav-group');
+            navGroups.forEach(group => {
+                const parent = group.querySelector('.nav-parent');
+                if (parent) {
+                    parent.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        
+                        // Cerrar otros submenús
+                        navGroups.forEach(otherGroup => {
+                            if (otherGroup !== group) {
+                                otherGroup.classList.remove('expanded');
+                            }
+                        });
+                        
+                        // Toggle el submenú actual
+                        group.classList.toggle('expanded');
+                    });
+                }
+            });
+            
+            // Marcar página activa
+            const currentPage = window.location.pathname.split('/').pop();
+            const navItems = document.querySelectorAll('.nav-item, .nav-subitem');
+            
+            navItems.forEach(item => {
+                const href = item.getAttribute('href');
+                if (href && href.includes(currentPage)) {
+                    item.classList.add('active');
+                    
+                    // Si es un subitem, expandir el grupo padre
+                    const parentGroup = item.closest('.nav-group');
+                    if (parentGroup) {
+                        parentGroup.classList.add('expanded');
+                    }
+                }
+            });
+        }
+
+        // INITIALIZATION
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize theme
+            initTheme();
+            
+            // Initialize sidebar
+            initializeSidebar();
+
+            // Initialize core managers
+            window.navigationManager = new NavigationManager();
+            window.notifications = new NotificationManager();
+            window.movementsManager = new MovementsManager();
+            window.dashboardManager = new DashboardManager();
+
+            // Initialize invoice system
+            console.log('🧾 Inicializando sistema de facturas...');
+            try {
+                window.invoiceManager = new InvoiceManager();
+                window.invoicePDFGenerator = new InvoicePDFGenerator();
+                console.log('✅ Sistema de facturas inicializado');
+            } catch (error) {
+                console.error('❌ Error inicializando sistema de facturas:', error);
+            }
+
+            // Setup amount formatting for filter inputs
+            setupAmountFormatting();
+
+            // Setup modal close on outside click
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('modal')) {
+                    ModalManager.closeAll();
+                }
+            });
+
+            // Setup escape key to close modals
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    ModalManager.closeAll();
+                }
+            });
+
+            console.log('✅ Educonta Dashboard initialized successfully');
+        });
+    </script>
+</body>
+
+</html>

@@ -1,670 +1,789 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Educonta</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --secondary: #10b981;
-            --accent: #8b5cf6;
-            --text: #1f2937;
-            --text-light: #6b7280;
-            --bg: #ffffff;
-            --bg-secondary: #f8fafc;
-            --bg-card: rgba(255, 255, 255, 0.8);
-            --border: rgba(255, 255, 255, 0.2);
-            --shadow: rgba(0, 0, 0, 0.1);
-            --error: #ef4444;
-            --success: #10b981;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Educonta</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --secondary: #10b981;
+    --accent: #8b5cf6;
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --bg: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-card: rgba(255, 255, 255, 0.95);
+    --border: rgba(229, 231, 235, 0.8);
+    --shadow: rgba(0, 0, 0, 0.1);
+    --error: #ef4444;
+    --success: #10b981;
+}
 
-        [data-theme="dark"] {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --secondary: #10b981;
-            --accent: #a855f7;
-            --text: #f9fafb;
-            --text-light: #d1d5db;
-            --bg: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-card: rgba(15, 23, 42, 0.8);
-            --border: rgba(255, 255, 255, 0.1);
-            --shadow: rgba(0, 0, 0, 0.3);
-            --error: #f87171;
-            --success: #34d399;
-        }
+[data-theme="dark"] {
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --secondary: #10b981;
+    --accent: #a855f7;
+    --text: #f8fafc;
+    --text-light: #d1d5db;
+    --bg: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-card: rgba(30, 41, 59, 0.95);
+    --border: rgba(71, 85, 105, 0.8);
+    --shadow: rgba(0, 0, 0, 0.3);
+    --error: #f87171;
+    --success: #34d399;
+}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
 
-        /* Background Animation */
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: linear-gradient(135deg,
-                    var(--primary) 0%,
-                    var(--secondary) 50%,
-                    var(--accent) 100%);
-            opacity: 0.05;
-        }
+.bg-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+    opacity: 0.03;
+}
 
-        .bg-animation::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23ffffff" stroke-width="0.5" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-            animation: float 20s ease-in-out infinite;
-        }
+[data-theme="dark"] .bg-animation {
+    opacity: 0.05;
+}
 
-        @keyframes float {
+.bg-animation::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23ffffff" stroke-width="0.5" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    animation: float 20s ease-in-out infinite;
+}
 
-            0%,
-            100% {
-                transform: translateX(0px) translateY(0px);
-            }
+@keyframes float {
+    0%, 100% { transform: translateX(0px) translateY(0px); }
+    25% { transform: translateX(10px) translateY(-10px); }
+    50% { transform: translateX(-5px) translateY(10px); }
+    75% { transform: translateX(-10px) translateY(-5px); }
+}
 
-            25% {
-                transform: translateX(10px) translateY(-10px);
-            }
+.login-container {
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+}
 
-            50% {
-                transform: translateX(-5px) translateY(10px);
-            }
+.login-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: 0 20px 40px var(--shadow);
+    animation: slideInUp 0.8s ease-out;
+    position: relative;
+    overflow: hidden;
+}
 
-            75% {
-                transform: translateX(-10px) translateY(-5px);
-            }
-        }
+.institution-banner {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    text-align: center;
+    display: none;
+}
 
-        /* Login Container */
-        .login-container {
-            width: 100%;
-            max-width: 450px;
-            margin: 0 auto;
-            padding: 2rem;
-            position: relative;
-            z-index: 1;
-        }
+.institution-banner.show {
+    display: block;
+    animation: slideInDown 0.5s ease-out;
+}
 
-        .login-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 3rem;
-            box-shadow: 0 20px 40px var(--shadow);
-            animation: slideInUp 0.8s ease-out;
-            position: relative;
-            overflow: hidden;
-        }
+.institution-logo {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: 0.75rem;
+    vertical-align: middle;
+}
 
-        .login-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            opacity: 0.02;
-            z-index: -1;
-        }
+.institution-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
 
-        /* Header */
-        .login-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
+.institution-nit {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
 
-        .logo {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--primary);
-            text-decoration: none;
-            margin-bottom: 1rem;
-        }
+.change-institution {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    margin-top: 0.75rem;
+    transition: all 0.3s ease;
+}
 
-        .welcome-text {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 0.5rem;
-        }
+.change-institution:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
 
-        .subtitle {
-            color: var(--text-light);
-            font-size: 1rem;
-        }
+.login-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
 
-        /* Form */
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
+.logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+    text-decoration: none;
+    margin-bottom: 1rem;
+}
 
-        .form-group {
-            position: relative;
-        }
+.welcome-text {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+}
 
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--text);
-            font-size: 0.9rem;
-        }
+.subtitle {
+    color: var(--text-light);
+    font-size: 1rem;
+}
 
-        .form-input {
-            width: 100%;
-            padding: 1rem 1.25rem;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-size: 1rem;
-            background: var(--bg);
-            color: var(--text);
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
-        }
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
 
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
+.form-group {
+    position: relative;
+}
 
-        .form-input::placeholder {
-            color: var(--text-light);
-        }
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text);
+    font-size: 0.9rem;
+}
 
-        .form-group {
-            position: relative;
-        }
+.form-input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 1rem;
+    background: var(--bg);
+    color: var(--text);
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
 
-        .form-input-with-icon {
-            padding-right: 3rem;
-        }
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
 
-        .input-icon {
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-light);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            margin-top: 1.25rem;
-        }
+.form-input::placeholder {
+    color: var(--text-light);
+}
 
-        .input-icon:hover {
-            color: var(--primary);
-            transform: translateY(-50%) scale(1.1);
-        }
+.form-input-with-icon {
+    padding-right: 3rem;
+}
 
-        .user-icon {
-            cursor: default;
-        }
+.input-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-top: 1.25rem;
+}
 
-        .user-icon:hover {
-            transform: translateY(-50%);
-        }
+.input-icon:hover {
+    color: var(--primary);
+    transform: translateY(-50%) scale(1.1);
+}
 
-        /* Button */
-        .login-button {
-            width: 100%;
-            padding: 1rem 1.5rem;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-        }
+.user-icon {
+    cursor: default;
+}
 
-        .login-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
-        }
+.user-icon:hover {
+    transform: translateY(-50%);
+}
 
-        .login-button:active {
-            transform: translateY(0);
-        }
+.login-button {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
 
-        .login-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
+.login-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+}
 
-        /* Loading spinner */
-        .loading {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-        }
+.login-button:active {
+    transform: translateY(0);
+}
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
+.login-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
 
+.loading {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
+}
 
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
 
-        /* Theme toggle */
-        .theme-toggle-container {
-            position: fixed;
-            top: 2rem;
-            right: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 50px;
-            padding: 0.75rem 1.25rem;
-            z-index: 100;
-        }
+.theme-toggle-container {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 0.75rem 1.25rem;
+    z-index: 100;
+}
 
-        .theme-label {
-            color: var(--text-light);
-            transition: all 0.3s ease;
-            user-select: none;
-        }
+.theme-label {
+    color: var(--text-light);
+    transition: all 0.3s ease;
+    user-select: none;
+}
 
-        .theme-label.active {
-            color: var(--primary);
-            font-weight: 600;
-        }
+.theme-label.active {
+    color: var(--primary);
+    font-weight: 600;
+}
 
-        .theme-toggle {
-            position: relative;
-            width: 60px;
-            height: 30px;
-            background: var(--bg-secondary);
-            border: 2px solid var(--border);
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
+.theme-toggle {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
 
-        .theme-toggle::before {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 22px;
-            height: 22px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border-radius: 50%;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-        }
+.theme-toggle::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
 
-        [data-theme="dark"] .theme-toggle::before {
-            transform: translateX(30px);
-            background: linear-gradient(135deg, var(--accent), #7c3aed);
-            box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
-        }
+[data-theme="dark"] .theme-toggle::before {
+    transform: translateX(30px);
+    background: linear-gradient(135deg, var(--accent), #7c3aed);
+    box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+}
 
-        .theme-toggle:hover {
-            border-color: var(--primary);
-            transform: scale(1.05);
-        }
+.back-link {
+    position: fixed;
+    top: 2rem;
+    left: 2rem;
+    color: var(--text-light);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-card);
+    padding: 0.75rem 1.25rem;
+    border-radius: 50px;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+}
 
-        .theme-toggle:hover::before {
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
-        }
+.back-link:hover {
+    color: var(--primary);
+    transform: translateX(-5px);
+}
 
-        [data-theme="dark"] .theme-toggle:hover::before {
-            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
-        }
+.alert {
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+}
 
-        /* Back to home */
-        .back-link {
-            position: fixed;
-            top: 2rem;
-            left: 2rem;
-            color: var(--text-light);
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--bg-card);
-            padding: 0.75rem 1.25rem;
-            border-radius: 50px;
-            border: 1px solid var(--border);
-            backdrop-filter: blur(20px);
-        }
+.alert.success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--success);
+    color: var(--success);
+}
 
-        .back-link:hover {
-            color: var(--primary);
-            transform: translateX(-5px);
-        }
+.alert.error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--error);
+    color: var(--error);
+}
 
-        /* Alert messages */
-        .alert {
-            padding: 1rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            font-weight: 500;
-            display: none;
-            align-items: center;
-            gap: 0.5rem;
-        }
+.alert.show {
+    display: flex;
+    animation: slideInDown 0.3s ease-out;
+}
 
-        .alert.success {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid var(--success);
-            color: var(--success);
-        }
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
-        .alert.error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid var(--error);
-            color: var(--error);
-        }
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
-        .alert.show {
-            display: flex;
-            animation: slideInDown 0.3s ease-out;
-        }
+@media (max-width: 768px) {
+    .login-container {
+        padding: 1rem;
+    }
 
-        /* Animations */
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
+    .login-card {
+        padding: 2rem;
+    }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    .theme-toggle-container,
+    .back-link {
+        position: absolute;
+        top: 1rem;
+    }
 
-        @keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
+    .theme-toggle-container {
+        right: 1rem;
+    }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .login-container {
-                padding: 1rem;
-            }
-
-            .login-card {
-                padding: 2rem;
-            }
-
-            .theme-toggle,
-            .back-link {
-                position: absolute;
-                top: 1rem;
-            }
-
-            .theme-toggle {
-                right: 1rem;
-            }
-
-            .back-link {
-                left: 1rem;
-            }
-        }
-    </style>
+    .back-link {
+        left: 1rem;
+    }
+}
+</style>
 </head>
 
 <body>
-    <div class="bg-animation"></div>
+<div class="bg-animation"></div>
 
-    <a href="/" class="back-link">
-        <svg width="20" height="20" fill="currentColor">
-            <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Volver al inicio
-    </a>
+<a href="/select-institution" class="back-link">
+<svg width="20" height="20" fill="currentColor">
+    <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke="currentColor" stroke-width="2" fill="none"/>
+</svg>
+Cambiar institución
+</a>
 
-    <div class="theme-toggle-container">
-        <span class="theme-label" id="light-label">CLARO</span>
-        <button class="theme-toggle" onclick="toggleTheme()"></button>
-        <span class="theme-label" id="dark-label">OSCURO</span>
-    </div>
+<div class="theme-toggle-container">
+<span class="theme-label" id="light-label">CLARO</span>
+<button class="theme-toggle" onclick="toggleTheme()"></button>
+<span class="theme-label" id="dark-label">OSCURO</span>
+</div>
 
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <a href="/" class="logo">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2L2 7v10c0 5.55 3.84 9.739 9 11 5.16-1.261 9-5.45 9-11V7l-10-5z" />
-                    </svg>
-                    Educonta
-                </a>
-                <h1 class="welcome-text">Bienvenido</h1>
-                <p class="subtitle">Accede a tu sistema contable educativo</p>
-            </div>
-
-            <div class="alert" id="alert">
-                <svg width="20" height="20" fill="currentColor">
-                    <path
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v6a1 1 0 102 0V5zm-1 9a1 1 0 100-2 1 1 0 000 2z" />
-                </svg>
-                <span id="alert-message"></span>
-            </div>
-
-            <form class="login-form" id="loginForm">
-                <div class="form-group">
-                    <label class="form-label" for="email">Correo electrónico</label>
-                    <input type="email" id="email" name="email" class="form-input form-input-with-icon"
-                        placeholder="contador@email.com" required>
-                    <span class="input-icon user-icon">
-                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                            <path
-                                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                        </svg>
-                    </span>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="password">Contraseña</label>
-                    <input type="password" id="password" name="password" class="form-input form-input-with-icon"
-                        placeholder="Tu contraseña" required>
-                    <span class="input-icon" onclick="togglePassword()">
-                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" id="eye-icon">
-                            <path
-                                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-                        </svg>
-                    </span>
-                </div>
-
-                <button type="submit" class="login-button" id="loginButton">
-                    <svg width="20" height="20" fill="currentColor">
-                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Iniciar Sesión
-                </button>
-            </form>
-
-
+<div class="login-container">
+<div class="login-card">
+    <!-- Banner de institución seleccionada -->
+    <div class="institution-banner" id="institutionBanner">
+        <div>
+            <span class="institution-logo" id="institutionLogo">EDU</span>
+            <span class="institution-name" id="institutionName">Institución Educativa</span>
         </div>
+        <div class="institution-nit" id="institutionNit">NIT: 000000000-0</div>
+        <button class="change-institution" onclick="changeInstitution()">
+            Cambiar institución
+        </button>
     </div>
 
-    <script>
-        // Update theme labels
-        function updateThemeLabels() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const lightLabel = document.getElementById('light-label');
-            const darkLabel = document.getElementById('dark-label');
+    <div class="login-header">
+        <a href="/" class="logo">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L2 7v10c0 5.55 3.84 9.739 9 11 5.16-1.261 9-5.45 9-11V7l-10-5z" />
+            </svg>
+            Educonta
+        </a>
+        <h1 class="welcome-text">Iniciar Sesión</h1>
+        <p class="subtitle">Accede a tu sistema contable educativo</p>
+    </div>
 
-            if (currentTheme === 'dark') {
-                lightLabel.classList.remove('active');
-                darkLabel.classList.add('active');
+    <div class="alert" id="alert">
+        <svg width="20" height="20" fill="currentColor">
+            <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v6a1 1 0 102 0V5zm-1 9a1 1 0 100-2 1 1 0 000 2z" />
+        </svg>
+        <span id="alert-message"></span>
+    </div>
+
+    <form class="login-form" id="loginForm">
+        <input type="hidden" id="institutionId" name="institutionId">
+        
+        <div class="form-group">
+            <label class="form-label" for="email">Correo electrónico</label>
+            <input type="email" id="email" name="email" class="form-input form-input-with-icon"
+                placeholder="contador@email.com" required>
+            <span class="input-icon user-icon">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                </svg>
+            </span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="password">Contraseña</label>
+            <input type="password" id="password" name="password" class="form-input form-input-with-icon"
+                placeholder="Tu contraseña" required>
+            <span class="input-icon" onclick="togglePassword()">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" id="eye-icon">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                </svg>
+            </span>
+        </div>
+
+        <button type="submit" class="login-button" id="loginButton">
+            <svg width="20" height="20" fill="currentColor">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Iniciar Sesión
+        </button>
+    </form>
+</div>
+</div>
+
+<script>
+let selectedInstitution = null;
+
+// Función para obtener el nombre corto de la institución
+function getShortName(name) {
+    return name.split(' ').map(word => word.charAt(0).toUpperCase()).join('').substring(0, 3);
+}
+
+// Update theme labels
+function updateThemeLabels() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const lightLabel = document.getElementById('light-label');
+    const darkLabel = document.getElementById('dark-label');
+
+    if (currentTheme === 'dark') {
+        lightLabel.classList.remove('active');
+        darkLabel.classList.add('active');
+    } else {
+        lightLabel.classList.add('active');
+        darkLabel.classList.remove('active');
+    }
+}
+
+// Theme toggle
+function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeLabels();
+}
+
+// Load saved theme
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeLabels();
+}
+
+// Alternar visibilidad de contraseña
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eye-icon');
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.innerHTML = `
+            <path fill="currentColor" d="M12 6c3.79 0 7.17 2.13 8.82 5.5-.59 1.22-1.42 2.27-2.41 3.12l1.41 1.41c1.39-1.23 2.49-2.77 3.18-4.53C21.27 7.11 17 4 12 4c-1.27 0-2.49.2-3.64.57l1.65 1.65C10.66 6.09 11.32 6 12 6zm-1.07 1.14L13 9.21c.57.25 1.03.71 1.28 1.28l2.07 2.07c.08-.34.14-.7.14-1.07C16.5 9.01 14.48 7 12 7c-.37 0-.72.06-1.07.14zM2.01 3.87l2.68 2.68C3.06 7.83 1.77 9.53 1 11.5 2.73 15.89 7 19 12 19c1.52 0 2.98-.29 4.32-.82l3.42 3.42 1.41-1.41L3.42 2.45 2.01 3.87zm7.5 7.5l2.61 2.61c-.04.01-.08.02-.12.02-1.38 0-2.5-1.12-2.5-2.5 0-.05.01-.08.01-.13zm-3.4-3.4l1.75 1.75c-.23.55-.36 1.15-.36 1.78 0 2.48 2.02 4.5 4.5 4.5.63 0 1.23-.13 1.77-.36l.98.98c-.88.24-1.8.38-2.75.38-3.79 0-7.17-2.13-8.82-5.5.7-1.43 1.72-2.61 2.93-3.53z"/>
+        `;
+    } else {
+        passwordInput.type = 'password';
+        eyeIcon.innerHTML = `
+            <path fill="currentColor" d="M12 6c3.79 0 7.17 2.13 8.82 5.5C19.17 14.87 15.79 17 12 17s-7.17-2.13-8.82-5.5C4.83 8.13 8.21 6 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5c1.38 0 2.5 1.12 2.5 2.5S13.38 14 12 14s-2.5-1.12-2.5-2.5S10.62 9 12 9m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z"/>
+        `;
+    }
+}
+
+// Mostrar alerta
+function showAlert(message, type = 'error') {
+    const alert = document.getElementById('alert');
+    const alertMessage = document.getElementById('alert-message');
+
+    alert.className = `alert ${type}`;
+    alertMessage.textContent = message;
+    alert.classList.add('show');
+
+    setTimeout(() => {
+        alert.classList.remove('show');
+    }, 5000);
+}
+
+// Cargar información de la institución
+function loadInstitutionInfo() {
+    // Primero verificar parámetros URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const institutionId = urlParams.get('institution');
+    
+    // Luego verificar localStorage
+    const savedInstitution = localStorage.getItem('selectedInstitution');
+    
+    if (institutionId) {
+        // Buscar institución por ID en la API
+        fetchInstitutionById(institutionId);
+    } else if (savedInstitution) {
+        try {
+            selectedInstitution = JSON.parse(savedInstitution);
+            displayInstitutionInfo(selectedInstitution);
+        } catch (e) {
+            console.error('Error parsing saved institution:', e);
+            redirectToSelector();
+        }
+    } else {
+        // No hay institución seleccionada, redirigir al selector
+        redirectToSelector();
+    }
+}
+
+// Buscar institución por ID
+async function fetchInstitutionById(institutionId) {
+    try {
+        const response = await fetch(`/api/institutions/public`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const institution = data.data.find(inst => inst.id === institutionId);
+            if (institution) {
+                selectedInstitution = institution;
+                localStorage.setItem('selectedInstitution', JSON.stringify(institution));
+                displayInstitutionInfo(institution);
             } else {
-                lightLabel.classList.add('active');
-                darkLabel.classList.remove('active');
+                showAlert('Institución no encontrada');
+                redirectToSelector();
             }
+        } else {
+            showAlert('Error al cargar la institución');
+            redirectToSelector();
         }
+    } catch (error) {
+        console.error('Error fetching institution:', error);
+        showAlert('Error de conexión');
+        redirectToSelector();
+    }
+}
 
-        // Theme toggle
-        function toggleTheme() {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeLabels();
-        }
+// Mostrar información de la institución
+function displayInstitutionInfo(institution) {
+    const banner = document.getElementById('institutionBanner');
+    const logo = document.getElementById('institutionLogo');
+    const name = document.getElementById('institutionName');
+    const nit = document.getElementById('institutionNit');
+    const institutionIdInput = document.getElementById('institutionId');
 
-        // Load saved theme
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        updateThemeLabels();
+    logo.textContent = getShortName(institution.name);
+    name.textContent = institution.name;
+    nit.textContent = `NIT: ${institution.nit}`;
+    institutionIdInput.value = institution.id;
 
-        // Password visibility toggle
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const eyeIcon = document.getElementById('eye-icon');
+    banner.classList.add('show');
+}
 
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                // Eye slash icon (password visible) - Clear and simple
-                eyeIcon.innerHTML = `
-                    <path fill="currentColor" d="M12 6c3.79 0 7.17 2.13 8.82 5.5-.59 1.22-1.42 2.27-2.41 3.12l1.41 1.41c1.39-1.23 2.49-2.77 3.18-4.53C21.27 7.11 17 4 12 4c-1.27 0-2.49.2-3.64.57l1.65 1.65C10.66 6.09 11.32 6 12 6zm-1.07 1.14L13 9.21c.57.25 1.03.71 1.28 1.28l2.07 2.07c.08-.34.14-.7.14-1.07C16.5 9.01 14.48 7 12 7c-.37 0-.72.06-1.07.14zM2.01 3.87l2.68 2.68C3.06 7.83 1.77 9.53 1 11.5 2.73 15.89 7 19 12 19c1.52 0 2.98-.29 4.32-.82l3.42 3.42 1.41-1.41L3.42 2.45 2.01 3.87zm7.5 7.5l2.61 2.61c-.04.01-.08.02-.12.02-1.38 0-2.5-1.12-2.5-2.5 0-.05.01-.08.01-.13zm-3.4-3.4l1.75 1.75c-.23.55-.36 1.15-.36 1.78 0 2.48 2.02 4.5 4.5 4.5.63 0 1.23-.13 1.77-.36l.98.98c-.88.24-1.8.38-2.75.38-3.79 0-7.17-2.13-8.82-5.5.7-1.43 1.72-2.61 2.93-3.53z"/>
-                `;
-            } else {
-                passwordInput.type = 'password';
-                // Eye icon (password hidden) - Clear and simple
-                eyeIcon.innerHTML = `
-                    <path fill="currentColor" d="M12 6c3.79 0 7.17 2.13 8.82 5.5C19.17 14.87 15.79 17 12 17s-7.17-2.13-8.82-5.5C4.83 8.13 8.21 6 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5c1.38 0 2.5 1.12 2.5 2.5S13.38 14 12 14s-2.5-1.12-2.5-2.5S10.62 9 12 9m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z"/>
-                `;
-            }
-        }
+// Cambiar institución
+function changeInstitution() {
+    localStorage.removeItem('selectedInstitution');
+    window.location.href = '/select-institution';
+}
 
-        // Show alert
-        function showAlert(message, type = 'error') {
-            const alert = document.getElementById('alert');
-            const alertMessage = document.getElementById('alert-message');
+// Redirigir al selector
+function redirectToSelector() {
+    setTimeout(() => {
+        window.location.href = '/select-institution';
+    }, 2000);
+}
 
-            alert.className = `alert ${type}`;
-            alertMessage.textContent = message;
-            alert.classList.add('show');
+// Manejo del formulario de login
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-            setTimeout(() => {
-                alert.classList.remove('show');
-            }, 5000);
-        }
+    if (!selectedInstitution) {
+        showAlert('Selecciona una institución primero');
+        redirectToSelector();
+        return;
+    }
 
-        // Login form handling
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const button = document.getElementById('loginButton');
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const button = document.getElementById('loginButton');
+    // Mostrar estado de carga
+    button.disabled = true;
+    button.innerHTML = '<div class="loading"></div> Iniciando sesión...';
 
-            // Show loading state
-            button.disabled = true;
-            button.innerHTML = '<div class="loading"></div> Iniciando sesión...';
-
-            try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showAlert('¡Login exitoso! Redirigiendo...', 'success');
-                    localStorage.setItem('token', data.tokens.accessToken);
-
-                    // Redirect after short delay
-                    setTimeout(() => {
-                        window.location.href = '/dashboard.html';
-                    }, 1500);
-                } else {
-                    showAlert('Error: ' + data.error);
-                }
-            } catch (error) {
-                showAlert('Error de conexión: ' + error.message);
-            } finally {
-                // Reset button state
-                button.disabled = false;
-                button.innerHTML = `
-                    <svg width="20" height="20" fill="currentColor">
-                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    Iniciar Sesión
-                `;
-            }
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                email, 
+                password,
+                institutionId: selectedInstitution.id 
+            })
         });
 
+        const data = await response.json();
 
-    </script>
+        if (data.success) {
+            showAlert('¡Login exitoso! Redirigiendo...', 'success');
+            localStorage.setItem('token', data.tokens.accessToken);
+            localStorage.setItem('user', JSON.stringify(data.user));
+
+            // Redirigir según el rol
+            setTimeout(() => {
+                const userRole = data.user.role;
+                switch (userRole) {
+                    case 'SUPER_ADMIN':
+                        window.location.href = '/admin-dashboard.html';
+                        break;
+                    case 'RECTOR':
+                        window.location.href = '/rector-dashboard.html';
+                        break;
+                    case 'AUXILIARY_ACCOUNTANT':
+                        window.location.href = '/accounting-dashboard.html';
+                        break;
+                    default:
+                        window.location.href = '/dashboard.html';
+                }
+            }, 1500);
+        } else {
+            showAlert('Error: ' + data.error);
+        }
+    } catch (error) {
+        showAlert('Error de conexión: ' + error.message);
+    } finally {
+        // Resetear estado del botón
+        button.disabled = false;
+        button.innerHTML = `
+            <svg width="20" height="20" fill="currentColor">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Iniciar Sesión
+        `;
+    }
+});
+
+// Cargar información al iniciar
+document.addEventListener('DOMContentLoaded', () => {
+    loadTheme();
+    loadInstitutionInfo();
+});
+</script>
 </body>
-
 </html>

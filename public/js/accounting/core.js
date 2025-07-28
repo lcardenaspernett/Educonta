@@ -11,18 +11,8 @@ const AccountingConfig = {
     DATE_FORMAT: 'DD/MM/YYYY'
 };
 
-// Estado global compartido
-const AccountingState = {
-    currentUser: null,
-    currentInstitution: null,
-    accounts: [],
-    transactions: [],
-    isLoading: false,
-    filters: {
-        accounts: {},
-        transactions: {}
-    }
-};
+// Estado global compartido (implementado en state.js)
+// const AccountingState se define en state.js
 
 // ===================================
 // INICIALIZACIÓN GLOBAL
