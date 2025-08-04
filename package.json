@@ -8,7 +8,7 @@
     "setup": "node scripts/setup.js",
     "install-complete": "node scripts/install-complete-system.js",
     "migrate-students": "node scripts/migrate-students.js",
-    "postinstall": "npx prisma generate",
+    "postinstall": "node scripts/render-deployment-strategy.js || npx prisma generate",
     "build": "npm install && npx prisma generate && node scripts/clean-duplicate-students.js && npx prisma db push --accept-data-loss && npx prisma generate",
     "deploy": "node scripts/safe-deployment.js && node server.js",
     "db:migrate": "npx prisma migrate dev",
