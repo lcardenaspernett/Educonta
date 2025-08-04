@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Persistencia de Datos</title>
+    <link rel="stylesheet" href="public/css/student-modals.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s ease;
+        }
+        .test-button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        .test-button.success {
+            background: #10b981;
+        }
+        .test-button.warning {
+            background: #f59e0b;
+        }
+        .test-button.danger {
+            background: #ef4444;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .result.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .result.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .result.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        .student-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .student-info h4 {
+            margin: 0 0 10px 0;
+            color: #1f2937;
+        }
+        .student-info p {
+            margin: 5px 0;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test - Persistencia de Datos en Base de Datos</h1>
+        
+        <div class="test-section">
+            <h3>1. Verificar Conexión con API</h3>
+            <button class="test-button" onclick="testAPIConnection()">🔗 Probar Conexión</button>
+            <div id="apiResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Cargar Estudiantes desde Base de Datos</h3>
+            <button class="test-button" onclick="loadStudentsFromDB()">📥 Cargar Estudiantes</button>
+            <div id="loadResult" class="result" style="display: none;"></div>
+            <div id="studentsCount" class="student-info" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. Probar Actualización de Estudiante</h3>
+            <p>Selecciona un estudiante para probar la actualización:</p>
+            <select id="studentSelect" style="width: 100%; padding: 8px; margin: 10px 0;">
+                <option value="">Primero carga los estudiantes</option>
+            </select>
+            <div id="selectedStudentInfo" class="student-info" style="display: none;"></div>
+            <button class="test-button success" onclick="testUpdateStudent()">💾 Probar Actualización</button>
+            <div id="updateResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. Verificar Persistencia</h3>
+            <p>Después de actualizar, verifica que los cambios persistan:</p>
+            <button class="test-button warning" onclick="reloadAndVerify()">🔄 Recargar y Verificar</button>
+            <div id="persistenceResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>5. Estado del Sistema</h3>
+            <div id="systemStatus">
+                <p>Cargando estado del sistema...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allStudents = [];
+        let selectedStudent = null;
+        const institutionId = 'cmdt7n66m00003t1jy17ay313';
+
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        async function testAPIConnection() {
+            try {
+                showResult('apiResult', 'Probando conexión con API...', 'info');
+                
+                const response = await fetch(`/api/students/test/${institutionId}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('apiResult', `✅ Conexión exitosa!\nRespuesta: ${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    showResult('apiResult', `❌ Error de conexión: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                showResult('apiResult', `❌ Error de red: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadStudentsFromDB() {
+            try {
+                showResult('loadResult', 'Cargando estudiantes desde base de datos...', 'info');
+                
+                const response = await fetch(`/api/students/${institutionId}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.success && data.students) {
+                        allStudents = data.students;
+                        
+                        showResult('loadResult', `✅ ${allStudents.length} estudiantes cargados exitosamente`, 'success');
+                        
+                        // Mostrar información de estudiantes
+                        const countDiv = document.getElementById('studentsCount');
+                        countDiv.innerHTML = `
+                            <h4>📊 Estudiantes Cargados: ${allStudents.length}</h4>
+                            <p>Primeros 3 estudiantes:</p>
+                            ${allStudents.slice(0, 3).map(s => `<p>• ${s.fullName} (${s.grade}° - ${s.course})</p>`).join('')}
+                        `;
+                        countDiv.style.display = 'block';
+                        
+                        // Llenar selector de estudiantes
+                        const select = document.getElementById('studentSelect');
+                        select.innerHTML = '<option value="">Selecciona un estudiante</option>';
+                        allStudents.forEach(student => {
+                            const option = document.createElement('option');
+                            option.value = student.id;
+                            option.textContent = `${student.fullName} (${student.grade}° - ${student.course})`;
+                            select.appendChild(option);
+                        });
+                        
+                    } else {
+                        showResult('loadResult', `❌ Error en respuesta: ${JSON.stringify(data)}`, 'error');
+                    }
+                } else {
+                    showResult('loadResult', `❌ Error HTTP: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                showResult('loadResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function onStudentSelect() {
+            const select = document.getElementById('studentSelect');
+            const studentId = select.value;
+            
+            if (studentId) {
+                selectedStudent = allStudents.find(s => s.id === studentId);
+                
+                if (selectedStudent) {
+                    const infoDiv = document.getElementById('selectedStudentInfo');
+                    infoDiv.innerHTML = `
+                        <h4>👤 Estudiante Seleccionado:</h4>
+                        <p><strong>Nombre:</strong> ${selectedStudent.fullName}</p>
+                        <p><strong>Documento:</strong> ${selectedStudent.document}</p>
+                        <p><strong>Email:</strong> ${selectedStudent.email}</p>
+                        <p><strong>Grado:</strong> ${selectedStudent.grade}° - Curso ${selectedStudent.course}</p>
+                        <p><strong>Teléfono:</strong> ${selectedStudent.phone}</p>
+                    `;
+                    infoDiv.style.display = 'block';
+                }
+            } else {
+                document.getElementById('selectedStudentInfo').style.display = 'none';
+                selectedStudent = null;
+            }
+        }
+
+        async function testUpdateStudent() {
+            if (!selectedStudent) {
+                showResult('updateResult', '❌ Primero selecciona un estudiante', 'error');
+                return;
+            }
+
+            try {
+                showResult('updateResult', 'Actualizando estudiante en base de datos...', 'info');
+                
+                // Datos de prueba para actualizar
+                const timestamp = new Date().toLocaleTimeString();
+                const updateData = {
+                    nombre: selectedStudent.firstName,
+                    apellido: `${selectedStudent.lastName} [Actualizado ${timestamp}]`,
+                    documento: selectedStudent.document,
+                    email: selectedStudent.email,
+                    telefono: selectedStudent.phone,
+                    grado: selectedStudent.grade,
+                    curso: selectedStudent.course,
+                    direccion: `Dirección actualizada ${timestamp}`,
+                    acudienteNombre: selectedStudent.guardian.name,
+                    acudienteTelefono: selectedStudent.guardian.phone,
+                    acudienteEmail: selectedStudent.guardian.email
+                };
+
+                console.log('📤 Enviando actualización:', updateData);
+
+                const response = await fetch(`/api/students/student/${selectedStudent.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showResult('updateResult', `✅ Estudiante actualizado exitosamente!\n\nRespuesta del servidor:\n${JSON.stringify(result, null, 2)}`, 'success');
+                    
+                    // Actualizar datos locales
+                    selectedStudent.lastName = updateData.apellido;
+                    selectedStudent.fullName = `${updateData.nombre} ${updateData.apellido}`;
+                    selectedStudent.address = updateData.direccion;
+                    
+                } else {
+                    const errorData = await response.json();
+                    showResult('updateResult', `❌ Error actualizando: ${response.status}\n${JSON.stringify(errorData, null, 2)}`, 'error');
+                }
+
+            } catch (error) {
+                showResult('updateResult', `❌ Error de red: ${error.message}`, 'error');
+            }
+        }
+
+        async function reloadAndVerify() {
+            try {
+                showResult('persistenceResult', 'Recargando datos desde base de datos para verificar persistencia...', 'info');
+                
+                if (!selectedStudent) {
+                    showResult('persistenceResult', '❌ Primero actualiza un estudiante', 'error');
+                    return;
+                }
+
+                const response = await fetch(`/api/students/student/${selectedStudent.id}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.success && data.student) {
+                        const reloadedStudent = data.student;
+                        
+                        // Comparar datos
+                        const comparison = `
+🔍 VERIFICACIÓN DE PERSISTENCIA:
+
+📋 Datos Originales (antes de actualizar):
+• Nombre: ${selectedStudent.firstName} ${selectedStudent.lastName.replace(/ \[Actualizado.*\]/, '')}
+• Dirección: Dirección pendiente
+
+📋 Datos Actuales (después de actualizar):
+• Nombre: ${reloadedStudent.fullName}
+• Dirección: ${reloadedStudent.address}
+
+${reloadedStudent.fullName.includes('[Actualizado') ? '✅ PERSISTENCIA EXITOSA: Los cambios se guardaron en la base de datos' : '❌ PERSISTENCIA FALLIDA: Los cambios no se guardaron'}
+                        `;
+                        
+                        const resultType = reloadedStudent.fullName.includes('[Actualizado') ? 'success' : 'error';
+                        showResult('persistenceResult', comparison, resultType);
+                        
+                    } else {
+                        showResult('persistenceResult', `❌ Error en respuesta: ${JSON.stringify(data)}`, 'error');
+                    }
+                } else {
+                    showResult('persistenceResult', `❌ Error HTTP: ${response.status}`, 'error');
+                }
+
+            } catch (error) {
+                showResult('persistenceResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function updateSystemStatus() {
+            const statusDiv = document.getElementById('systemStatus');
+            statusDiv.innerHTML = `
+                <h4>🔧 Estado del Sistema:</h4>
+                <p>• <strong>Institución ID:</strong> ${institutionId}</p>
+                <p>• <strong>Estudiantes Cargados:</strong> ${allStudents.length}</p>
+                <p>• <strong>Estudiante Seleccionado:</strong> ${selectedStudent ? selectedStudent.fullName : 'Ninguno'}</p>
+                <p>• <strong>Hora Actual:</strong> ${new Date().toLocaleString()}</p>
+            `;
+        }
+
+        // Event listeners
+        document.getElementById('studentSelect').addEventListener('change', onStudentSelect);
+
+        // Actualizar estado cada 5 segundos
+        setInterval(updateSystemStatus, 5000);
+        updateSystemStatus();
+
+        // Instrucciones iniciales
+        console.log('🧪 Test de Persistencia Iniciado');
+        console.log('📋 Pasos a seguir:');
+        console.log('1. Probar conexión con API');
+        console.log('2. Cargar estudiantes desde BD');
+        console.log('3. Seleccionar un estudiante');
+        console.log('4. Actualizar el estudiante');
+        console.log('5. Verificar que los cambios persistan');
+    </script>
+</body>
+</html>

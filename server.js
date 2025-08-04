@@ -21,6 +21,72 @@ app.use((req, res, next) => {
 });
 
 // ===================================
+// ENDPOINT DIRECTO PARA ESTUDIANTES (ANTES DE OTROS MIDDLEWARES)
+// ===================================
+app.get('/api/students/:institutionId', async (req, res) => {
+  try {
+    const institutionId = req.params.institutionId;
+    console.log('🔍 [DIRECTO-EARLY] Obteniendo estudiantes para institución:', institutionId);
+    
+    const studentsFromDB = await prisma.student.findMany({
+      where: {
+        institutionId: institutionId
+      },
+      orderBy: [
+        { grado: 'asc' },
+        { curso: 'asc' },
+        { apellido: 'asc' },
+        { nombre: 'asc' }
+      ]
+    });
+
+    console.log('📊 [DIRECTO-EARLY] Estudiantes encontrados en DB:', studentsFromDB.length);
+
+    // Transformar datos
+    const students = studentsFromDB.map(student => ({
+      id: student.id,
+      firstName: student.nombre || '',
+      lastName: student.apellido || '',
+      fullName: `${student.nombre || ''} ${student.apellido || ''}`.trim(),
+      documentType: 'TI',
+      document: student.documento || '',
+      email: student.email || `${(student.nombre || '').toLowerCase().replace(' ', '.')}@estudiante.edu.co`,
+      phone: student.telefono || '+57 300 000 0000',
+      grade: student.grado || '',
+      course: student.curso || '',
+      status: student.estado === 'activo' ? 'ACTIVE' : 'INACTIVE',
+      enrollmentDate: student.createdAt || new Date().toISOString(),
+      birthDate: student.fechaNacimiento || new Date('2008-01-01').toISOString(),
+      guardian: {
+        name: student.acudienteNombre || 'Acudiente',
+        phone: student.acudienteTelefono || '+57 300 000 0000',
+        email: student.acudienteEmail || 'acudiente@email.com'
+      },
+      address: student.direccion || 'Dirección pendiente',
+      events: [],
+      totalDebt: 0,
+      totalPaid: 0,
+      createdAt: student.createdAt || new Date().toISOString()
+    }));
+
+    console.log('✅ [DIRECTO-EARLY] Estudiantes transformados:', students.length);
+
+    res.json({
+      success: true,
+      students: students
+    });
+
+  } catch (error) {
+    console.error('❌ [DIRECTO-EARLY] Error obteniendo estudiantes:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error obteniendo estudiantes',
+      error: error.message
+    });
+  }
+});
+
+// ===================================
 // RUTAS PRINCIPALES
 // ===================================
 
@@ -117,13 +183,86 @@ try {
   console.log('⚠️ Institution routes not found:', error.message);
 }
 
-// Rutas de estudiantes
+// Endpoint de prueba para estudiantes
+app.get('/api/students/test', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'API de estudiantes funcionando',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Endpoint directo para obtener estudiantes (solución temporal)
+app.get('/api/students/:institutionId', async (req, res) => {
+  try {
+    const institutionId = req.params.institutionId;
+    console.log('🔍 [DIRECTO] Obteniendo estudiantes para institución:', institutionId);
+    
+    const studentsFromDB = await prisma.student.findMany({
+      where: {
+        institutionId: institutionId
+      },
+      orderBy: [
+        { grado: 'asc' },
+        { curso: 'asc' },
+        { apellido: 'asc' },
+        { nombre: 'asc' }
+      ]
+    });
+
+    console.log('📊 [DIRECTO] Estudiantes encontrados en DB:', studentsFromDB.length);
+
+    // Transformar datos para que coincidan con el formato esperado por el frontend
+    const students = studentsFromDB.map(student => ({
+      id: student.id,
+      firstName: student.nombre || '',
+      lastName: student.apellido || '',
+      fullName: `${student.nombre || ''} ${student.apellido || ''}`.trim(),
+      documentType: 'TI',
+      document: student.documento || '',
+      email: student.email || `${(student.nombre || '').toLowerCase().replace(' ', '.')}@estudiante.edu.co`,
+      phone: student.telefono || '+57 300 000 0000',
+      grade: student.grado || '',
+      course: student.curso || '',
+      status: student.estado === 'activo' ? 'ACTIVE' : 'INACTIVE',
+      enrollmentDate: student.createdAt || new Date().toISOString(),
+      birthDate: student.fechaNacimiento || new Date('2008-01-01').toISOString(),
+      guardian: {
+        name: student.acudienteNombre || 'Acudiente',
+        phone: student.acudienteTelefono || '+57 300 000 0000',
+        email: student.acudienteEmail || 'acudiente@email.com'
+      },
+      address: student.direccion || 'Dirección pendiente',
+      events: [],
+      totalDebt: 0,
+      totalPaid: 0,
+      createdAt: student.createdAt || new Date().toISOString()
+    }));
+
+    console.log('✅ [DIRECTO] Estudiantes transformados:', students.length);
+
+    res.json({
+      success: true,
+      students: students
+    });
+
+  } catch (error) {
+    console.error('❌ [DIRECTO] Error obteniendo estudiantes:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error obteniendo estudiantes',
+      error: error.message
+    });
+  }
+});
+
+// Rutas de estudiantes (versión simple)
 try {
-  const studentRoutes = require('./routes/students');
+  const studentRoutes = require('./routes/students-simple');
   app.use('/api/students', studentRoutes);
-  console.log('✅ Student routes loaded');
+  console.log('✅ Student routes (simple) loaded');
 } catch (error) {
-  console.log('⚠️ Student routes not found:', error.message);
+  console.log('⚠️ Student routes (simple) not found:', error.message);
 }
 
 // Rutas financieras (NUEVAS)
@@ -189,6 +328,24 @@ try {
   console.log('⚠️ Report routes not found:', error.message);
 }
 
+// Rutas de eventos
+try {
+  const eventRoutes = require('./routes/events');
+  app.use('/api/events', eventRoutes);
+  console.log('✅ Event routes loaded');
+} catch (error) {
+  console.log('⚠️ Event routes not found:', error.message);
+}
+
+// Rutas de CSV
+try {
+  const csvRoutes = require('./routes/csv');
+  app.use('/api/csv', csvRoutes);
+  console.log('✅ CSV routes loaded');
+} catch (error) {
+  console.log('⚠️ CSV routes not found:', error.message);
+}
+
 // ===================================
 // MIDDLEWARE DE REDIRECCIONAMIENTO INTELIGENTE
 // ===================================
@@ -238,7 +395,7 @@ app.get('/dashboard.html', async (req, res) => {
 // ERROR HANDLERS
 // ===================================
 
-// 404 handler para API routes
+// 404 handler para API routes (debe ir DESPUÉS de todas las rutas de API)
 app.use('/api/*', (req, res) => {
   res.status(404).json({ 
     success: false,

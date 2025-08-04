@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Event Modal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Event Modal</h1>
+        
+        <div class="debug-info" id="debugInfo">
+            <strong>Debug Info:</strong><br>
+            <div id="debugContent">Cargando...</div>
+        </div>
+        
+        <div class="mb-3">
+            <button class="btn btn-primary" id="testBtn1">
+                Test Botón 1 (Header)
+            </button>
+            <button class="btn btn-success" id="testBtn2">
+                Test Botón 2 (Card)
+            </button>
+            <button class="btn btn-info" id="testBtn3">
+                Test Modal Directo
+            </button>
+        </div>
+
+        <!-- Modal de prueba -->
+        <div class="modal fade" id="eventModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="eventModalTitle">Test Modal</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="eventForm">
+                            <div class="mb-3">
+                                <label class="form-label">Nombre del Evento</label>
+                                <input type="text" class="form-control" id="eventName" name="name">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Tipo</label>
+                                <select class="form-select" id="eventType" name="type">
+                                    <option value="">Seleccionar</option>
+                                    <option value="raffle">Rifa</option>
+                                    <option value="bingo">Bingo</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simular la clase EventsTableView
+        class TestEventsTableView {
+            constructor() {
+                this.events = [];
+                this.currentEvent = null;
+                this.init();
+            }
+
+            init() {
+                console.log('🚀 Inicializando test...');
+                this.setupEventListeners();
+                this.updateDebugInfo();
+            }
+
+            setupEventListeners() {
+                document.getElementById('testBtn1').addEventListener('click', () => {
+                    console.log('🔘 Botón 1 clickeado');
+                    this.showEventModal();
+                });
+
+                document.getElementById('testBtn2').addEventListener('click', () => {
+                    console.log('🔘 Botón 2 clickeado');
+                    this.showEventModal();
+                });
+
+                document.getElementById('testBtn3').addEventListener('click', () => {
+                    console.log('🔘 Botón 3 clickeado - Modal directo');
+                    this.showModalDirect();
+                });
+            }
+
+            showEventModal(eventId = null) {
+                console.log('📝 showEventModal llamado', { eventId });
+                
+                this.currentEvent = eventId ? this.events.find(e => e.id === eventId) : null;
+                
+                const modalElement = document.getElementById('eventModal');
+                const modalTitle = document.getElementById('eventModalTitle');
+                
+                console.log('🔍 Elementos encontrados:', {
+                    modalElement: !!modalElement,
+                    modalTitle: !!modalTitle
+                });
+                
+                if (!modalElement) {
+                    console.error('❌ Modal eventModal no encontrado');
+                    alert('Error: Modal no encontrado');
+                    return;
+                }
+                
+                if (modalTitle) {
+                    modalTitle.textContent = this.currentEvent ? 'Editar Evento' : 'Nuevo Evento';
+                }
+                
+                // Limpiar formulario
+                this.resetEventForm();
+                
+                // Mostrar modal con corrección agresiva
+                try {
+                    console.log('🔧 Aplicando corrección agresiva de modal...');
+                    
+                    // Limpiar TODOS los modales y backdrops existentes
+                    const allModals = document.querySelectorAll('.modal');
+                    allModals.forEach(modal => {
+                        const instance = bootstrap.Modal.getInstance(modal);
+                        if (instance) {
+                            instance.dispose();
+                        }
+                        modal.classList.remove('show');
+                        modal.style.display = 'none';
+                    });
+                    
+                    // Limpiar TODOS los backdrops
+                    const allBackdrops = document.querySelectorAll('.modal-backdrop');
+                    allBackdrops.forEach(backdrop => backdrop.remove());
+                    
+                    // Restaurar completamente el body
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                    document.body.style.marginRight = '';
+                    
+                    // Esperar un momento para que se limpie todo
+                    setTimeout(() => {
+                        // Crear modal con configuración que NO bloquee
+                        const modal = new bootstrap.Modal(modalElement, {
+                            backdrop: true, // Permitir cerrar haciendo clic fuera
+                            keyboard: true,
+                            focus: true
+                        });
+                        
+                        modal.show();
+                        console.log('✅ Modal mostrado correctamente');
+                        this.updateDebugInfo();
+                    }, 100);
+                    
+                } catch (error) {
+                    console.error('❌ Error mostrando modal:', error);
+                    alert('Error al mostrar el modal: ' + error.message);
+                }
+            }
+
+            showModalDirect() {
+                const modalElement = document.getElementById('eventModal');
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+                console.log('✅ Modal directo mostrado');
+            }
+
+            resetEventForm() {
+                console.log('🧹 Limpiando formulario de evento...');
+                
+                const form = document.getElementById('eventForm');
+                if (form) {
+                    form.reset();
+                    console.log('✅ Formulario reseteado');
+                } else {
+                    console.warn('⚠️ Formulario eventForm no encontrado');
+                }
+                
+                this.currentEvent = null;
+            }
+
+            updateDebugInfo() {
+                const debugContent = document.getElementById('debugContent');
+                const modalElement = document.getElementById('eventModal');
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                const bodyClasses = Array.from(document.body.classList);
+                
+                debugContent.innerHTML = `
+                    Bootstrap disponible: ${typeof bootstrap !== 'undefined' ? '✅' : '❌'}<br>
+                    Modal element: ${modalElement ? '✅' : '❌'}<br>
+                    Backdrops activos: ${backdrops.length}<br>
+                    Body classes: ${bodyClasses.join(', ') || 'ninguna'}<br>
+                    Body overflow: ${document.body.style.overflow || 'normal'}<br>
+                    Body padding-right: ${document.body.style.paddingRight || 'normal'}<br>
+                    Timestamp: ${new Date().toLocaleTimeString()}
+                `;
+            }
+        }
+
+        // Inicializar cuando se carga la página
+        document.addEventListener('DOMContentLoaded', () => {
+            window.testEventsPage = new TestEventsTableView();
+            
+            // Actualizar debug info cada 2 segundos
+            setInterval(() => {
+                window.testEventsPage.updateDebugInfo();
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

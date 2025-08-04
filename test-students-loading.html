@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Carga de Estudiantes</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .loading { color: orange; }
+        .success { color: green; }
+        .error { color: red; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test - Carga de Estudiantes</h1>
+    <div id="status">Iniciando prueba...</div>
+    <div id="logs"></div>
+
+    <script>
+        const logs = document.getElementById('logs');
+        const status = document.getElementById('status');
+
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logs.appendChild(div);
+            console.log(message);
+        }
+
+        async function testStudentsLoading() {
+            try {
+                status.textContent = '🔄 Probando carga de estudiantes...';
+                status.className = 'loading';
+
+                // Simular institutionId de Villas de San Pablo
+                const institutionId = 'cmdt7n66m00003t1jy17ay313';
+                
+                log('🏫 Usando institutionId: ' + institutionId);
+                
+                // Probar la API
+                log('📡 Probando API: /api/students/' + institutionId);
+                
+                try {
+                    const response = await fetch(`/api/students/${institutionId}`);
+                    log(`📊 Respuesta API: ${response.status} ${response.statusText}`);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        log(`✅ Datos recibidos: ${JSON.stringify(data, null, 2)}`);
+                        
+                        if (data.students && Array.isArray(data.students)) {
+                            log(`👥 Estudiantes encontrados: ${data.students.length}`);
+                            status.textContent = `✅ API funcionando - ${data.students.length} estudiantes`;
+                            status.className = 'success';
+                        } else {
+                            log('⚠️ Formato de respuesta inesperado');
+                            status.textContent = '⚠️ API responde pero formato incorrecto';
+                            status.className = 'error';
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        log(`❌ Error API: ${errorText}`);
+                        status.textContent = `❌ Error API: ${response.status}`;
+                        status.className = 'error';
+                    }
+                } catch (apiError) {
+                    log(`❌ Error conectando a API: ${apiError.message}`);
+                    
+                    // Probar localStorage como fallback
+                    log('🔄 Probando localStorage como fallback...');
+                    
+                    const possibleKeys = ['students', 'estudiantes', 'studentsData', 'allStudents'];
+                    let foundData = false;
+                    
+                    for (const key of possibleKeys) {
+                        const data = localStorage.getItem(key);
+                        if (data) {
+                            try {
+                                const parsed = JSON.parse(data);
+                                if (Array.isArray(parsed) && parsed.length > 0) {
+                                    log(`✅ Encontrados ${parsed.length} estudiantes en localStorage[${key}]`);
+                                    status.textContent = `✅ Datos desde localStorage - ${parsed.length} estudiantes`;
+                                    status.className = 'success';
+                                    foundData = true;
+                                    break;
+                                }
+                            } catch (e) {
+                                log(`❌ Error parsing localStorage[${key}]: ${e.message}`);
+                            }
+                        }
+                    }
+                    
+                    if (!foundData) {
+                        log('❌ No se encontraron datos en localStorage');
+                        status.textContent = '❌ Sin datos - usando ejemplos';
+                        status.className = 'error';
+                    }
+                }
+                
+            } catch (error) {
+                log(`❌ Error general: ${error.message}`);
+                status.textContent = `❌ Error: ${error.message}`;
+                status.className = 'error';
+            }
+        }
+
+        // Ejecutar prueba al cargar
+        document.addEventListener('DOMContentLoaded', testStudentsLoading);
+    </script>
+</body>
+</html>

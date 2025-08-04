@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Modales Tema Oscuro</title>
+    <link rel="stylesheet" href="public/css/accounting-dashboard.css">
+    <link rel="stylesheet" href="public/css/student-modals.css">
+    <link rel="stylesheet" href="public/css/dark-theme-tables.css">
+    <link rel="stylesheet" href="public/css/dark-theme-forms.css">
+    <link rel="stylesheet" href="public/css/dark-theme-modals.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-secondary);
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--card-bg);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .test-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .theme-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .demo-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin-top: 1rem;
+        }
+        
+        .demo-table thead th {
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            font-weight: 700;
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .demo-table tbody td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-primary);
+        }
+        
+        .demo-table tbody tr:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .demo-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <button class="btn btn-primary theme-toggle-btn" onclick="toggleTheme()">
+        🌓 Cambiar Tema
+    </button>
+    
+    <div class="test-container">
+        <h1 style="text-align: center; color: var(--text-primary); margin-bottom: 2rem;">
+            🌙 Test Modales - Tema Oscuro Optimizado
+        </h1>
+        
+        <!-- Botones para Abrir Modales -->
+        <div class="test-section">
+            <h2 class="test-title">🎯 Modales de Acciones</h2>
+            <div class="buttons-grid">
+                <button class="btn btn-info" onclick="showViewModal()">
+                    👁️ Ver Estudiante
+                </button>
+                <button class="btn btn-warning" onclick="showEditModal()">
+                    ✏️ Editar Estudiante
+                </button>
+                <button class="btn btn-success" onclick="showPaymentModal()">
+                    💳 Registrar Pago
+                </button>
+                <button class="btn btn-error" onclick="showDeleteModal()">
+                    🗑️ Eliminar Estudiante
+                </button>
+                <button class="btn btn-primary" onclick="showFormModal()">
+                    📝 Formulario Completo
+                </button>
+                <button class="btn btn-secondary" onclick="showTableModal()">
+                    📊 Modal con Tabla
+                </button>
+            </div>
+        </div>
+        
+        <!-- Tabla Demo -->
+        <div class="test-section">
+            <h2 class="test-title">📋 Tabla de Estudiantes Demo</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Haz clic en los botones de acción para ver los modales optimizados:
+            </p>
+            <table class="demo-table">
+                <thead>
+                    <tr>
+                        <th>👤 Estudiante</th>
+                        <th>📧 Email</th>
+                        <th>🎓 Grado</th>
+                        <th>💰 Deuda</th>
+                        <th>⚙️ Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #1e40af); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">JD</div>
+                                <div>
+                                    <div style="font-weight: 600;">Juan David Pérez</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">TI: 1234567890</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>juan.perez@email.com</td>
+                        <td><span style="background: var(--info-bg); color: var(--info-text); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">11°-01</span></td>
+                        <td><span style="color: var(--error-text); font-weight: 700;">$150,000</span></td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-info btn-sm" onclick="showViewModal()" title="Ver">👁️</button>
+                                <button class="btn btn-warning btn-sm" onclick="showEditModal()" title="Editar">✏️</button>
+                                <button class="btn btn-success btn-sm" onclick="showPaymentModal()" title="Pagar">💳</button>
+                                <button class="btn btn-error btn-sm" onclick="showDeleteModal()" title="Eliminar">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--success-text), #059669); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">MG</div>
+                                <div>
+                                    <div style="font-weight: 600;">María García López</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">TI: 0987654321</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>maria.garcia@email.com</td>
+                        <td><span style="background: var(--info-bg); color: var(--info-text); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">10°-02</span></td>
+                        <td><span style="color: var(--success-text); font-weight: 700;">$0</span></td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-info btn-sm" onclick="showViewModal()" title="Ver">👁️</button>
+                                <button class="btn btn-warning btn-sm" onclick="showEditModal()" title="Editar">✏️</button>
+                                <button class="btn btn-success btn-sm" onclick="showPaymentModal()" title="Pagar">💳</button>
+                                <button class="btn btn-error btn-sm" onclick="showDeleteModal()" title="Eliminar">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL VER ESTUDIANTE -->
+    <div id="viewModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>
+                    <span class="icon view">👁️</span>
+                    Información del Estudiante
+                </h2>
+                <button class="modal-close" onclick="closeModal('viewModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="student-modal-info">
+                    <div class="student-modal-avatar">JD</div>
+                    <div class="student-modal-details">
+                        <h3>Juan David Pérez González</h3>
+                        <div class="student-meta">
+                            <div class="meta-item">
+                                <span class="icon">📄</span>
+                                <span>TI: 1234567890</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="icon">📧</span>
+                                <span>juan.perez@email.com</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="icon">📱</span>
+                                <span>+57 300 123 4567</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="icon">🎓</span>
+                                <span>11° - Curso 01</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h4>💰 Información Financiera</h4>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="label">Deuda Total:</span>
+                            <span class="value amount negative">$150,000</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Total Pagado:</span>
+                            <span class="value amount positive">$350,000</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Último Pago:</span>
+                            <span class="value">15/01/2025</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h4>🎯 Eventos Asignados</h4>
+                    <table class="modal-table">
+                        <thead>
+                            <tr>
+                                <th>Evento</th>
+                                <th>Valor</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Matrícula 2025</td>
+                                <td>$500,000</td>
+                                <td><span class="modal-badge success">Pagado</span></td>
+                            </tr>
+                            <tr>
+                                <td>Seguro Estudiantil</td>
+                                <td>$50,000</td>
+                                <td><span class="modal-badge warning">Pendiente</span></td>
+                            </tr>
+                            <tr>
+                                <td>Materiales</td>
+                                <td>$100,000</td>
+                                <td><span class="modal-badge error">Vencido</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-actions">
+                    <button class="modal-btn cancel" onclick="closeModal('viewModal')">Cerrar</button>
+                    <button class="modal-btn primary" onclick="showEditModal(); closeModal('viewModal')">Editar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR ESTUDIANTE -->
+    <div id="editModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>
+                    <span class="icon edit">✏️</span>
+                    Editar Estudiante
+                </h2>
+                <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form class="modal-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombres:</label>
+                            <input type="text" value="Juan David" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Apellidos:</label>
+                            <input type="text" value="Pérez González" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Documento:</label>
+                            <input type="text" value="1234567890" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="email" value="juan.perez@email.com" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Teléfono:</label>
+                            <input type="tel" value="+57 300 123 4567">
+                        </div>
+                        <div class="form-group">
+                            <label>Grado:</label>
+                            <select required>
+                                <option value="6">6° (Sexto)</option>
+                                <option value="7">7° (Séptimo)</option>
+                                <option value="8">8° (Octavo)</option>
+                                <option value="9">9° (Noveno)</option>
+                                <option value="10">10° (Décimo)</option>
+                                <option value="11" selected>11° (Undécimo)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Observaciones:</label>
+                        <textarea placeholder="Notas adicionales sobre el estudiante..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-actions">
+                    <button class="modal-btn cancel" onclick="closeModal('editModal')">Cancelar</button>
+                    <button class="modal-btn primary" onclick="saveStudent()">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL REGISTRAR PAGO -->
+    <div id="paymentModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>
+                    <span class="icon payment">💳</span>
+                    Registrar Pago
+                </h2>
+                <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="student-modal-info">
+                    <div class="student-modal-avatar">JD</div>
+                    <div class="student-modal-details">
+                        <h3>Juan David Pérez González</h3>
+                        <div class="student-meta">
+                            <div class="meta-item">
+                                <span class="icon">💰</span>
+                                <span>Deuda Total: <strong style="color: var(--error-text);">$150,000</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <form class="modal-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Evento a Pagar:</label>
+                            <select required>
+                                <option value="">Seleccionar evento...</option>
+                                <option value="seguro">Seguro Estudiantil - $50,000</option>
+                                <option value="materiales">Materiales - $100,000</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Monto a Pagar:</label>
+                            <input type="number" placeholder="0" min="0" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Método de Pago:</label>
+                            <select required>
+                                <option value="">Seleccionar método...</option>
+                                <option value="efectivo">Efectivo</option>
+                                <option value="transferencia">Transferencia</option>
+                                <option value="tarjeta">Tarjeta</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Pago:</label>
+                            <input type="date" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Observaciones:</label>
+                        <textarea placeholder="Notas sobre el pago..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-actions">
+                    <button class="modal-btn cancel" onclick="closeModal('paymentModal')">Cancelar</button>
+                    <button class="modal-btn success" onclick="processPayment()">Registrar Pago</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ELIMINAR -->
+    <div id="deleteModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>
+                    <span class="icon delete">🗑️</span>
+                    Confirmar Eliminación
+                </h2>
+                <button class="modal-close" onclick="closeModal('deleteModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; padding: 2rem 1rem;">
+                    <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--error-bg); color: var(--error-text); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.5rem;">
+                        ⚠️
+                    </div>
+                    <h3 style="color: var(--text-primary); margin-bottom: 1rem;">¿Estás seguro?</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6;">
+                        Esta acción eliminará permanentemente al estudiante <strong>Juan David Pérez González</strong> y todos sus datos asociados. Esta acción no se puede deshacer.
+                    </p>
+                    <div class="info-item" style="background: var(--error-bg); border: 1px solid var(--error-border); margin-bottom: 1rem;">
+                        <span class="label">Deuda pendiente:</span>
+                        <span class="value amount negative">$150,000</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-actions">
+                    <button class="modal-btn cancel" onclick="closeModal('deleteModal')">Cancelar</button>
+                    <button class="modal-btn danger" onclick="deleteStudent()">Eliminar Estudiante</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CON LOADING -->
+    <div id="loadingModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container" style="max-width: 400px;">
+            <div class="modal-body">
+                <div class="modal-loading">
+                    <div class="spinner"></div>
+                    <div class="message">Procesando...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.body.setAttribute('data-theme', newTheme);
+            
+            localStorage.setItem('theme', newTheme);
+            console.log(`🎨 Tema cambiado a: ${newTheme}`);
+        }
+        
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        function showViewModal() {
+            showModal('viewModal');
+        }
+        
+        function showEditModal() {
+            showModal('editModal');
+        }
+        
+        function showPaymentModal() {
+            showModal('paymentModal');
+        }
+        
+        function showDeleteModal() {
+            showModal('deleteModal');
+        }
+        
+        function showFormModal() {
+            showEditModal(); // Reutilizar el modal de edición
+        }
+        
+        function showTableModal() {
+            showViewModal(); // Reutilizar el modal de vista
+        }
+        
+        function saveStudent() {
+            closeModal('editModal');
+            showLoadingModal();
+            setTimeout(() => {
+                closeModal('loadingModal');
+                alert('✅ Estudiante actualizado correctamente');
+            }, 2000);
+        }
+        
+        function processPayment() {
+            closeModal('paymentModal');
+            showLoadingModal();
+            setTimeout(() => {
+                closeModal('loadingModal');
+                alert('✅ Pago registrado correctamente');
+            }, 2000);
+        }
+        
+        function deleteStudent() {
+            closeModal('deleteModal');
+            showLoadingModal();
+            setTimeout(() => {
+                closeModal('loadingModal');
+                alert('✅ Estudiante eliminado correctamente');
+            }, 2000);
+        }
+        
+        function showLoadingModal() {
+            showModal('loadingModal');
+        }
+        
+        // Cerrar modal al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Cerrar modal con ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modals = document.querySelectorAll('.modal-overlay');
+                modals.forEach(modal => {
+                    if (modal.style.display === 'flex') {
+                        modal.style.display = 'none';
+                    }
+                });
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Inicializar tema
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.body.setAttribute('data-theme', savedTheme);
+            
+            console.log('✅ Test de modales tema oscuro inicializado');
+        });
+    </script>
+</body>
+</html>

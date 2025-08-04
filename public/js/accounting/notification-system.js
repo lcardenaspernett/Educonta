@@ -66,7 +66,7 @@ class NotificationSystem {
         if (window.pendingInvoicesManager) {
             const pendingInvoices = window.pendingInvoicesManager.pendingInvoices || [];
             const myPendingCount = this.getMyPendingInvoicesCount(pendingInvoices);
-            
+
             if (myPendingCount > 0) {
                 this.addNotification({
                     id: 'pending-invoices',
@@ -82,10 +82,10 @@ class NotificationSystem {
         }
 
         // Notificaciones para transacciones pendientes
-        if (window.DemoData) {
-            const pendingTransactions = window.DemoData.transactions.filter(t => t.status === 'PENDING');
+        if (null) {
+            const pendingTransactions = null.transactions.filter(t => t.status === 'PENDING');
             const myPendingTransactions = this.getMyPendingTransactionsCount(pendingTransactions);
-            
+
             if (myPendingTransactions > 0) {
                 this.addNotification({
                     id: 'pending-transactions',
@@ -124,8 +124,8 @@ class NotificationSystem {
 
         // Verificar facturas de alto valor
         if (window.pendingInvoicesManager) {
-            const highValueInvoices = window.pendingInvoicesManager.pendingInvoices.filter(inv => 
-                inv.amount > 1000000 || 
+            const highValueInvoices = window.pendingInvoicesManager.pendingInvoices.filter(inv =>
+                inv.amount > 1000000 ||
                 ['MATRICULA', 'EXCURSION', 'GRADO'].includes(this.normalizeConceptType(inv.concept))
             );
 
@@ -236,7 +236,7 @@ class NotificationSystem {
         if (notification && notification.action) {
             notification.action();
             this.markAsRead(notificationId);
-            
+
             // Cerrar toast si existe
             const toast = document.querySelector('.notification-toast');
             if (toast) toast.remove();
@@ -251,7 +251,7 @@ class NotificationSystem {
         if (dropdown) {
             const isVisible = dropdown.style.display === 'block';
             dropdown.style.display = isVisible ? 'none' : 'block';
-            
+
             if (!isVisible) {
                 this.renderNotificationList();
             }
@@ -281,15 +281,15 @@ class NotificationSystem {
                 const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 };
                 const aPriority = priorityOrder[a.priority] || 2;
                 const bPriority = priorityOrder[b.priority] || 2;
-                
+
                 if (aPriority !== bPriority) return bPriority - aPriority;
-                
+
                 // Luego por fecha
                 return new Date(b.createdAt) - new Date(a.createdAt);
             })
             .slice(0, 10); // Mostrar solo las 10 más recientes
 
-        list.innerHTML = sortedNotifications.map(notification => 
+        list.innerHTML = sortedNotifications.map(notification =>
             this.renderNotificationItem(notification)
         ).join('');
     }
@@ -396,7 +396,7 @@ class NotificationSystem {
         if (window.pendingInvoicesManager) {
             const pendingCount = this.getMyPendingInvoicesCount(window.pendingInvoicesManager.pendingInvoices);
             const existingNotification = this.notifications.find(n => n.id === 'pending-invoices');
-            
+
             if (pendingCount > 0 && !existingNotification) {
                 this.addNotification({
                     id: 'pending-invoices',
@@ -424,13 +424,13 @@ class NotificationSystem {
                 section.classList.remove('active');
             });
             document.getElementById('movements-section')?.classList.add('active');
-            
+
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
             document.querySelector('[data-section="movements"]')?.classList.add('active');
         }
-        
+
         // Cerrar dropdown
         const dropdown = document.getElementById('notificationDropdown');
         if (dropdown) dropdown.style.display = 'none';
@@ -442,14 +442,14 @@ class NotificationSystem {
             const user = window.AccountingState.get('user');
             if (user && user.role) return user.role;
         }
-        
+
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         return user.role || 'AUXILIARY_ACCOUNTANT';
     }
 
     getMyPendingInvoicesCount(invoices) {
         if (!invoices) return 0;
-        
+
         return invoices.filter(invoice => {
             const approvalInfo = this.getApprovalRequirement(invoice);
             return approvalInfo.canApprove;
@@ -458,7 +458,7 @@ class NotificationSystem {
 
     getMyPendingTransactionsCount(transactions) {
         if (!transactions) return 0;
-        
+
         return transactions.filter(transaction => {
             const approvalInfo = this.getTransactionApprovalRequirement(transaction);
             return approvalInfo.canApprove;
@@ -468,7 +468,7 @@ class NotificationSystem {
     getApprovalRequirement(invoice) {
         const concept = this.normalizeConceptType(invoice.concept);
         const amount = invoice.amount || 0;
-        
+
         // Lógica simplificada de aprobación
         if (amount > 1000000 || ['MATRICULA', 'EXCURSION', 'GRADO'].includes(concept)) {
             return { canApprove: this.userRole === 'RECTOR' };
@@ -480,7 +480,7 @@ class NotificationSystem {
     getTransactionApprovalRequirement(transaction) {
         const amount = transaction.amount || 0;
         const description = (transaction.description || '').toUpperCase();
-        
+
         if (amount > 1000000 || description.includes('MATRICULA') || description.includes('EXCURSION')) {
             return { canApprove: this.userRole === 'RECTOR' };
         } else {
@@ -490,14 +490,14 @@ class NotificationSystem {
 
     normalizeConceptType(concept) {
         if (!concept) return 'OTRO';
-        
+
         const normalized = concept.toUpperCase();
-        
+
         if (normalized.includes('MATRICULA')) return 'MATRICULA';
         if (normalized.includes('EXCURSION')) return 'EXCURSION';
         if (normalized.includes('GRADO')) return 'GRADO';
         if (normalized.includes('MENSUALIDAD')) return 'MENSUALIDAD';
-        
+
         return 'OTRO';
     }
 
@@ -513,7 +513,7 @@ class NotificationSystem {
         if (diffMins < 60) return `Hace ${diffMins} min`;
         if (diffHours < 24) return `Hace ${diffHours}h`;
         if (diffDays < 7) return `Hace ${diffDays}d`;
-        
+
         return date.toLocaleDateString('es-CO');
     }
 
@@ -568,13 +568,20 @@ class NotificationSystem {
                 right: 0;
                 width: 400px;
                 max-width: 90vw;
-                background: var(--bg-card);
-                border: 1px solid var(--border);
+                background: #ffffff;
+                border: 1px solid #e0e0e0;
                 border-radius: 12px;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-                z-index: 1000;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+                z-index: 9998;
                 display: none;
                 margin-top: 0.5rem;
+                opacity: 1;
+            }
+            
+            [data-theme="dark"] .notification-dropdown {
+                background: #2d3748;
+                border-color: #4a5568;
+                color: #ffffff;
             }
 
             .notification-header {
@@ -616,27 +623,43 @@ class NotificationSystem {
                 align-items: flex-start;
                 gap: 0.75rem;
                 padding: 1rem;
-                border-bottom: 1px solid var(--border);
+                border-bottom: 1px solid #e5e7eb;
                 transition: background 0.2s;
+                background: #ffffff;
+                opacity: 1;
             }
 
             .notification-item:hover {
-                background: var(--bg-hover);
+                background: #f8fafc;
             }
 
             .notification-item.unread {
-                background: rgba(59, 130, 246, 0.05);
-                border-left: 3px solid var(--primary);
+                background: #eff6ff;
+                border-left: 3px solid #3b82f6;
             }
 
             .notification-item.priority-urgent {
-                border-left: 3px solid var(--error);
-                background: rgba(239, 68, 68, 0.05);
+                border-left: 3px solid #ef4444;
+                background: #fef2f2;
             }
 
             .notification-item.priority-high {
-                border-left: 3px solid var(--warning);
-                background: rgba(245, 158, 11, 0.05);
+                border-left: 3px solid #f59e0b;
+                background: #fffbeb;
+            }
+            
+            [data-theme="dark"] .notification-item {
+                background: #374151;
+                border-bottom-color: #4b5563;
+                color: #ffffff;
+            }
+            
+            [data-theme="dark"] .notification-item:hover {
+                background: #4b5563;
+            }
+            
+            [data-theme="dark"] .notification-item.unread {
+                background: #1e3a8a;
             }
 
             .notification-icon {
@@ -756,24 +779,47 @@ class NotificationSystem {
                 right: 20px;
                 width: 350px;
                 max-width: 90vw;
-                background: var(--bg-card);
-                border: 1px solid var(--border);
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
                 border-radius: 12px;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                box-shadow: 0 10px 40px rgba(0,0,0,0.25);
                 z-index: 10001;
                 animation: slideInRight 0.3s ease-out;
+                opacity: 1;
+                color: #1f2937;
             }
 
             .notification-toast.error {
-                border-left: 4px solid var(--error);
+                border-left: 4px solid #ef4444;
+                background: #fef2f2;
             }
 
             .notification-toast.warning {
-                border-left: 4px solid var(--warning);
+                border-left: 4px solid #f59e0b;
+                background: #fffbeb;
             }
 
             .notification-toast.success {
-                border-left: 4px solid var(--success);
+                border-left: 4px solid #10b981;
+                background: #f0fdf4;
+            }
+            
+            [data-theme="dark"] .notification-toast {
+                background: #374151;
+                border-color: #4b5563;
+                color: #ffffff;
+            }
+            
+            [data-theme="dark"] .notification-toast.error {
+                background: #7f1d1d;
+            }
+            
+            [data-theme="dark"] .notification-toast.warning {
+                background: #78350f;
+            }
+            
+            [data-theme="dark"] .notification-toast.success {
+                background: #14532d;
             }
 
             .notification-toast.info {
@@ -792,8 +838,14 @@ class NotificationSystem {
             }
 
             .toast-header strong {
-                color: var(--text);
+                color: #1f2937;
                 font-size: 0.875rem;
+                font-weight: 600;
+            }
+            
+            [data-theme="dark"] .toast-header strong {
+                color: #ffffff;
+            }
             }
 
             .toast-close {
@@ -818,8 +870,14 @@ class NotificationSystem {
             }
 
             .toast-message {
-                color: var(--text-light);
+                color: #6b7280;
                 font-size: 0.8125rem;
+                line-height: 1.4;
+            }
+            
+            [data-theme="dark"] .toast-message {
+                color: #d1d5db;
+            }
                 line-height: 1.4;
                 margin-bottom: 0.75rem;
             }

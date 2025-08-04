@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Eventos con Participantes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .test-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .event-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .event-card:hover {
+            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
+        }
+        
+        .event-card.selected {
+            border-color: #007bff;
+            background-color: #f8f9ff;
+        }
+        
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        
+        .progress-mini {
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-card">
+            <h1 class="mb-4">
+                <i class="fas fa-calendar-check text-primary"></i>
+                Test - Sistema de Eventos con Participantes
+            </h1>
+            
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Instrucciones:</strong> Haz clic en cualquier evento para ver la lista de participantes.
+                Los datos son de demostración y se generan automáticamente.
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h3 class="mb-3">Eventos Disponibles</h3>
+            <div id="eventsContainer">
+                <!-- Los eventos se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver participantes del evento -->
+    <div class="modal fade" id="participantsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-users me-2"></i>
+                        Participantes del Evento: <span id="participantsEventName"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Resumen de participantes -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h4 class="mb-1" id="totalParticipants">0</h4>
+                                    <small>Total Participantes</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h4 class="mb-1" id="paidParticipants">0</h4>
+                                    <small>Pagos Completos</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <h4 class="mb-1" id="partialParticipants">0</h4>
+                                    <small>Pagos Parciales</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body text-center">
+                                    <h4 class="mb-1" id="pendingParticipants">0</h4>
+                                    <small>Pendientes</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de participantes -->
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Estudiante</th>
+                                    <th>Grado</th>
+                                    <th>Estado</th>
+                                    <th>Monto Esperado</th>
+                                    <th>Monto Pagado</th>
+                                    <th>Fecha Pago</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="participantsTableBody">
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Cargando...</span>
+                                        </div>
+                                        <p class="mt-2 text-muted">Cargando participantes...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Sistema de prueba simplificado
+        class EventsTestSystem {
+            constructor() {
+                this.events = [
+                    {
+                        id: 1,
+                        nombre: 'Rifa Navideña 2024',
+                        tipo: 'raffle',
+                        estado: 'active',
+                        fechaInicio: '2024-12-01',
+                        fechaFin: '2024-12-24',
+                        metaRecaudacion: 5000000,
+                        montoRecaudado: 2500000,
+                        descripcion: 'Rifa navideña para recaudar fondos para mejoras institucionales',
+                        precioBoletaRifa: 10000,
+                        maxBoletasRifa: 500,
+                        boletasVendidas: 250,
+                        stats: {
+                            totalParticipants: 150,
+                            paidParticipants: 100,
+                            partialParticipants: 30,
+                            pendingParticipants: 20
+                        }
+                    },
+                    {
+                        id: 2,
+                        nombre: 'Derecho a Grado 2024-2',
+                        tipo: 'graduation',
+                        estado: 'completed',
+                        fechaInicio: '2024-11-01',
+                        fechaFin: '2024-11-30',
+                        metaRecaudacion: 15000000,
+                        montoRecaudado: 15000000,
+                        descripcion: 'Cobro de derechos de grado para estudiantes de último semestre',
+                        valorDerecho: 200000,
+                        stats: {
+                            totalParticipants: 75,
+                            paidParticipants: 75,
+                            partialParticipants: 0,
+                            pendingParticipants: 0
+                        }
+                    }
+                ];
+                
+                this.participants = [];
+                this.init();
+            }
+
+            init() {
+                this.renderEvents();
+            }
+
+            renderEvents() {
+                const container = document.getElementById('eventsContainer');
+                const eventsHTML = this.events.map(event => this.renderEventCard(event)).join('');
+                container.innerHTML = eventsHTML;
+            }
+
+            renderEventCard(event) {
+                const progress = event.metaRecaudacion > 0 ? (event.montoRecaudado / event.metaRecaudacion) * 100 : 0;
+                const statusClass = event.estado === 'active' ? 'success' : event.estado === 'completed' ? 'info' : 'warning';
+                const statusText = event.estado === 'active' ? 'Activo' : event.estado === 'completed' ? 'Completado' : 'En Planificación';
+
+                return `
+                    <div class="event-card" onclick="testSystem.showParticipants(${event.id})">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="mb-0">${event.nombre}</h5>
+                            <span class="badge bg-${statusClass}">${statusText}</span>
+                        </div>
+                        <p class="text-muted mb-2">${event.descripcion}</p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted">Participantes: ${event.stats.totalParticipants}</small>
+                                <div class="progress progress-mini">
+                                    <div class="progress-bar bg-info" style="width: ${(event.stats.paidParticipants / event.stats.totalParticipants) * 100}%"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted">Recaudación: ${this.formatCurrency(event.montoRecaudado)} / ${this.formatCurrency(event.metaRecaudacion)}</small>
+                                <div class="progress progress-mini">
+                                    <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            showParticipants(eventId) {
+                const event = this.events.find(e => e.id === eventId);
+                if (!event) return;
+
+                console.log('🎯 Mostrando participantes para evento:', event.nombre);
+
+                // Actualizar título del modal
+                document.getElementById('participantsEventName').textContent = event.nombre;
+
+                // Generar participantes de demostración
+                this.participants = this.generateDemoParticipants(event);
+
+                // Mostrar modal
+                const modal = new bootstrap.Modal(document.getElementById('participantsModal'));
+                modal.show();
+
+                // Renderizar participantes
+                this.renderParticipants();
+                this.updateStats();
+            }
+
+            generateDemoParticipants(event) {
+                const nombres = ['Ana', 'Carlos', 'María', 'José', 'Laura', 'Diego', 'Sofía', 'Miguel', 'Valentina', 'Andrés'];
+                const apellidos = ['García', 'Rodríguez', 'López', 'Martínez', 'González', 'Pérez', 'Sánchez', 'Ramírez', 'Cruz', 'Torres'];
+                const grados = ['6', '7', '8', '9', '10', '11'];
+                const cursos = ['A', 'B', 'C'];
+                const estados = ['paid', 'partial', 'pending'];
+
+                const participants = [];
+                const numParticipants = event.stats.totalParticipants;
+
+                for (let i = 1; i <= numParticipants; i++) {
+                    const nombre = nombres[Math.floor(Math.random() * nombres.length)];
+                    const apellido = apellidos[Math.floor(Math.random() * apellidos.length)];
+                    const grado = grados[Math.floor(Math.random() * grados.length)];
+                    const curso = cursos[Math.floor(Math.random() * cursos.length)];
+                    
+                    let estado;
+                    if (i <= event.stats.paidParticipants) {
+                        estado = 'paid';
+                    } else if (i <= event.stats.paidParticipants + event.stats.partialParticipants) {
+                        estado = 'partial';
+                    } else {
+                        estado = 'pending';
+                    }
+                    
+                    let montoEsperado = 50000;
+                    if (event.tipo === 'raffle') {
+                        montoEsperado = event.precioBoletaRifa || 10000;
+                    } else if (event.tipo === 'graduation') {
+                        montoEsperado = event.valorDerecho || 200000;
+                    }
+
+                    let montoPagado = 0;
+                    if (estado === 'paid') {
+                        montoPagado = montoEsperado;
+                    } else if (estado === 'partial') {
+                        montoPagado = Math.floor(montoEsperado * (0.3 + Math.random() * 0.4));
+                    }
+
+                    participants.push({
+                        id: i,
+                        student: {
+                            nombre: nombre,
+                            apellido: apellido,
+                            codigo: `EST${String(i).padStart(3, '0')}`,
+                            grado: grado,
+                            curso: curso
+                        },
+                        estado: estado,
+                        montoEsperado: montoEsperado,
+                        montoPagado: montoPagado,
+                        fechaPago: estado === 'paid' ? new Date().toISOString().split('T')[0] : null
+                    });
+                }
+
+                return participants;
+            }
+
+            renderParticipants() {
+                const tbody = document.getElementById('participantsTableBody');
+                const participantsHTML = this.participants.map(participant => this.renderParticipantRow(participant)).join('');
+                tbody.innerHTML = participantsHTML;
+            }
+
+            renderParticipantRow(participant) {
+                const student = participant.student;
+                const statusClass = this.getStatusClass(participant.estado);
+                const statusText = this.getStatusText(participant.estado);
+
+                return `
+                    <tr>
+                        <td>
+                            <div>
+                                <div class="fw-semibold">${student.nombre} ${student.apellido}</div>
+                                <small class="text-muted">${student.codigo}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">${student.grado}° ${student.curso}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-${statusClass}">${statusText}</span>
+                        </td>
+                        <td>
+                            <span class="fw-semibold">${this.formatCurrency(participant.montoEsperado)}</span>
+                        </td>
+                        <td>
+                            <span class="fw-semibold text-success">${this.formatCurrency(participant.montoPagado)}</span>
+                            ${participant.montoPagado < participant.montoEsperado ? 
+                                `<br><small class="text-danger">Falta: ${this.formatCurrency(participant.montoEsperado - participant.montoPagado)}</small>` : 
+                                ''}
+                        </td>
+                        <td>
+                            ${participant.fechaPago ? 
+                                `<small>${this.formatDate(participant.fechaPago)}</small>` : 
+                                '<small class="text-muted">Sin pago</small>'}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-success" title="Registrar pago" ${participant.estado === 'paid' ? 'disabled' : ''}>
+                                    <i class="fas fa-dollar-sign"></i>
+                                </button>
+                                <button class="btn btn-outline-primary" title="Ver historial">
+                                    <i class="fas fa-history"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            updateStats() {
+                const total = this.participants.length;
+                const paid = this.participants.filter(p => p.estado === 'paid').length;
+                const partial = this.participants.filter(p => p.estado === 'partial').length;
+                const pending = this.participants.filter(p => p.estado === 'pending').length;
+
+                document.getElementById('totalParticipants').textContent = total;
+                document.getElementById('paidParticipants').textContent = paid;
+                document.getElementById('partialParticipants').textContent = partial;
+                document.getElementById('pendingParticipants').textContent = pending;
+            }
+
+            getStatusClass(status) {
+                const classes = {
+                    'paid': 'success',
+                    'partial': 'warning',
+                    'pending': 'danger'
+                };
+                return classes[status] || 'secondary';
+            }
+
+            getStatusText(status) {
+                const texts = {
+                    'paid': 'Pagado',
+                    'partial': 'Parcial',
+                    'pending': 'Pendiente'
+                };
+                return texts[status] || 'Desconocido';
+            }
+
+            formatCurrency(amount) {
+                return new Intl.NumberFormat('es-CO', {
+                    style: 'currency',
+                    currency: 'COP',
+                    minimumFractionDigits: 0
+                }).format(amount || 0);
+            }
+
+            formatDate(dateString) {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            }
+        }
+
+        // Inicializar sistema de prueba
+        const testSystem = new EventsTestSystem();
+        
+        console.log('✅ Sistema de prueba de eventos con participantes inicializado');
+    </script>
+</body>
+</html>

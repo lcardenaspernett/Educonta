@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Estudiantes Simple</title>
+    <link rel="stylesheet" href="public/css/accounting-dashboard.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .test-header { background: #f0f0f0; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        .loading-spinner { 
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 2s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .students-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .students-table th, .students-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .students-table th { background-color: #f2f2f2; font-weight: bold; }
+        .student-info { display: flex; align-items: center; }
+        .student-avatar { 
+            width: 40px; height: 40px; border-radius: 50%; 
+            background: #3498db; color: white; 
+            display: flex; align-items: center; justify-content: center;
+            margin-right: 10px; font-weight: bold;
+        }
+        .student-details { display: flex; flex-direction: column; }
+        .student-name { font-weight: bold; margin-bottom: 4px; }
+        .student-document { font-size: 0.9em; color: #666; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8em; }
+        .status-badge.active { background: #d4edda; color: #155724; }
+        .status-badge.inactive { background: #f8d7da; color: #721c24; }
+        .btn { padding: 6px 12px; margin: 2px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stat-value { font-size: 2em; font-weight: bold; margin: 10px 0; }
+        .search-section { margin-bottom: 20px; }
+        .search-input-group { display: flex; align-items: center; margin-bottom: 10px; }
+        .search-input-group input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .header-actions { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-outline { background: white; color: #007bff; border: 1px solid #007bff; }
+    </style>
+</head>
+<body>
+    <div class="test-header">
+        <h1>🧪 Test - Gestión de Estudiantes (Versión Simple)</h1>
+        <p>Esta es una versión simplificada para diagnosticar problemas de carga</p>
+        <div id="testStatus">🔄 Inicializando...</div>
+    </div>
+
+    <div class="header-actions">
+        <button class="btn btn-outline" onclick="exportStudentsReport()">📊 Exportar</button>
+        <button class="btn btn-secondary" onclick="showBulkUploadModal()">📤 Carga Masiva</button>
+        <button class="btn btn-primary" onclick="showNewStudentModal()">➕ Nuevo Estudiante</button>
+    </div>
+
+    <div class="search-section">
+        <div class="search-input-group">
+            <input type="text" id="studentSearch" placeholder="Buscar estudiantes..." onkeyup="searchStudents()">
+            <button onclick="clearSearch()">🧹 Limpiar</button>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Estudiantes</h3>
+            <div class="stat-value" id="totalStudents">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Al Día</h3>
+            <div class="stat-value" id="currentStudents">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Con Abonos</h3>
+            <div class="stat-value" id="partialStudents">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Con Deudas</h3>
+            <div class="stat-value" id="overdueStudents">0</div>
+        </div>
+    </div>
+
+    <table class="students-table">
+        <thead>
+            <tr>
+                <th>Estudiante</th>
+                <th>Documento</th>
+                <th>Grado/Curso</th>
+                <th>Estado</th>
+                <th>Eventos</th>
+                <th>Deuda</th>
+                <th>Pagado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="studentsTableBody">
+            <tr class="loading-row">
+                <td colspan="8">
+                    <div class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <span>Cargando estudiantes...</span>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script src="public/js/accounting/students-page-simple.js"></script>
+    
+    <script>
+        // Actualizar estado de la prueba
+        document.addEventListener('DOMContentLoaded', function() {
+            const status = document.getElementById('testStatus');
+            
+            setTimeout(() => {
+                if (window.studentsPage) {
+                    status.innerHTML = '✅ StudentsManagementPage inicializada correctamente';
+                    status.style.color = 'green';
+                } else {
+                    status.innerHTML = '❌ Error: StudentsManagementPage no se inicializó';
+                    status.style.color = 'red';
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

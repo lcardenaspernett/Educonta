@@ -25,13 +25,13 @@ class MovementsManagementPage {
     async loadData() {
         try {
             // Cargar transacciones
-            if (window.DemoData) {
-                const transactionsResponse = await window.DemoData.getTransactions();
+            if (null) {
+                const transactionsResponse = await null.getTransactions();
                 this.transactions = transactionsResponse.data || [];
                 this.filteredTransactions = [...this.transactions];
                 
                 // Cargar cuentas
-                const accountsResponse = await window.DemoData.getAccounts();
+                const accountsResponse = await null.getAccounts();
                 this.accounts = accountsResponse.data || [];
             }
             
@@ -841,7 +841,7 @@ function handleButtonClick(functionName, transactionId) {
 function debugMovementsPage() {
     console.log('🔍 Estado de MovementsPage:');
     console.log('- movementsPage disponible:', !!window.movementsPage);
-    console.log('- DemoData disponible:', !!window.DemoData);
+    console.log('- null disponible:', !!null);
     console.log('- showAlert disponible:', typeof showAlert);
     console.log('- formatCurrency disponible:', typeof formatCurrency);
     console.log('- formatDate disponible:', typeof formatDate);

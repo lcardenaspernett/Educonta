@@ -1,0 +1,21 @@
+documento,nombre,apellido,email,telefono,grado,curso,genero,fecha_nacimiento,direccion,acudiente_nombre,acudiente_telefono,acudiente_email,estado
+1234567890,Juan Carlos,Pérez García,juan.perez@email.com,3001234567,6,A,M,2010-03-15,Calle 123 #45-67,María García,3009876543,maria.garcia@email.com,activo
+9876543210,Ana María,López Rodríguez,ana.lopez@email.com,3002345678,6,A,F,2010-05-22,Carrera 45 #12-34,Carlos López,3008765432,carlos.lopez@email.com,activo
+5555666777,Luis Fernando,Martínez Silva,luis.martinez@email.com,3003456789,6,B,M,2010-01-08,Avenida 67 #89-12,Sandra Silva,3007654321,sandra.silva@email.com,activo
+4444333222,María Fernanda,González Torres,maria.gonzalez@email.com,3004567890,7,A,F,2009-11-30,Calle 89 #23-45,Roberto González,3006543210,roberto.gonzalez@email.com,activo
+7777888999,Carlos Andrés,Ramírez Moreno,carlos.ramirez@email.com,3005678901,7,A,M,2009-07-14,Carrera 12 #56-78,Luz Moreno,3005432109,luz.moreno@email.com,activo
+1111222333,Sofía Isabel,Herrera Castillo,sofia.herrera@email.com,3006789012,7,B,F,2009-09-03,Avenida 34 #67-90,Miguel Herrera,3004321098,miguel.herrera@email.com,activo
+8888999000,Diego Alejandro,Vargas Ruiz,diego.vargas@email.com,3007890123,8,A,M,2008-12-25,Calle 56 #78-90,Patricia Ruiz,3003210987,patricia.ruiz@email.com,activo
+2222333444,Valentina,Jiménez Ortega,valentina.jimenez@email.com,3008901234,8,A,F,2008-04-18,Carrera 78 #90-12,Fernando Jiménez,3002109876,fernando.jimenez@email.com,activo
+6666777888,Sebastián,Morales Díaz,sebastian.morales@email.com,3009012345,8,B,M,2008-08-07,Avenida 90 #12-34,Carmen Díaz,3001098765,carmen.diaz@email.com,activo
+3333444555,Isabella,Cruz Mendoza,isabella.cruz@email.com,3000123456,9,A,F,2007-06-12,Calle 12 #34-56,Andrés Cruz,3000987654,andres.cruz@email.com,activo
+9999000111,Mateo,Sánchez Vega,mateo.sanchez@email.com,3001234567,9,A,M,2007-10-29,Carrera 34 #56-78,Gloria Vega,3009876543,gloria.vega@email.com,activo
+5555444333,Camila,Torres Aguilar,camila.torres@email.com,3002345678,9,B,F,2007-02-14,Avenida 56 #78-90,Ricardo Torres,3008765432,ricardo.torres@email.com,activo
+7777666555,Nicolás,Restrepo Gómez,nicolas.restrepo@email.com,3003456789,10,A,M,2006-12-05,Calle 78 #90-12,Elena Gómez,3007654321,elena.gomez@email.com,activo
+1111000999,Mariana,Ospina Herrera,mariana.ospina@email.com,3004567890,10,A,F,2006-03-28,Carrera 90 #12-34,Julio Ospina,3006543210,julio.ospina@email.com,activo
+8888777666,Alejandro,Cardona Mejía,alejandro.cardona@email.com,3005678901,10,B,M,2006-09-16,Avenida 12 #34-56,Rosa Mejía,3005432109,rosa.mejia@email.com,activo
+4444555666,Gabriela,Muñoz Parra,gabriela.munoz@email.com,3006789012,11,A,F,2005-11-11,Calle 34 #56-78,Héctor Muñoz,3004321098,hector.munoz@email.com,activo
+2222111000,Santiago,Álvarez Rojas,santiago.alvarez@email.com,3007890123,11,A,M,2005-05-24,Carrera 56 #78-90,Beatriz Rojas,3003210987,beatriz.rojas@email.com,activo
+6666555444,Valeria,Pineda Castro,valeria.pineda@email.com,3008901234,11,B,F,2005-08-02,Avenida 78 #90-12,Germán Pineda,3002109876,german.pineda@email.com,activo
+3333222111,Andrés Felipe,Cortés Navarro,andres.cortes@email.com,3009012345,6,C,M,2010-04-20,Calle 90 #12-34,Liliana Navarro,3001098765,liliana.navarro@email.com,activo
+9999888777,Lucía,Ramírez Peña,lucia.ramirez@email.com,3000123456,7,C,F,2009-12-08,Carrera 12 #34-56,Oscar Ramírez,3000987654,oscar.ramirez@email.com,activo

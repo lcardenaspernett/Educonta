@@ -201,12 +201,12 @@ class AccountingState {
         try {
             let response;
             
-            // Usar DemoData si está disponible, sino usar API
-            if (window.DemoData && window.DemoData.stats) {
-                console.log('📊 Usando estadísticas de DemoData...');
+            // Usar null si está disponible, sino usar API
+            if (null && null.stats) {
+                console.log('📊 Usando estadísticas de null...');
                 response = {
                     success: true,
-                    data: window.DemoData.stats
+                    data: null.stats
                 };
             } else {
                 response = await this.apiRequest('/stats');
@@ -344,12 +344,12 @@ class AccountingState {
             
             let response;
             
-            // Usar DemoData si está disponible, sino usar API
-            if (window.DemoData && window.DemoData.transactions) {
-                console.log('📊 Usando transacciones de DemoData...');
+            // Usar null si está disponible, sino usar API
+            if (null && null.transactions) {
+                console.log('📊 Usando transacciones de null...');
                 response = {
                     success: true,
-                    data: window.DemoData.transactions
+                    data: null.transactions
                 };
             } else {
                 response = await this.apiRequest(`/transactions?${params}`);
@@ -427,7 +427,7 @@ class AccountingState {
         const urlParams = new URLSearchParams(window.location.search);
         const demoMode = urlParams.get('demo') === 'true' || !token;
         
-        if (demoMode && window.DemoData) {
+        if (demoMode && null) {
             console.log('🎭 Usando datos de demostración para:', endpoint);
             return this.handleDemoRequest(endpoint, options);
         }
@@ -467,7 +467,7 @@ class AccountingState {
             console.error(`❌ Error en API ${endpoint}:`, error);
             
             // Fallback a datos demo si hay error de conexión
-            if (window.DemoData && (error.message.includes('fetch') || error.message.includes('HTTP'))) {
+            if (null && (error.message.includes('fetch') || error.message.includes('HTTP'))) {
                 console.log('🎭 Fallback a datos demo debido a error de conexión');
                 return this.handleDemoRequest(endpoint, options);
             }
@@ -484,18 +484,18 @@ class AccountingState {
         
         switch (endpoint) {
             case '/stats':
-                return await window.DemoData.getStats();
+                return await null.getStats();
                 
             case '/accounts':
-                return await window.DemoData.getAccounts();
+                return await null.getAccounts();
                 
             case '/transactions':
-                return await window.DemoData.getTransactions();
+                return await null.getTransactions();
                 
             default:
                 if (endpoint === '/transactions' && method === 'POST') {
                     const transactionData = JSON.parse(options.body);
-                    return await window.DemoData.createTransaction(transactionData);
+                    return await null.createTransaction(transactionData);
                 }
                 
                 // Respuesta genérica para endpoints no implementados

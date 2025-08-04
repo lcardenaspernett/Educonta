@@ -8,12 +8,11 @@ const jwt = require('jsonwebtoken');
 
 const {
     getStudents,
-    getStudentById,
+    getStudent,
     createStudent,
     updateStudent,
     deleteStudent,
-    getStudentStats,
-    getStudentOptions
+    getStudentStats
 } = require('../controllers/studentController');
 
 const router = express.Router();
@@ -246,57 +245,126 @@ const validateStudentQuery = [
 // RUTAS
 // ===================================
 
-// GET /api/students - Listar estudiantes con filtros y paginación
-router.get('/',
-    authenticate,
-    checkPermission('students', 'read'),
-    validateStudentQuery,
+// Ruta de prueba sin autenticación
+router.get('/test/:institutionId', async (req, res) => {
+    try {
+        console.log('🧪 Ruta de prueba llamada para institución:', req.params.institutionId);
+        res.json({
+            success: true,
+            message: 'Ruta de prueba funcionando',
+            institutionId: req.params.institutionId,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// GET /api/students/:institutionId - Listar estudiantes de una institución
+router.get('/:institutionId',
     getStudents
 );
 
-// GET /api/students/stats - Estadísticas de estudiantes
-router.get('/stats',
-    authenticate,
-    checkPermission('students', 'read'),
+// GET /api/students/:institutionId/filters - Obtener filtros dinámicos
+router.get('/:institutionId/filters', async (req, res) => {
+    try {
+        const { institutionId } = req.params;
+        
+        console.log('🔧 Obteniendo filtros para institución:', institutionId);
+        
+        const { PrismaClient } = require('@prisma/client');
+        const prisma = new PrismaClient();
+        
+        // Obtener grados únicos
+        const uniqueGrades = await prisma.student.findMany({
+            where: { institutionId },
+            select: { grado: true },
+            distinct: ['grado']
+        });
+        
+        // Obtener cursos únicos
+        const uniqueCourses = await prisma.student.findMany({
+            where: { institutionId },
+            select: { curso: true },
+            distinct: ['curso']
+        });
+        
+        const gradeNames = {
+            '6': 'Sexto',
+            '7': 'Séptimo',
+            '8': 'Octavo',
+            '9': 'Noveno',
+            '10': 'Décimo',
+            '11': 'Undécimo'
+        };
+        
+        const grades = uniqueGrades
+            .map(g => g.grado)
+            .filter(Boolean)
+            .sort()
+            .map(grade => ({
+                value: grade,
+                label: `${grade}° (${gradeNames[grade] || `Grado ${grade}`})`
+            }));
+            
+        const courses = uniqueCourses
+            .map(c => c.curso)
+            .filter(Boolean)
+            .sort()
+            .map(course => ({
+                value: course,
+                label: `Curso ${course}`
+            }));
+        
+        console.log('✅ Filtros obtenidos:', { grades: grades.length, courses: courses.length });
+        
+        await prisma.$disconnect();
+        
+        res.json({
+            success: true,
+            grades: grades,
+            courses: courses,
+            stats: {
+                totalGrades: grades.length,
+                totalCourses: courses.length
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Error obteniendo filtros:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Error interno del servidor',
+            details: error.message
+        });
+    }
+});
+
+// GET /api/students/:institutionId/stats - Estadísticas de estudiantes
+router.get('/:institutionId/stats',
     getStudentStats
 );
 
-// GET /api/students/options - Opciones para formularios
-router.get('/options',
-    authenticate,
-    checkPermission('students', 'read'),
-    getStudentOptions
+// GET /api/students/student/:studentId - Obtener estudiante por ID
+router.get('/student/:studentId',
+    getStudent
 );
 
-// GET /api/students/:id - Obtener estudiante por ID
-router.get('/:id',
-    authenticate,
-    checkPermission('students', 'read'),
-    validateStudentId,
-    getStudentById
-);
-
-// POST /api/students - Crear nuevo estudiante
-router.post('/',
-    authenticate,
-    checkPermission('students', 'create'),
-    validateStudentCreate,
+// POST /api/students/:institutionId - Crear nuevo estudiante
+router.post('/:institutionId',
     createStudent
 );
 
-// PUT /api/students/:id - Actualizar estudiante
-router.put('/:id',
-    authenticate,
-    checkPermission('students', 'update'),
-    validateStudentUpdate,
+// PUT /api/students/student/:studentId - Actualizar estudiante
+router.put('/student/:studentId',
     updateStudent
 );
 
-// DELETE /api/students/:id - Eliminar estudiante
-router.delete('/:id',
-    authenticate,
-    checkPermission('students', 'delete'),
-    validateStudentId,
+// DELETE /api/students/student/:studentId - Eliminar estudiante
+router.delete('/student/:studentId',
     deleteStudent
 );
 

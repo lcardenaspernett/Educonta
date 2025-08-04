@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Final - Estudiantes</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+        .stats { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .student-sample { background: #e8f4f8; padding: 10px; margin: 5px 0; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Final - Carga de Estudiantes</h1>
+    
+    <div id="status">🔄 Inicializando...</div>
+    
+    <div id="results"></div>
+
+    <script src="public/js/students-data.js"></script>
+    
+    <script>
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = type;
+        }
+
+        function addResult(content) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.innerHTML = content;
+            results.appendChild(div);
+        }
+
+        function testStudentsData() {
+            console.log('🧪 Iniciando test de datos de estudiantes...');
+            
+            // Verificar si los datos están disponibles
+            if (typeof window.STUDENTS_DATA === 'undefined') {
+                updateStatus('❌ Error: window.STUDENTS_DATA no está definido', 'error');
+                addResult('<div class="error">Los datos de estudiantes no se cargaron correctamente.</div>');
+                return;
+            }
+
+            if (!Array.isArray(window.STUDENTS_DATA)) {
+                updateStatus('❌ Error: STUDENTS_DATA no es un array', 'error');
+                addResult('<div class="error">Los datos no tienen el formato correcto.</div>');
+                return;
+            }
+
+            const totalStudents = window.STUDENTS_DATA.length;
+            
+            if (totalStudents === 0) {
+                updateStatus('❌ Error: No hay estudiantes en los datos', 'error');
+                addResult('<div class="error">El array de estudiantes está vacío.</div>');
+                return;
+            }
+
+            // ¡Éxito!
+            updateStatus(`✅ ¡Éxito! ${totalStudents} estudiantes cargados correctamente`, 'success');
+            
+            // Mostrar estadísticas
+            const gradeStats = {};
+            window.STUDENTS_DATA.forEach(student => {
+                const grade = student.grade;
+                gradeStats[grade] = (gradeStats[grade] || 0) + 1;
+            });
+
+            let statsHTML = '<div class="stats"><h3>📊 Estadísticas por Grado:</h3>';
+            Object.keys(gradeStats).sort().forEach(grade => {
+                statsHTML += `<div>Grado ${grade}: ${gradeStats[grade]} estudiantes</div>`;
+            });
+            statsHTML += '</div>';
+            
+            addResult(statsHTML);
+
+            // Mostrar muestra de estudiantes
+            const sampleStudents = window.STUDENTS_DATA.slice(0, 5);
+            let sampleHTML = '<div><h3>👥 Muestra de Estudiantes:</h3>';
+            sampleStudents.forEach((student, index) => {
+                sampleHTML += `
+                    <div class="student-sample">
+                        <strong>${index + 1}. ${student.fullName}</strong><br>
+                        Documento: ${student.document}<br>
+                        Grado: ${student.grade}° ${student.course}<br>
+                        Estado: ${student.status}
+                    </div>
+                `;
+            });
+            sampleHTML += '</div>';
+            
+            addResult(sampleHTML);
+
+            // Instrucciones finales
+            addResult(`
+                <div class="success">
+                    <h3>🎉 ¡Todo está funcionando!</h3>
+                    <p>Los ${totalStudents} estudiantes están disponibles.</p>
+                    <p><strong>Próximo paso:</strong> Ve a la página de gestión de estudiantes y recárgala.</p>
+                    <p><a href="public/students-management.html?institutionId=cmdt7n66m00003t1jy17ay313" target="_blank">
+                        🔗 Abrir Gestión de Estudiantes
+                    </a></p>
+                </div>
+            `);
+        }
+
+        // Ejecutar test cuando la página cargue
+        document.addEventListener('DOMContentLoaded', testStudentsData);
+    </script>
+</body>
+</html>

@@ -1,0 +1,522 @@
+/* ===================================
+   EDUCONTA - Estilos Empresariales para Eventos
+   =================================== */
+
+:root {
+    /* Colores empresariales */
+    --primary-blue: #1e3a8a;
+    --primary-blue-light: #3b82f6;
+    --success-green: #059669;
+    --success-green-light: #10b981;
+    --purple-primary: #7c3aed;
+    --purple-light: #a855f7;
+    --danger-red: #dc2626;
+    --danger-red-light: #ef4444;
+
+    /* Sombras empresariales */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* Transiciones */
+    --transition-fast: 0.15s ease-in-out;
+    --transition-normal: 0.3s ease-in-out;
+    --transition-slow: 0.5s ease-in-out;
+}
+
+/* Tarjetas de estadísticas empresariales */
+.stats-card-enterprise {
+    border: none;
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-normal);
+    overflow: hidden;
+    position: relative;
+}
+
+.stats-card-enterprise::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+}
+
+.stats-card-enterprise:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.stats-card-enterprise .card-body {
+    padding: 1.75rem;
+}
+
+.stats-card-enterprise .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    transition: all var(--transition-normal);
+}
+
+.stats-card-enterprise:hover .stat-icon {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.stats-card-enterprise .stat-number {
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card-enterprise .stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-card-enterprise .stat-sublabel {
+    font-size: 0.75rem;
+    opacity: 0.75;
+    margin-top: 0.25rem;
+}
+
+/* Tarjetas de eventos empresariales */
+.event-card-enterprise {
+    border: none;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-normal);
+    overflow: hidden;
+    background: #ffffff;
+    position: relative;
+}
+
+.event-card-enterprise::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-blue) 0%, var(--success-green) 100%);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.event-card-enterprise:hover::before {
+    opacity: 1;
+}
+
+.event-card-enterprise:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.event-card-enterprise .card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 1.25rem;
+}
+
+.event-card-enterprise .event-type-icon {
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
+}
+
+.event-card-enterprise .event-status-badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.event-card-enterprise .card-body {
+    padding: 1.25rem;
+}
+
+.event-card-enterprise .event-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.event-card-enterprise .event-description {
+    color: #6b7280;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    overflow: hidden;
+}
+
+.event-card-enterprise .event-dates {
+    background: #f3f4f6;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.event-card-enterprise .event-dates small {
+    color: #4b5563;
+    font-weight: 500;
+}
+
+.event-card-enterprise .progress-container {
+    margin-bottom: 1rem;
+}
+
+.event-card-enterprise .progress {
+    height: 8px;
+    border-radius: 10px;
+    background-color: #e5e7eb;
+    overflow: hidden;
+}
+
+.event-card-enterprise .progress-bar {
+    background: linear-gradient(90deg, var(--success-green) 0%, var(--success-green-light) 100%);
+    border-radius: 10px;
+    transition: width var(--transition-slow);
+}
+
+.event-card-enterprise .event-amounts {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.event-card-enterprise .amount-raised {
+    font-weight: 700;
+    color: var(--success-green);
+    font-size: 1.125rem;
+}
+
+.event-card-enterprise .amount-target {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.event-card-enterprise .participants-count {
+    color: #6b7280;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.event-card-enterprise .card-footer {
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    padding: 0.75rem 1.25rem;
+}
+
+.event-card-enterprise .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.event-card-enterprise .action-buttons .btn {
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all var(--transition-fast);
+}
+
+.event-card-enterprise .action-buttons .btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Modales empresariales */
+.modal-enterprise .modal-content {
+    border: none;
+    border-radius: 16px;
+    box-shadow: var(--shadow-xl);
+}
+
+.modal-enterprise .modal-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 16px 16px 0 0;
+    padding: 1.5rem 2rem;
+}
+
+.modal-enterprise .modal-title {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.modal-enterprise .modal-body {
+    padding: 2rem;
+}
+
+.modal-enterprise .modal-footer {
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    border-radius: 0 0 16px 16px;
+    padding: 1.5rem 2rem;
+}
+
+/* Formularios empresariales */
+.form-enterprise .form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.form-enterprise .form-control,
+.form-enterprise .form-select {
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    transition: all var(--transition-fast);
+}
+
+.form-enterprise .form-control:focus,
+.form-enterprise .form-select:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-enterprise .form-control:invalid {
+    border-color: var(--danger-red);
+}
+
+.form-enterprise .form-control:valid {
+    border-color: var(--success-green);
+}
+
+/* Tablas empresariales */
+.table-enterprise {
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.table-enterprise thead th {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: none;
+    font-weight: 600;
+    color: #374151;
+    padding: 1rem 1.25rem;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.table-enterprise tbody td {
+    border: none;
+    border-bottom: 1px solid #f3f4f6;
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+}
+
+.table-enterprise tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.table-enterprise tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Badges empresariales */
+.badge-enterprise {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.375rem 0.75rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-enterprise.badge-success {
+    background: linear-gradient(135deg, var(--success-green) 0%, var(--success-green-light) 100%);
+    color: white;
+}
+
+.badge-enterprise.badge-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    color: white;
+}
+
+.badge-enterprise.badge-danger {
+    background: linear-gradient(135deg, var(--danger-red) 0%, var(--danger-red-light) 100%);
+    color: white;
+}
+
+.badge-enterprise.badge-info {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+    color: white;
+}
+
+/* Botones empresariales */
+.btn-enterprise {
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+}
+
+.btn-enterprise:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-enterprise.btn-primary {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+    color: white;
+}
+
+.btn-enterprise.btn-success {
+    background: linear-gradient(135deg, var(--success-green) 0%, var(--success-green-light) 100%);
+    color: white;
+}
+
+.btn-enterprise.btn-danger {
+    background: linear-gradient(135deg, var(--danger-red) 0%, var(--danger-red-light) 100%);
+    color: white;
+}
+
+.btn-enterprise.btn-outline {
+    background: transparent;
+    border: 2px solid #e5e7eb;
+    color: #6b7280;
+}
+
+.btn-enterprise.btn-outline:hover {
+    background: #f9fafb;
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-slide-in-right {
+    animation: slideInRight 0.4s ease-out;
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-card-enterprise .stat-number {
+        font-size: 1.75rem;
+    }
+
+    .event-card-enterprise .card-body {
+        padding: 1rem;
+    }
+
+    .modal-enterprise .modal-body {
+        padding: 1.5rem;
+    }
+
+    .btn-enterprise {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.8125rem;
+    }
+}
+
+/* Estados de carga */
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Indicadores de rendimiento */
+.performance-indicator {
+    font-weight: 600;
+    transition: color var(--transition-fast);
+}
+
+.performance-indicator.text-success {
+    color: var(--success-green) !important;
+}
+
+.performance-indicator.text-warning {
+    color: #f59e0b !important;
+}
+
+.performance-indicator.text-danger {
+    color: var(--danger-red) !important;
+}

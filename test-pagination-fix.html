@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Corrección de Paginación</title>
+    <link rel="stylesheet" href="public/css/accounting-dashboard.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-secondary);
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--card-bg);
+        }
+        
+        .test-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .movements-container {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .movements-list {
+            min-height: 300px;
+        }
+        
+        .movement-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .movement-item:hover {
+            background: var(--hover-bg);
+            transform: translateX(4px);
+        }
+        
+        .movement-item:last-child {
+            border-bottom: none;
+        }
+        
+        .movement-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: transparent;
+            transition: var(--transition);
+        }
+        
+        .movement-item.income::before {
+            background: var(--success);
+        }
+        
+        .movement-item.expense::before {
+            background: var(--error);
+        }
+        
+        .movement-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .movement-item.income .movement-icon {
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .movement-item.expense .movement-icon {
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .movement-content {
+            flex: 1;
+        }
+        
+        .movement-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .movement-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .movement-amount {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-right: 1.5rem;
+        }
+        
+        .movement-amount.income {
+            color: var(--success);
+        }
+        
+        .movement-amount.expense {
+            color: var(--error);
+        }
+        
+        .theme-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <button class="btn btn-primary theme-toggle-btn" onclick="toggleTheme()">
+        🌓 Cambiar Tema
+    </button>
+    
+    <div class="test-container">
+        <h1>🔧 Test - Corrección de Paginación</h1>
+        
+        <!-- Test de Paginación Corregida -->
+        <div class="test-section">
+            <h2 class="test-title">📄 Paginación Corregida</h2>
+            <p>Esta paginación debe verse correctamente con estilos aplicados:</p>
+            
+            <div class="movements-container">
+                <div class="movements-list" id="testMovementsList">
+                    <!-- Los movimientos se cargarán aquí -->
+                </div>
+                <div id="testPagination" class="pagination-container"></div>
+            </div>
+        </div>
+        
+        <!-- Test de Filtros -->
+        <div class="test-section">
+            <h2 class="test-title">🔍 Test de Filtros</h2>
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <input type="text" id="testSearch" placeholder="Buscar..." style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 0.5rem;">
+                <select id="testFilter" style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 0.5rem;">
+                    <option value="">Todos</option>
+                    <option value="income">Ingresos</option>
+                    <option value="expense">Egresos</option>
+                </select>
+                <button class="btn btn-outline" onclick="applyTestFilters()">Filtrar</button>
+                <button class="btn btn-ghost" onclick="clearTestFilters()">Limpiar</button>
+            </div>
+            <p id="filterResults">Mostrando todos los elementos</p>
+        </div>
+    </div>
+
+    <script src="public/js/shared/pagination.js"></script>
+    <script>
+        // Datos de prueba
+        const testData = [
+            { id: 1, concept: 'Pago de Matrícula', type: 'income', amount: 500000, date: '2025-01-15' },
+            { id: 2, concept: 'Compra de Materiales', type: 'expense', amount: 150000, date: '2025-01-14' },
+            { id: 3, concept: 'Pago de Pensión', type: 'income', amount: 300000, date: '2025-01-13' },
+            { id: 4, concept: 'Servicios Públicos', type: 'expense', amount: 80000, date: '2025-01-12' },
+            { id: 5, concept: 'Venta de Uniformes', type: 'income', amount: 200000, date: '2025-01-11' },
+            { id: 6, concept: 'Mantenimiento', type: 'expense', amount: 120000, date: '2025-01-10' },
+            { id: 7, concept: 'Donación', type: 'income', amount: 100000, date: '2025-01-09' },
+            { id: 8, concept: 'Papelería', type: 'expense', amount: 50000, date: '2025-01-08' },
+            { id: 9, concept: 'Evento Escolar', type: 'income', amount: 400000, date: '2025-01-07' },
+            { id: 10, concept: 'Transporte', type: 'expense', amount: 75000, date: '2025-01-06' },
+            { id: 11, concept: 'Matrícula Tardía', type: 'income', amount: 550000, date: '2025-01-05' },
+            { id: 12, concept: 'Limpieza', type: 'expense', amount: 90000, date: '2025-01-04' },
+            { id: 13, concept: 'Rifas', type: 'income', amount: 250000, date: '2025-01-03' },
+            { id: 14, concept: 'Internet', type: 'expense', amount: 60000, date: '2025-01-02' },
+            { id: 15, concept: 'Bingo', type: 'income', amount: 180000, date: '2025-01-01' }
+        ];
+        
+        let filteredData = [...testData];
+        let testPagination = null;
+        
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        function renderTestMovements() {
+            const list = document.getElementById('testMovementsList');
+            if (!list || !testPagination) return;
+            
+            const currentMovements = testPagination.getPageItems(filteredData);
+            
+            list.innerHTML = currentMovements.map(m => `
+                <div class="movement-item ${m.type}">
+                    <div class="movement-icon">
+                        ${m.type === 'income' ? '💰' : '💸'}
+                    </div>
+                    <div class="movement-content">
+                        <div class="movement-title">${m.concept}</div>
+                        <div class="movement-meta">
+                            <span>${new Date(m.date).toLocaleDateString('es-CO')}</span>
+                            <span>•</span>
+                            <span>${m.type === 'income' ? 'Ingreso' : 'Egreso'}</span>
+                        </div>
+                    </div>
+                    <div class="movement-amount ${m.type}">
+                        ${m.type === 'income' ? '+' : '-'}${formatCurrency(Math.abs(m.amount))}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function applyTestFilters() {
+            const searchTerm = document.getElementById('testSearch').value.toLowerCase();
+            const filterType = document.getElementById('testFilter').value;
+            
+            filteredData = testData.filter(item => {
+                const matchesSearch = !searchTerm || item.concept.toLowerCase().includes(searchTerm);
+                const matchesType = !filterType || item.type === filterType;
+                return matchesSearch && matchesType;
+            });
+            
+            testPagination.updateTotal(filteredData.length);
+            renderTestMovements();
+            
+            document.getElementById('filterResults').textContent = 
+                `Mostrando ${filteredData.length} de ${testData.length} elementos`;
+        }
+        
+        function clearTestFilters() {
+            document.getElementById('testSearch').value = '';
+            document.getElementById('testFilter').value = '';
+            filteredData = [...testData];
+            testPagination.updateTotal(filteredData.length);
+            renderTestMovements();
+            
+            document.getElementById('filterResults').textContent = 'Mostrando todos los elementos';
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.body.setAttribute('data-theme', newTheme);
+            
+            localStorage.setItem('theme', newTheme);
+            console.log(`🎨 Tema cambiado a: ${newTheme}`);
+        }
+        
+        // Inicializar cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar tema guardado
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.body.setAttribute('data-theme', savedTheme);
+            
+            // Inicializar paginación de prueba
+            testPagination = new PaginationManager({
+                itemsPerPage: 5,
+                containerId: 'testPagination',
+                onPageChange: (page) => {
+                    console.log(`📄 Página cambiada a: ${page}`);
+                    renderTestMovements();
+                }
+            });
+            
+            testPagination.updateTotal(testData.length);
+            renderTestMovements();
+            
+            // Configurar filtros
+            document.getElementById('testSearch').addEventListener('input', applyTestFilters);
+            document.getElementById('testFilter').addEventListener('change', applyTestFilters);
+            
+            console.log('✅ Test de paginación inicializado');
+        });
+    </script>
+</body>
+</html>

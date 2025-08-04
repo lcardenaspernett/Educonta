@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Syntax Fix</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; background: #f8f9fa; }
+        .status-card { 
+            background: white; 
+            padding: 20px; 
+            margin: 15px 0; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-success { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; }
+        .status-error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; }
+        .status-warning { background: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; }
+        .console-output {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Test: Corrección de Errores de Sintaxis</h1>
+        
+        <div class="status-card">
+            <h3>Estado de Carga de Scripts</h3>
+            <div id="scriptStatus">Verificando...</div>
+        </div>
+
+        <div class="status-card">
+            <h3>Test de Funcionalidad</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <button class="btn btn-primary w-100 mb-2" id="newEventBtnHeader">
+                        📅 Nuevo Evento (Header)
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-success w-100 mb-2" id="newEventBtn">
+                        📅 Nuevo Evento (Card)
+                    </button>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button class="btn btn-info me-2" onclick="testEventsPage()">
+                    🧪 Test EventsPage
+                </button>
+                <button class="btn btn-warning me-2" onclick="testModal()">
+                    🪟 Test Modal
+                </button>
+                <button class="btn btn-secondary" onclick="clearConsole()">
+                    🧹 Limpiar
+                </button>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <h3>Consola de Resultados</h3>
+            <div id="consoleOutput" class="console-output">
+                Esperando pruebas...
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de prueba -->
+    <div class="modal fade" id="eventModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalTitle">Test Modal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-success">
+                        <h6>🎉 ¡Errores de Sintaxis Corregidos!</h6>
+                        <p>El archivo events-table-view.js se ha limpiado y ahora funciona correctamente.</p>
+                    </div>
+                    <form id="eventForm">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre del Evento</label>
+                            <input type="text" class="form-control" placeholder="Evento de prueba">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/accounting/events-table-view.js"></script>
+    <script>
+        const logs = [];
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            logs.push(logEntry);
+            console.log(message);
+            updateConsole();
+        }
+
+        function updateConsole() {
+            const output = document.getElementById('consoleOutput');
+            output.innerHTML = logs.slice(-20).join('<br>');
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function updateScriptStatus() {
+            const statusDiv = document.getElementById('scriptStatus');
+            
+            const checks = [
+                { name: 'Bootstrap', check: typeof bootstrap !== 'undefined', critical: true },
+                { name: 'EventsTableView Class', check: typeof EventsTableView !== 'undefined', critical: true },
+                { name: 'window.eventsPage', check: typeof window.eventsPage !== 'undefined', critical: true },
+                { name: 'Modal Element', check: !!document.getElementById('eventModal'), critical: false },
+                { name: 'Form Element', check: !!document.getElementById('eventForm'), critical: false }
+            ];
+
+            let html = '';
+            let hasErrors = false;
+
+            checks.forEach(check => {
+                const status = check.check ? 'success' : (check.critical ? 'error' : 'warning');
+                const icon = check.check ? '✅' : '❌';
+                html += `<div class="status-${status} mb-2">${icon} ${check.name}</div>`;
+                
+                if (!check.check && check.critical) {
+                    hasErrors = true;
+                }
+            });
+
+            if (!hasErrors) {
+                html += '<div class="status-success mt-3">🎉 Todos los componentes críticos están funcionando</div>';
+            } else {
+                html += '<div class="status-error mt-3">⚠️ Hay problemas críticos que necesitan atención</div>';
+            }
+
+            statusDiv.innerHTML = html;
+            return !hasErrors;
+        }
+
+        function testEventsPage() {
+            log('🧪 Probando window.eventsPage...');
+            
+            if (typeof window.eventsPage === 'undefined') {
+                log('❌ window.eventsPage no está definido');
+                return;
+            }
+
+            log('✅ window.eventsPage está disponible');
+            
+            // Test de métodos
+            const methods = ['showEventModal', 'showNotification', 'filterEvents', 'updateStats'];
+            methods.forEach(method => {
+                if (typeof window.eventsPage[method] === 'function') {
+                    log(`✅ Método ${method} disponible`);
+                } else {
+                    log(`❌ Método ${method} no disponible`);
+                }
+            });
+
+            // Test de propiedades
+            log(`📊 Eventos cargados: ${window.eventsPage.events?.length || 0}`);
+            log(`🎯 Evento seleccionado: ${window.eventsPage.selectedEvent ? 'Sí' : 'No'}`);
+        }
+
+        function testModal() {
+            log('🪟 Probando modal...');
+            
+            if (typeof window.eventsPage !== 'undefined' && typeof window.eventsPage.showEventModal === 'function') {
+                try {
+                    window.eventsPage.showEventModal();
+                    log('✅ Modal abierto exitosamente');
+                } catch (error) {
+                    log('❌ Error abriendo modal: ' + error.message);
+                }
+            } else {
+                log('❌ window.eventsPage.showEventModal no disponible');
+            }
+        }
+
+        function clearConsole() {
+            logs.length = 0;
+            updateConsole();
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Iniciando test de corrección de sintaxis...');
+            
+            // Esperar un momento para que se carguen los scripts
+            setTimeout(() => {
+                const success = updateScriptStatus();
+                if (success) {
+                    log('✅ Todos los scripts se cargaron correctamente');
+                    testEventsPage();
+                } else {
+                    log('❌ Hay problemas con la carga de scripts');
+                }
+            }, 1000);
+        });
+
+        // Interceptar errores de JavaScript
+        window.addEventListener('error', (e) => {
+            log(`❌ Error de JavaScript: ${e.message} en ${e.filename}:${e.lineno}`);
+        });
+    </script>
+</body>
+</html>

@@ -263,11 +263,16 @@ function formatCurrency(amount) {
 
 // Inicializar dashboard cuando se carga la página
 // ================= MOVEMENTS SECTION =================
+let allMovements = [];
+let movementsPagination = null;
+
 async function loadMovements() {
     const list = document.getElementById('movementsList');
     const loading = document.getElementById('movementsLoading');
     if (!list) return;
+    
     loading.style.display = '';
+    
     try {
         const token = localStorage.getItem('token');
         const res = await fetch('/api/accounting-simple/movements', {
@@ -275,49 +280,94 @@ async function loadMovements() {
         });
         if (!res.ok) throw new Error('Error al cargar movimientos');
         const data = await res.json();
-        renderMovements(data.data || []);
+        
+        allMovements = data.data || [];
+        
+        // Inicializar paginación si no existe
+        if (!movementsPagination) {
+            movementsPagination = new PaginationManager({
+                itemsPerPage: 5,
+                containerId: 'movementsPagination',
+                onPageChange: (page) => {
+                    console.log(`📄 Cambiando a página ${page} de movimientos`);
+                    renderCurrentMovements();
+                }
+            });
+        }
+        
+        // Actualizar paginación y renderizar
+        movementsPagination.updateTotal(allMovements.length);
+        renderCurrentMovements();
+        
     } catch (e) {
+        console.error('❌ Error cargando movimientos:', e);
         list.innerHTML = `<div class="error-message">No se pudieron cargar los movimientos.</div>`;
     } finally {
         loading.style.display = 'none';
     }
 }
 
-function renderMovements(movements) {
+function renderCurrentMovements() {
     const list = document.getElementById('movementsList');
-    if (!list) return;
-    if (!movements.length) {
+    if (!list || !movementsPagination) return;
+    
+    // Obtener movimientos para la página actual
+    const currentMovements = movementsPagination.getPageItems(allMovements);
+    
+    if (currentMovements.length === 0) {
         list.innerHTML = '<div class="empty-message">No hay movimientos registrados.</div>';
         return;
     }
-    list.innerHTML = movements.map(m => `
-        <div class="movement-row">
-            <div class="movement-info">
-                <span class="movement-date">${new Date(m.date).toLocaleDateString()}</span>
-                <span class="movement-type ${m.type}">${m.type === 'income' ? 'Ingreso' : 'Egreso'}</span>
-                <span class="movement-concept">${m.concept || ''}</span>
-                <span class="movement-amount">${formatCurrency(m.amount)}</span>
+    
+    list.innerHTML = currentMovements.map(m => `
+        <div class="movement-item ${m.type}">
+            <div class="movement-icon">
+                ${m.type === 'income' ? '💰' : '💸'}
+            </div>
+            <div class="movement-content">
+                <div class="movement-title">${m.concept || 'Sin concepto'}</div>
+                <div class="movement-meta">
+                    <span>${new Date(m.date).toLocaleDateString('es-CO')}</span>
+                    <span>•</span>
+                    <span>${m.type === 'income' ? 'Ingreso' : 'Egreso'}</span>
+                    ${m.reference ? `<span>• Ref: ${m.reference}</span>` : ''}
+                </div>
+            </div>
+            <div class="movement-amount ${m.type}">
+                ${m.type === 'income' ? '+' : '-'}${formatCurrency(Math.abs(m.amount))}
             </div>
             <div class="movement-actions">
-                <button class="btn btn-invoice btn-sm" data-invoice-id="${m.invoiceId || ''}" data-movement-id="${m.id}" title="Ver Factura">Ver Factura</button>
-                <button class="btn btn-outline btn-sm" data-edit-id="${m.id}" title="Editar">Editar</button>
+                <button class="btn btn-ghost btn-sm" data-invoice-id="${m.invoiceId || ''}" data-movement-id="${m.id}" title="Ver Factura">
+                    <svg width="14" height="14" fill="currentColor">
+                        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6z"/>
+                    </svg>
+                </button>
+                <button class="btn btn-ghost btn-sm" data-edit-id="${m.id}" title="Editar">
+                    <svg width="14" height="14" fill="currentColor">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                </button>
             </div>
         </div>
     `).join('');
+    
     // Attach event listeners
-    list.querySelectorAll('.btn-invoice').forEach(btn => {
+    list.querySelectorAll('.btn[data-invoice-id]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const movementId = btn.getAttribute('data-movement-id');
             const invoiceId = btn.getAttribute('data-invoice-id');
             viewInvoiceForMovement(movementId, invoiceId);
         });
     });
+    
     list.querySelectorAll('[data-edit-id]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const movementId = btn.getAttribute('data-edit-id');
             editMovement(movementId);
         });
     });
+    
+    console.log(`✅ Renderizados ${currentMovements.length} movimientos de ${allMovements.length} totales`);
 }
 
 function viewInvoiceForMovement(movementId, invoiceId) {

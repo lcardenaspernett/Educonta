@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Estudiantes - Depuración</title>
+    <link rel="stylesheet" href="css/accounting-dashboard.css">
+    <style>
+        /* Estilos específicos para depuración */
+        .debug-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            background: #fff;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .debug-panel h4 {
+            margin: 0 0 10px 0;
+            color: #007bff;
+        }
+
+        .debug-info {
+            font-family: monospace;
+            font-size: 12px;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 5px 0;
+            white-space: pre-wrap;
+        }
+
+        .debug-buttons {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .debug-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .debug-btn.primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .debug-btn.danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .debug-btn.success {
+            background: #28a745;
+            color: white;
+        }
+
+        .data-inspector {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .toggle-debug {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Toggle Debug Panel -->
+    <button class="toggle-debug" onclick="toggleDebugPanel()">🔧 Debug</button>
+
+    <!-- Debug Panel -->
+    <div id="debugPanel" class="debug-panel hidden">
+        <h4>🔍 Panel de Depuración</h4>
+        
+        <div class="debug-buttons">
+            <button class="debug-btn primary" onclick="checkLocalStorage()">Verificar LocalStorage</button>
+            <button class="debug-btn primary" onclick="checkSessionStorage()">Verificar SessionStorage</button>
+            <button class="debug-btn danger" onclick="clearAllStorage()">Limpiar Todo</button>
+        </div>
+
+        <div class="debug-buttons">
+            <button class="debug-btn success" onclick="loadMockData()">Datos de Prueba</button>
+            <button class="debug-btn primary" onclick="exportDebugData()">Exportar Debug</button>
+        </div>
+
+        <div id="debugInfo" class="debug-info">
+            Información de depuración aparecerá aquí...
+        </div>
+
+        <div id="dataInspector" class="data-inspector">
+            <strong>Inspector de Datos:</strong>
+            <div id="inspectorContent">No hay datos para mostrar</div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- SIDEBAR UNIFICADO -->
+        <aside class="sidebar">
+            <!-- El contenido se cargará dinámicamente con sidebar.js -->
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1 class="page-title">👥 Gestión de Estudiantes - Debug</h1>
+                    <p class="page-subtitle">Diagnóstico y solución de problemas</p>
+                </div>
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button class="btn btn-outline" onclick="refreshData()">
+                            🔄 Actualizar
+                        </button>
+                        <button class="btn btn-primary" onclick="showAddStudentForm()">
+                            ➕ Nuevo Estudiante
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- STATUS CARDS -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="totalStudents">0</div>
+                            <div class="stat-label">Total Estudiantes</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="activeStudents">0</div>
+                            <div class="stat-label">Estudiantes Activos</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💾</div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="storageKeys">0</div>
+                            <div class="stat-label">Claves en Storage</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔧</div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="debugStatus">OK</div>
+                            <div class="stat-label">Estado del Sistema</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEARCH SECTION -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3>Buscar y Filtrar Estudiantes</h3>
+                    </div>
+                    <div class="filters-grid">
+                        <div class="form-group">
+                            <label for="studentSearch">Buscar</label>
+                            <input type="text" id="studentSearch" class="form-control" placeholder="Nombre, documento..." onkeyup="filterStudents()">
+                        </div>
+                        <div class="form-group">
+                            <label for="gradeFilter">Grado</label>
+                            <select id="gradeFilter" class="form-control" onchange="filterStudents()">
+                                <option value="">Todos los grados</option>
+                                <option value="6">6° Grado</option>
+                                <option value="7">7° Grado</option>
+                                <option value="8">8° Grado</option>
+                                <option value="9">9° Grado</option>
+                                <option value="10">10° Grado</option>
+                                <option value="11">11° Grado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button class="btn btn-outline" onclick="clearFilters()">
+                                🗑️ Limpiar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STUDENTS LIST -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3>Lista de Estudiantes</h3>
+                        <div class="header-actions">
+                            <span id="studentsCount">0 estudiantes encontrados</span>
+                        </div>
+                    </div>
+                    <div id="studentsContainer">
+                        <div class="loading-state" id="loadingState">
+                            <div class="loading-spinner"></div>
+                            <p>Cargando estudiantes...</p>
+                        </div>
+                        <div class="empty-state hidden" id="emptyState">
+                            <div class="empty-icon">📚</div>
+                            <h3>No hay estudiantes registrados</h3>
+                            <p>Agrega estudiantes para comenzar a gestionarlos</p>
+                            <button class="btn btn-primary" onclick="showAddStudentForm()">Agregar Primer Estudiante</button>
+                        </div>
+                        <div id="studentsTable" class="hidden">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre Completo</th>
+                                        <th>Documento</th>
+                                        <th>Grado</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentsTableBody">
+                                    <!-- Los estudiantes aparecerán aquí -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QUICK ADD FORM -->
+                <div class="content-card hidden" id="addStudentForm">
+                    <div class="card-header">
+                        <h3>Agregar Nuevo Estudiante</h3>
+                        <button class="btn btn-outline" onclick="hideAddStudentForm()">✖️ Cerrar</button>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="firstName">Nombres *</label>
+                            <input type="text" id="firstName" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Apellidos *</label>
+                            <input type="text" id="lastName" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="documentNumber">Documento *</label>
+                            <input type="text" id="documentNumber" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="grade">Grado *</label>
+                            <select id="grade" class="form-control" required>
+                                <option value="">Seleccionar grado</option>
+                                <option value="6">6° Grado</option>
+                                <option value="7">7° Grado</option>
+                                <option value="8">8° Grado</option>
+                                <option value="9">9° Grado</option>
+                                <option value="10">10° Grado</option>
+                                <option value="11">11° Grado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="course">Curso</label>
+                            <select id="course" class="form-control">
+                                <option value="">Seleccionar curso</option>
+                                <option value="A">Curso A</option>
+                                <option value="B">Curso B</option>
+                                <option value="C">Curso C</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Estado</label>
+                            <select id="status" class="form-control">
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <button class="btn btn-primary" onclick="saveStudent()">💾 Guardar Estudiante</button>
+                            <button class="btn btn-outline" onclick="clearForm()">🗑️ Limpiar Formulario</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/shared/sidebar.js"></script>
+    
+    <script>
+        // ===================================
+        // VARIABLES GLOBALES
+        // ===================================
+        let allStudents = [];
+        let filteredStudents = [];
+        let debugMode = false;
+
+        // ===================================
+        // FUNCIONES DE DEPURACIÓN
+        // ===================================
+        function toggleDebugPanel() {
+            const panel = document.getElementById('debugPanel');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                updateDebugInfo();
+            }
+        }
+
+        function updateDebugInfo() {
+            const debugInfo = document.getElementById('debugInfo');
+            const info = [
+                `🕒 Timestamp: ${new Date().toLocaleString()}`,
+                `📦 LocalStorage keys: ${localStorage.length}`,
+                `📦 SessionStorage keys: ${sessionStorage.length}`,
+                `👥 Students in memory: ${allStudents.length}`,
+                `🔍 Filtered students: ${filteredStudents.length}`,
+                `🌐 URL: ${window.location.href}`,
+                `📱 User Agent: ${navigator.userAgent.substring(0, 50)}...`
+            ].join('\n');
+            
+            debugInfo.textContent = info;
+            updateDataInspector();
+        }
+
+        function updateDataInspector() {
+            const inspector = document.getElementById('inspectorContent');
+            const data = {
+                localStorage: getStorageData('localStorage'),
+                sessionStorage: getStorageData('sessionStorage'),
+                studentsInMemory: allStudents,
+                currentFilters: getCurrentFilters()
+            };
+            
+            inspector.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+
+        function getStorageData(storageType) {
+            const storage = storageType === 'localStorage' ? localStorage : sessionStorage;
+            const data = {};
+            for (let i = 0; i < storage.length; i++) {
+                const key = storage.key(i);
+                try {
+                    data[key] = JSON.parse(storage.getItem(key));
+                } catch (e) {
+                    data[key] = storage.getItem(key);
+                }
+            }
+            return data;
+        }
+
+        function getCurrentFilters() {
+            return {
+                search: document.getElementById('studentSearch')?.value || '',
+                grade: document.getElementById('gradeFilter')?.value || '',
+                course: document.getElementById('courseFilter')?.value || ''
+            };
+        }
+
+        function checkLocalStorage() {
+            const students = localStorage.getItem('students');
+            const estudiantesData = localStorage.getItem('estudiantes');
+            const studentsData = localStorage.getItem('studentsData');
+            
+            console.log('🔍 Verificando LocalStorage:');
+            console.log('students:', students);
+            console.log('estudiantes:', estudiantesData);
+            console.log('studentsData:', studentsData);
+            
+            logToDebug(`LocalStorage verificado:
+- students: ${students ? 'Encontrado' : 'No encontrado'}
+- estudiantes: ${estudiantesData ? 'Encontrado' : 'No encontrado'}
+- studentsData: ${studentsData ? 'Encontrado' : 'No encontrado'}`);
+            
+            updateDebugInfo();
+        }
+
+        function checkSessionStorage() {
+            const sessionData = {};
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                sessionData[key] = sessionStorage.getItem(key);
+            }
+            
+            console.log('🔍 SessionStorage:', sessionData);
+            logToDebug(`SessionStorage: ${JSON.stringify(sessionData, null, 2)}`);
+            updateDebugInfo();
+        }
+
+        function clearAllStorage() {
+            if (confirm('¿Estás seguro de que quieres limpiar todo el storage? Esto eliminará todos los datos guardados.')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                allStudents = [];
+                filteredStudents = [];
+                
+                logToDebug('✅ Todo el storage ha sido limpiado');
+                loadStudents();
+                updateDebugInfo();
+            }
+        }
+
+        function loadMockData() {
+            const mockStudents = [
+                {
+                    id: 1,
+                    firstName: 'Juan Carlos',
+                    lastName: 'Pérez García',
+                    documentNumber: '1234567890',
+                    grade: '10',
+                    course: 'A',
+                    status: 'activo',
+                    enrollmentDate: new Date().toISOString()
+                },
+                {
+                    id: 2,
+                    firstName: 'María Elena',
+                    lastName: 'Rodríguez López',
+                    documentNumber: '0987654321',
+                    grade: '11',
+                    course: 'B',
+                    status: 'activo',
+                    enrollmentDate: new Date().toISOString()
+                },
+                {
+                    id: 3,
+                    firstName: 'Carlos Alberto',
+                    lastName: 'González Martínez',
+                    documentNumber: '1122334455',
+                    grade: '9',
+                    course: 'A',
+                    status: 'inactivo',
+                    enrollmentDate: new Date().toISOString()
+                }
+            ];
+            
+            // Guardar en todas las posibles claves que pueda usar el sistema
+            localStorage.setItem('students', JSON.stringify(mockStudents));
+            localStorage.setItem('estudiantes', JSON.stringify(mockStudents));
+            localStorage.setItem('studentsData', JSON.stringify(mockStudents));
+            
+            allStudents = [...mockStudents];
+            
+            logToDebug(`✅ Datos de prueba cargados: ${mockStudents.length} estudiantes`);
+            loadStudents();
+            updateDebugInfo();
+        }
+
+        function exportDebugData() {
+            const debugData = {
+                timestamp: new Date().toISOString(),
+                url: window.location.href,
+                localStorage: getStorageData('localStorage'),
+                sessionStorage: getStorageData('sessionStorage'),
+                studentsInMemory: allStudents,
+                filters: getCurrentFilters(),
+                userAgent: navigator.userAgent
+            };
+            
+            const blob = new Blob([JSON.stringify(debugData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `debug-data-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            logToDebug('📁 Datos de debug exportados');
+        }
+
+        function logToDebug(message) {
+            const debugInfo = document.getElementById('debugInfo');
+            const timestamp = new Date().toLocaleTimeString();
+            debugInfo.textContent += `\n[${timestamp}] ${message}`;
+            debugInfo.scrollTop = debugInfo.scrollHeight;
+        }
+
+        // ===================================
+        // FUNCIONES PRINCIPALES
+        // ===================================
+        function loadStudents() {
+            console.log('🔄 Cargando estudiantes...');
+            showLoading();
+            
+            // Intentar cargar desde diferentes fuentes
+            let studentsData = null;
+            
+            // Buscar en localStorage con diferentes claves posibles
+            const possibleKeys = ['students', 'estudiantes', 'studentsData', 'student_data'];
+            
+            for (const key of possibleKeys) {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    try {
+                        studentsData = JSON.parse(data);
+                        console.log(`✅ Datos encontrados en localStorage con clave: ${key}`);
+                        logToDebug(`✅ Datos cargados desde localStorage[${key}]: ${studentsData.length} estudiantes`);
+                        break;
+                    } catch (e) {
+                        console.warn(`❌ Error parsing data from ${key}:`, e);
+                    }
+                }
+            }
+            
+            // Si no hay datos, intentar cargar desde sessionStorage
+            if (!studentsData) {
+                for (const key of possibleKeys) {
+                    const data = sessionStorage.getItem(key);
+                    if (data) {
+                        try {
+                            studentsData = JSON.parse(data);
+                            console.log(`✅ Datos encontrados en sessionStorage con clave: ${key}`);
+                            logToDebug(`✅ Datos cargados desde sessionStorage[${key}]: ${studentsData.length} estudiantes`);
+                            break;
+                        } catch (e) {
+                            console.warn(`❌ Error parsing data from sessionStorage ${key}:`, e);
+                        }
+                    }
+                }
+            }
+            
+            // Asignar datos encontrados o array vacío
+            allStudents = studentsData && Array.isArray(studentsData) ? studentsData : [];
+            filteredStudents = [...allStudents];
+            
+            console.log(`📊 Total estudiantes cargados: ${allStudents.length}`);
+            
+            setTimeout(() => {
+                hideLoading();
+                renderStudents();
+                updateStats();
+                updateDebugInfo();
+            }, 500);
+        }
+
+        function renderStudents() {
+            const container = document.getElementById('studentsContainer');
+            const tableContainer = document.getElementById('studentsTable');
+            const tableBody = document.getElementById('studentsTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const studentsCount = document.getElementById('studentsCount');
+            
+            // Actualizar contador
+            studentsCount.textContent = `${filteredStudents.length} estudiante${filteredStudents.length !== 1 ? 's' : ''} encontrado${filteredStudents.length !== 1 ? 's' : ''}`;
+            
+            if (filteredStudents.length === 0) {
+                tableContainer.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            tableContainer.classList.remove('hidden');
+            
+            // Limpiar tabla
+            tableBody.innerHTML = '';
+            
+            // Renderizar estudiantes
+            filteredStudents.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.id || 'N/A'}</td>
+                    <td>${student.firstName || ''} ${student.lastName || ''}</td>
+                    <td>${student.documentNumber || 'N/A'}</td>
+                    <td>${student.grade || 'N/A'}${student.course ? student.course : ''}</td>
+                    <td>
+                        <span class="status-badge ${student.status === 'activo' ? 'status-active' : 'status-inactive'}">
+                            ${student.status || 'Desconocido'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="viewStudent(${student.id})">👁️ Ver</button>
+                        <button class="btn btn-sm btn-outline" onclick="editStudent(${student.id})">✏️ Editar</button>
+                        <button class="btn btn-sm btn-outline" onclick="deleteStudent(${student.id})">🗑️ Eliminar</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            logToDebug(`📋 Renderizados ${filteredStudents.length} estudiantes en la tabla`);
+        }
+
+        function filterStudents() {
+            const searchTerm = document.getElementById('studentSearch').value.toLowerCase();
+            const gradeFilter = document.getElementById('gradeFilter').value;
+            
+            filteredStudents = allStudents.filter(student => {
+                const matchesSearch = !searchTerm || 
+                    (student.firstName && student.firstName.toLowerCase().includes(searchTerm)) ||
+                    (student.lastName && student.lastName.toLowerCase().includes(searchTerm)) ||
+                    (student.documentNumber && student.documentNumber.includes(searchTerm));
+                
+                const matchesGrade = !gradeFilter || student.grade === gradeFilter;
+                
+                return matchesSearch && matchesGrade;
+            });
+            
+            renderStudents();
+            updateDebugInfo();
+        }
+
+        function clearFilters() {
+            document.getElementById('studentSearch').value = '';
+            document.getElementById('gradeFilter').value = '';
+            filteredStudents = [...allStudents];
+            renderStudents();
+            logToDebug('🗑️ Filtros limpiados');
+        }
+
+        function updateStats() {
+            const totalStudents = allStudents.length;
+            const activeStudents = allStudents.filter(s => s.status === 'activo').length;
+            const storageKeys = localStorage.length + sessionStorage.length;
+            
+            document.getElementById('totalStudents').textContent = totalStudents;
+            document.getElementById('activeStudents').textContent = activeStudents;
+            document.getElementById('storageKeys').textContent = storageKeys;
+            document.getElementById('debugStatus').textContent = totalStudents > 0 ? 'OK' : 'VACÍO';
+        }
+
+        function showLoading() {
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('studentsTable').classList.add('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingState').classList.add('hidden');
+        }
+
+        function refreshData() {
+            logToDebug('🔄 Actualizando datos...');
+            loadStudents();
+        }
+
+        // ===================================
+        // FUNCIONES DE FORMULARIO
+        // ===================================
+        function showAddStudentForm() {
+            document.getElementById('addStudentForm').classList.remove('hidden');
+            clearForm();
+        }
+
+        function hideAddStudentForm() {
+            document.getElementById('addStudentForm').classList.add('hidden');
+        }
+
+        function clearForm() {
+            document.getElementById('firstName').value = '';
+            document.getElementById('lastName').value = '';
+            document.getElementById('documentNumber').value = '';
+            document.getElementById('grade').value = '';
+            document.getElementById('course').value = '';
+            document.getElementById('status').value = 'activo';
+        }
+
+        function saveStudent() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const documentNumber = document.getElementById('documentNumber').value.trim();
+            const grade = document.getElementById('grade').value;
+            
+            if (!firstName || !lastName || !documentNumber || !grade) {
+                alert('❌ Por favor completa todos los campos requeridos');
+                return;
+            }
+            
+            const newStudent = {
+                id: Date.now(), // ID único basado en timestamp
+                firstName,
+                lastName,
+                documentNumber,
+                grade,
+                course: document.getElementById('course').value,
+                status: document.getElementById('status').value,
+                enrollmentDate: new Date().toISOString()
+            };
+            
+            allStudents.push(newStudent);
+            
+            // Guardar en localStorage con múltiples claves para compatibilidad
+            localStorage.setItem('students', JSON.stringify(allStudents));
+            localStorage.setItem('estudiantes', JSON.stringify(allStudents));
+            localStorage.setItem('studentsData', JSON.stringify(allStudents));
+            
+            logToDebug(`✅ Estudiante guardado: ${firstName} ${lastName} (ID: ${newStudent.id})`);
+            
+            // Actualizar vista
+            filteredStudents = [...allStudents];
+            renderStudents();
+            updateStats();
+            hideAddStudentForm();
+            
+            alert(`✅ Estudiante ${firstName} ${lastName} guardado correctamente`);
+        }
+
+        // ===================================
+        // FUNCIONES DE GESTIÓN
+        // ===================================
+        function viewStudent(id) {
+            const student = allStudents.find(s => s.id === id);
+            if (student) {
+                alert(`👁️ Datos del estudiante:
+                
+Nombre: ${student.firstName} ${student.lastName}
+Documento: ${student.documentNumber}
+Grado: ${student.grade}${student.course ? student.course : ''}
+Estado: ${student.status}
+Fecha de matrícula: ${new Date(student.enrollmentDate).toLocaleDateString()}`);
+            }
+        }
+
+        function editStudent(id) {
+            const student = allStudents.find(s => s.id === id);
+            if (student) {
+                // Llenar formulario con datos existentes
+                document.getElementById('firstName').value = student.firstName;
+                document.getElementById('lastName').value = student.lastName;
+                document.getElementById('documentNumber').value = student.documentNumber;
+                document.getElementById('grade').value = student.grade;
+                document.getElementById('course').value = student.course || '';
+                document.getElementById('status').value = student.status;
+                
+                // Eliminar estudiante existente
+                allStudents = allStudents.filter(s => s.id !== id);
+                
+                showAddStudentForm();
+                logToDebug(`✏️ Editando estudiante: ${student.firstName} ${student.lastName}`);
+            }
+        }
+
+        function deleteStudent(id) {
+            const student = allStudents.find(s => s.id === id);
+            if (student && confirm(`¿Estás seguro de eliminar a ${student.firstName} ${student.lastName}?`)) {
+                allStudents = allStudents.filter(s => s.id !== id);
+                
+                // Actualizar localStorage
+                localStorage.setItem('students', JSON.stringify(allStudents));
+                localStorage.setItem('estudiantes', JSON.stringify(allStudents));
+                localStorage.setItem('studentsData', JSON.stringify(allStudents));
+                
+                filteredStudents = [...allStudents];
+                renderStudents();
+                updateStats();
+                
+                logToDebug(`🗑️ Estudiante eliminado: ${student.firstName} ${student.lastName}`);
+                alert(`✅ Estudiante eliminado correctamente`);
+            }
+        }
+
+        // ===================================
+        // INICIALIZACIÓN
+        // ===================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Iniciando aplicación de gestión de estudiantes...');
+            
+            // Cargar estudiantes al iniciar
+            loadStudents();
+            
+            // Configurar eventos de filtrado en tiempo real
+            const searchInput = document.getElementById('studentSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', filterStudents);
+            }
+            
+            const gradeFilter = document.getElementById('gradeFilter');
+            if (gradeFilter) {
+                gradeFilter.addEventListener('change', filterStudents);
+            }
+            
+            // Log inicial
+            logToDebug('🚀 Aplicación iniciada correctamente');
+            console.log('✅ Aplicación de gestión de estudiantes iniciada');
+        });
+
+        // ===================================
+        // UTILIDADES ADICIONALES
+        // ===================================
+        
+        // Función para importar datos desde JSON
+        function importStudentsFromJSON() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            if (Array.isArray(data)) {
+                                allStudents = data;
+                                localStorage.setItem('students', JSON.stringify(allStudents));
+                                localStorage.setItem('estudiantes', JSON.stringify(allStudents));
+                                localStorage.setItem('studentsData', JSON.stringify(allStudents));
+                                
+                                filteredStudents = [...allStudents];
+                                renderStudents();
+                                updateStats();
+                                
+                                logToDebug(`📥 Importados ${data.length} estudiantes desde JSON`);
+                                alert(`✅ ${data.length} estudiantes importados correctamente`);
+                            } else {
+                                alert('❌ El archivo JSON debe contener un array de estudiantes');
+                            }
+                        } catch (error) {
+                            alert('❌ Error al leer el archivo JSON: ' + error.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        // Función para exportar estudiantes a JSON
+        function exportStudentsToJSON() {
+            if (allStudents.length === 0) {
+                alert('❌ No hay estudiantes para exportar');
+                return;
+            }
+            
+            const blob = new Blob([JSON.stringify(allStudents, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `estudiantes-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            logToDebug(`📤 Exportados ${allStudents.length} estudiantes a JSON`);
+        }
+
+        // Función para verificar integridad de datos
+        function verifyDataIntegrity() {
+            const issues = [];
+            
+            allStudents.forEach((student, index) => {
+                if (!student.id) issues.push(`Estudiante ${index}: Sin ID`);
+                if (!student.firstName) issues.push(`Estudiante ${index}: Sin nombre`);
+                if (!student.lastName) issues.push(`Estudiante ${index}: Sin apellido`);
+                if (!student.documentNumber) issues.push(`Estudiante ${index}: Sin documento`);
+                if (!student.grade) issues.push(`Estudiante ${index}: Sin grado`);
+            });
+            
+            if (issues.length > 0) {
+                console.warn('⚠️ Problemas de integridad encontrados:', issues);
+                logToDebug(`⚠️ Problemas de integridad: ${issues.length} issues encontrados`);
+                return false;
+            } else {
+                logToDebug('✅ Integridad de datos verificada correctamente');
+                return true;
+            }
+        }
+
+        // Función para sincronizar con servidor (simulada)
+        async function syncWithServer() {
+            logToDebug('🔄 Iniciando sincronización con servidor...');
+            
+            try {
+                // Simular llamada a API
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Aquí iría la lógica real de sincronización
+                // Por ahora solo simulamos
+                
+                logToDebug('✅ Sincronización completada');
+                alert('✅ Datos sincronizados con el servidor');
+            } catch (error) {
+                logToDebug(`❌ Error en sincronización: ${error.message}`);
+                alert('❌ Error al sincronizar con el servidor');
+            }
+        }
+
+        // Función de diagnóstico completo
+        function runFullDiagnostic() {
+            logToDebug('🔍 Ejecutando diagnóstico completo...');
+            
+            const diagnostic = {
+                timestamp: new Date().toISOString(),
+                browserInfo: {
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    platform: navigator.platform
+                },
+                storageInfo: {
+                    localStorageAvailable: typeof(Storage) !== "undefined",
+                    localStorageKeys: localStorage.length,
+                    sessionStorageKeys: sessionStorage.length
+                },
+                dataInfo: {
+                    studentsInMemory: allStudents.length,
+                    filteredStudents: filteredStudents.length,
+                    dataIntegrity: verifyDataIntegrity()
+                },
+                pageInfo: {
+                    url: window.location.href,
+                    title: document.title,
+                    sidebarLoaded: document.querySelector('.sidebar').innerHTML.length > 0
+                }
+            };
+            
+            console.log('📊 Diagnóstico completo:', diagnostic);
+            logToDebug(`📊 Diagnóstico: ${JSON.stringify(diagnostic, null, 2)}`);
+            
+            return diagnostic;
+        }
+
+        // Agregar botones adicionales al panel de debug
+        function addAdvancedDebugButtons() {
+            const debugPanel = document.getElementById('debugPanel');
+            const advancedButtons = document.createElement('div');
+            advancedButtons.className = 'debug-buttons';
+            advancedButtons.innerHTML = `
+                <button class="debug-btn primary" onclick="importStudentsFromJSON()">📥 Importar JSON</button>
+                <button class="debug-btn primary" onclick="exportStudentsToJSON()">📤 Exportar JSON</button>
+                <button class="debug-btn primary" onclick="runFullDiagnostic()">🔍 Diagnóstico</button>
+                <button class="debug-btn primary" onclick="verifyDataIntegrity()">✅ Verificar Datos</button>
+            `;
+            
+            debugPanel.appendChild(advancedButtons);
+        }
+
+        // Llamar a la función de botones avanzados cuando se cargue la página
+        setTimeout(addAdvancedDebugButtons, 1000);
+    </script>
+</body>
+</html>

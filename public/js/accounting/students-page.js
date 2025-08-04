@@ -31,25 +31,207 @@ class StudentsManagementPage {
         try {
             console.log('🔄 Cargando datos de estudiantes...');
             
-            // Esperar un poco para asegurar que DemoData esté disponible
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            // Cargar estudiantes desde demo data
-            if (window.DemoData && typeof window.DemoData.getStudents === 'function') {
-                console.log('📊 Cargando desde DemoData...');
-                try {
-                    const studentsResponse = await window.DemoData.getStudents();
-                    this.students = studentsResponse.data || [];
-                    console.log('✅ Estudiantes cargados desde DemoData:', this.students.length);
-                } catch (demoError) {
-                    console.error('❌ Error en DemoData.getStudents:', demoError);
+            // Cargar estudiantes desde la API con fallback a localStorage
+            try {
+                // Obtener institutionId desde la URL o localStorage
+                const urlParams = new URLSearchParams(window.location.search);
+                const institutionId = urlParams.get('institutionId') || localStorage.getItem('institutionId');
+                
+                if (!institutionId) {
+                    console.log('⚠️ No se encontró institutionId, usando datos de ejemplo');
                     this.students = this.generateSampleStudents();
-                    console.log('⚠️ Usando datos de ejemplo por error en DemoData');
+                } else {
+                    const response = await fetch(`/api/students/${institutionId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.students = data.students || [];
+                        console.log('✅ Estudiantes cargados desde API:', this.students.length);
+                    } else {
+                        console.log('⚠️ No se pudieron cargar estudiantes desde la API');
+                    
+                    // FALLBACK: Intentar cargar desde localStorage
+                    console.log('🔄 Intentando cargar desde localStorage...');
+                    const possibleKeys = ['students', 'estudiantes', 'studentsData', 'allStudents'];
+                    let foundStudents = [];
+                    
+                    for (const key of possibleKeys) {
+                        const data = localStorage.getItem(key);
+                        if (data) {
+                            try {
+                                const parsed = JSON.parse(data);
+                                if (Array.isArray(parsed) && parsed.length > 0) {
+                                    foundStudents = parsed;
+                                    console.log('✅ Encontrados ' + parsed.length + ' estudiantes en localStorage[' + key + ']');
+                                    break;
+                                }
+                            } catch (e) {
+                                console.warn('❌ Error parsing localStorage[' + key + ']:', e);
+                            }
+                        }
+                    }
+                    
+                    if (foundStudents.length > 0) {
+                        // Convertir formato si es necesario
+                        this.students = foundStudents.map(student => {
+                            // Si el estudiante ya tiene el formato correcto, devolverlo tal como está
+                            if (student.fullName && student.status) {
+                                return student;
+                            }
+                            
+                            // Si tiene formato de Excel, convertirlo
+                            if (student['Nombre Completo']) {
+                                const names = student['Nombre Completo'].split(' ');
+                                const firstName = names.slice(0, Math.ceil(names.length / 2)).join(' ');
+                                const lastName = names.slice(Math.ceil(names.length / 2)).join(' ');
+                                
+                                return {
+                                    id: student['No.'] || student.id || Date.now() + Math.random(),
+                                    firstName: firstName,
+                                    lastName: lastName,
+                                    fullName: student['Nombre Completo'],
+                                    documentType: 'CC',
+                                    document: student['Identificación'] ? student['Identificación'].toString() : '',
+                                    email: firstName.toLowerCase().replace(' ', '.') + '@estudiante.edu.co',
+                                    phone: '+57 300 000 0000',
+                                    grade: student['Curso'] && student['Curso'].includes('Décimo') ? '10' : 
+                                           student['Curso'] && student['Curso'].includes('Once') ? '11' : '9',
+                                    course: student['Curso'] ? student['Curso'].split(' ')[1] || 'A' : 'A',
+                                    status: 'ACTIVE',
+                                    enrollmentDate: new Date().toISOString(),
+                                    birthDate: new Date('2008-01-01').toISOString(),
+                                    guardian: {
+                                        name: 'Acudiente',
+                                        phone: '+57 300 000 0000',
+                                        email: 'acudiente@email.com'
+                                    },
+                                    address: 'Dirección pendiente',
+                                    events: [],
+                                    totalDebt: 0,
+                                    totalPaid: 0,
+                                    createdAt: new Date().toISOString()
+                                };
+                            }
+                            
+                            // Si tiene formato básico, completarlo
+                            return {
+                                id: student.id || Date.now() + Math.random(),
+                                firstName: student.firstName || '',
+                                lastName: student.lastName || '',
+                                fullName: student.fullName || (student.firstName + ' ' + student.lastName),
+                                documentType: student.documentType || 'CC',
+                                document: student.documentNumber || student.document || '',
+                                email: student.email || 'estudiante@email.com',
+                                phone: student.phone || '+57 300 000 0000',
+                                grade: student.grade || '10',
+                                course: student.course || 'A',
+                                status: student.status === 'activo' ? 'ACTIVE' : 'ACTIVE',
+                                enrollmentDate: student.enrollmentDate || new Date().toISOString(),
+                                birthDate: student.birthDate || new Date('2008-01-01').toISOString(),
+                                guardian: student.guardian || {
+                                    name: 'Acudiente',
+                                    phone: '+57 300 000 0000',
+                                    email: 'acudiente@email.com'
+                                },
+                                address: student.address || 'Dirección pendiente',
+                                events: student.events || [],
+                                totalDebt: student.totalDebt || 0,
+                                totalPaid: student.totalPaid || 0,
+                                createdAt: student.createdAt || new Date().toISOString()
+                            };
+                        });
+                        
+                        console.log('✅ ' + this.students.length + ' estudiantes cargados desde localStorage y convertidos');
+                        } else {
+                            console.log('❌ No se encontraron estudiantes en localStorage, usando datos de ejemplo');
+                            this.students = this.generateSampleStudents();
+                        }
+                    }
                 }
-            } else {
-                console.log('⚠️ DemoData no disponible, usando datos de ejemplo...');
-                this.students = this.generateSampleStudents();
-                console.log('✅ Estudiantes generados:', this.students.length);
+            } catch (error) {
+                console.error('❌ Error cargando estudiantes:', error);
+                
+                // FALLBACK en caso de error: Intentar cargar desde localStorage
+                console.log('🔄 Error en API, intentando localStorage...');
+                const possibleKeys = ['students', 'estudiantes', 'studentsData', 'allStudents'];
+                let foundStudents = [];
+                
+                for (const key of possibleKeys) {
+                    const data = localStorage.getItem(key);
+                    if (data) {
+                        try {
+                            const parsed = JSON.parse(data);
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                                foundStudents = parsed;
+                                console.log('✅ Encontrados ' + parsed.length + ' estudiantes en localStorage[' + key + ']');
+                                break;
+                            }
+                        } catch (e) {
+                            console.warn('❌ Error parsing localStorage[' + key + ']:', e);
+                        }
+                    }
+                }
+                
+                if (foundStudents.length > 0) {
+                    this.students = foundStudents.map(student => {
+                        // Misma lógica de conversión que arriba
+                        if (student.fullName && student.status) return student;
+                        
+                        if (student['Nombre Completo']) {
+                            const names = student['Nombre Completo'].split(' ');
+                            const firstName = names.slice(0, Math.ceil(names.length / 2)).join(' ');
+                            const lastName = names.slice(Math.ceil(names.length / 2)).join(' ');
+                            
+                            return {
+                                id: student['No.'] || student.id || Date.now() + Math.random(),
+                                firstName: firstName,
+                                lastName: lastName,
+                                fullName: student['Nombre Completo'],
+                                documentType: 'CC',
+                                document: student['Identificación'] ? student['Identificación'].toString() : '',
+                                email: firstName.toLowerCase().replace(' ', '.') + '@estudiante.edu.co',
+                                phone: '+57 300 000 0000',
+                                grade: student['Curso'] && student['Curso'].includes('Décimo') ? '10' : 
+                                       student['Curso'] && student['Curso'].includes('Once') ? '11' : '9',
+                                course: student['Curso'] ? student['Curso'].split(' ')[1] || 'A' : 'A',
+                                status: 'ACTIVE',
+                                enrollmentDate: new Date().toISOString(),
+                                birthDate: new Date('2008-01-01').toISOString(),
+                                guardian: { name: 'Acudiente', phone: '+57 300 000 0000', email: 'acudiente@email.com' },
+                                address: 'Dirección pendiente',
+                                events: [],
+                                totalDebt: 0,
+                                totalPaid: 0,
+                                createdAt: new Date().toISOString()
+                            };
+                        }
+                        
+                        return {
+                            id: student.id || Date.now() + Math.random(),
+                            firstName: student.firstName || '',
+                            lastName: student.lastName || '',
+                            fullName: student.fullName || (student.firstName + ' ' + student.lastName),
+                            documentType: 'CC',
+                            document: student.documentNumber || student.document || '',
+                            email: student.email || 'estudiante@email.com',
+                            phone: '+57 300 000 0000',
+                            grade: student.grade || '10',
+                            course: student.course || 'A',
+                            status: 'ACTIVE',
+                            enrollmentDate: new Date().toISOString(),
+                            birthDate: new Date('2008-01-01').toISOString(),
+                            guardian: { name: 'Acudiente', phone: '+57 300 000 0000', email: 'acudiente@email.com' },
+                            address: 'Dirección pendiente',
+                            events: [],
+                            totalDebt: 0,
+                            totalPaid: 0,
+                            createdAt: new Date().toISOString()
+                        };
+                    });
+                    
+                    console.log('✅ ' + this.students.length + ' estudiantes cargados desde localStorage tras error en API');
+                } else {
+                    this.students = this.generateSampleStudents();
+                }
             }
             
             // Cargar eventos y grados
@@ -168,115 +350,6 @@ class StudentsManagementPage {
                 totalDebt: 30000,
                 totalPaid: 50000,
                 createdAt: new Date('2024-02-01').toISOString()
-            },
-            {
-                id: '3',
-                firstName: 'Carlos Andrés',
-                lastName: 'Rodríguez Martín',
-                fullName: 'Carlos Andrés Rodríguez Martín',
-                documentType: 'TI',
-                document: '3456789012',
-                email: 'carlos.rodriguez@estudiante.edu.co',
-                phone: '+57 304 567 8901',
-                grade: '9',
-                course: 'A',
-                status: 'ACTIVE',
-                enrollmentDate: new Date('2024-02-01').toISOString(),
-                birthDate: new Date('2009-07-10').toISOString(),
-                guardian: {
-                    name: 'Ana Martín',
-                    phone: '+57 305 678 9012',
-                    email: 'ana.martin@email.com'
-                },
-                address: 'Avenida 80 #23-45, Cali',
-                events: [
-                    {
-                        eventId: 'event-3',
-                        eventName: 'Bingo Familiar',
-                        amount: 30000,
-                        paid: 15000,
-                        status: 'PARTIAL',
-                        paymentDate: new Date('2025-01-20').toISOString()
-                    },
-                    {
-                        eventId: 'event-4',
-                        eventName: 'Preicfes',
-                        amount: 80000,
-                        paid: 0,
-                        status: 'PENDING',
-                        paymentDate: null
-                    }
-                ],
-                totalDebt: 95000,
-                totalPaid: 15000,
-                createdAt: new Date('2024-02-01').toISOString()
-            },
-            {
-                id: '4',
-                firstName: 'Ana Sofía',
-                lastName: 'Herrera Castro',
-                fullName: 'Ana Sofía Herrera Castro',
-                documentType: 'TI',
-                document: '4567890123',
-                email: 'ana.herrera@estudiante.edu.co',
-                phone: '+57 306 789 0123',
-                grade: '11',
-                course: 'B',
-                status: 'ACTIVE',
-                enrollmentDate: new Date('2024-02-01').toISOString(),
-                birthDate: new Date('2007-11-28').toISOString(),
-                guardian: {
-                    name: 'Luis Herrera',
-                    phone: '+57 307 890 1234',
-                    email: 'luis.herrera@email.com'
-                },
-                address: 'Calle 72 #11-25, Barranquilla',
-                events: [
-                    {
-                        eventId: 'event-1',
-                        eventName: 'Derecho de Grado',
-                        amount: 150000,
-                        paid: 0,
-                        status: 'PENDING',
-                        paymentDate: null
-                    },
-                    {
-                        eventId: 'event-4',
-                        eventName: 'Preicfes',
-                        amount: 80000,
-                        paid: 80000,
-                        status: 'PAID',
-                        paymentDate: new Date('2025-01-05').toISOString()
-                    }
-                ],
-                totalDebt: 150000,
-                totalPaid: 80000,
-                createdAt: new Date('2024-02-01').toISOString()
-            },
-            {
-                id: '5',
-                firstName: 'Luis Fernando',
-                lastName: 'Castro Morales',
-                fullName: 'Luis Fernando Castro Morales',
-                documentType: 'TI',
-                document: '5678901234',
-                email: 'luis.castro@estudiante.edu.co',
-                phone: '+57 308 901 2345',
-                grade: '8',
-                course: 'C',
-                status: 'INACTIVE',
-                enrollmentDate: new Date('2024-02-01').toISOString(),
-                birthDate: new Date('2010-01-12').toISOString(),
-                guardian: {
-                    name: 'Patricia Morales',
-                    phone: '+57 309 012 3456',
-                    email: 'patricia.morales@email.com'
-                },
-                address: 'Transversal 15 #67-89, Bucaramanga',
-                events: [],
-                totalDebt: 0,
-                totalPaid: 0,
-                createdAt: new Date('2024-02-01').toISOString()
             }
         ];
     }
@@ -298,54 +371,6 @@ class StudentsManagementPage {
                 totalExpected: 6750000,
                 totalCollected: 3000000,
                 totalPending: 3750000
-            },
-            {
-                id: 'event-2',
-                name: 'Rifa Navideña',
-                description: 'Rifa benéfica para actividades navideñas',
-                amount: 50000,
-                type: 'RAFFLE',
-                status: 'ACTIVE',
-                targetGrades: ['9', '10', '11'],
-                targetCourses: ['A', 'B', 'C'],
-                dueDate: new Date('2025-02-28').toISOString(),
-                createdAt: new Date('2024-12-01').toISOString(),
-                assignedStudents: 120,
-                totalExpected: 6000000,
-                totalCollected: 4500000,
-                totalPending: 1500000
-            },
-            {
-                id: 'event-3',
-                name: 'Bingo Familiar',
-                description: 'Evento familiar de integración',
-                amount: 30000,
-                type: 'BINGO',
-                status: 'ACTIVE',
-                targetGrades: ['8', '9', '10'],
-                targetCourses: ['A', 'B', 'C'],
-                dueDate: new Date('2025-02-15').toISOString(),
-                createdAt: new Date('2025-01-10').toISOString(),
-                assignedStudents: 85,
-                totalExpected: 2550000,
-                totalCollected: 1275000,
-                totalPending: 1275000
-            },
-            {
-                id: 'event-4',
-                name: 'Preicfes',
-                description: 'Curso preparatorio para examen ICFES',
-                amount: 80000,
-                type: 'COURSE',
-                status: 'ACTIVE',
-                targetGrades: ['10', '11'],
-                targetCourses: ['A', 'B'],
-                dueDate: new Date('2025-04-30').toISOString(),
-                createdAt: new Date('2025-01-15').toISOString(),
-                assignedStudents: 60,
-                totalExpected: 4800000,
-                totalCollected: 2400000,
-                totalPending: 2400000
             }
         ];
     }
@@ -425,14 +450,18 @@ class StudentsManagementPage {
     }
 
     filterStudents() {
-        const gradeFilter = document.getElementById('gradeFilter')?.value || '';
-        const courseFilter = document.getElementById('courseFilter')?.value || '';
-        const statusFilter = document.getElementById('statusFilter')?.value || '';
+        const gradeFilter = document.getElementById('gradeFilter');
+        const courseFilter = document.getElementById('courseFilter');
+        const statusFilter = document.getElementById('statusFilter');
+
+        const gradeValue = gradeFilter ? gradeFilter.value : '';
+        const courseValue = courseFilter ? courseFilter.value : '';
+        const statusValue = statusFilter ? statusFilter.value : '';
 
         this.filteredStudents = this.students.filter(student => {
-            const matchesGrade = !gradeFilter || student.grade === gradeFilter;
-            const matchesCourse = !courseFilter || student.course === courseFilter;
-            const matchesStatus = !statusFilter || student.status === statusFilter;
+            const matchesGrade = !gradeValue || student.grade === gradeValue;
+            const matchesCourse = !courseValue || student.course === courseValue;
+            const matchesStatus = !statusValue || student.status === statusValue;
             
             return matchesGrade && matchesCourse && matchesStatus;
         });
@@ -462,8 +491,8 @@ class StudentsManagementPage {
                 valueA = new Date(valueA);
                 valueB = new Date(valueB);
             } else {
-                valueA = valueA?.toString().toLowerCase() || '';
-                valueB = valueB?.toString().toLowerCase() || '';
+                valueA = valueA ? valueA.toString().toLowerCase() : '';
+                valueB = valueB ? valueB.toString().toLowerCase() : '';
             }
 
             if (valueA < valueB) return this.sortDirection === 'asc' ? -1 : 1;
@@ -482,7 +511,7 @@ class StudentsManagementPage {
         });
 
         // Agregar indicador al column actual
-        const headerCell = document.querySelector(`[data-sort="${this.sortColumn}"]`);
+        const headerCell = document.querySelector('[data-sort="' + this.sortColumn + '"]');
         if (headerCell) {
             const indicator = document.createElement('span');
             indicator.className = 'sort-indicator';
@@ -501,102 +530,69 @@ class StudentsManagementPage {
         const paginatedStudents = this.filteredStudents.slice(startIndex, endIndex);
 
         if (paginatedStudents.length === 0) {
-            tbody.innerHTML = `
-                <tr class="empty-row">
-                    <td colspan="9">
-                        <div class="empty-state">
-                            <svg width="48" height="48" fill="currentColor" class="empty-icon">
-                                <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-1c0-1.1.9-2 2-2h2l1.5-4.5L7.91 8.5C7.66 8.04 7.66 7.96 7.91 7.5L9.5 5H8c-.55 0-1-.45-1-1s.45-1 1-1h8c.55 0 1 .45 1 1s-.45 1-1 1h-1.5L12.09 7.5c.25.46.25.54 0 1L10.5 10.5 12 15h2c1.1 0 2 .9 2 2v1H4z"/>
-                            </svg>
-                            <h3>No hay estudiantes</h3>
-                            <p>No se encontraron estudiantes con los filtros aplicados</p>
-                        </div>
-                    </td>
-                </tr>
-            `;
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="8"><div class="empty-state"><h3>No hay estudiantes</h3><p>No se encontraron estudiantes con los filtros aplicados</p></div></td></tr>';
             return;
         }
 
-        tbody.innerHTML = paginatedStudents.map(student => {
+        let htmlContent = '';
+        
+        paginatedStudents.forEach(student => {
             const statusClass = student.status === 'ACTIVE' ? 'active' : 'inactive';
             const statusText = student.status === 'ACTIVE' ? 'Activo' : 'Inactivo';
             const debtStatus = student.totalDebt > 0 ? 'debt' : 'clear';
             
-            return `
-                <tr class="student-row">
-                    <td>
-                        <div class="student-info">
-                            <div class="student-avatar">
-                                ${student.firstName.charAt(0)}${student.lastName.charAt(0)}
-                            </div>
-                            <div class="student-details">
-                                <strong class="student-name">${student.fullName}</strong>
-                                <span class="student-document">${student.documentType}: ${student.document}</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="contact-info">
-                            <div class="email">${student.email}</div>
-                            <div class="phone">${student.phone}</div>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="grade-course">${student.grade}° ${student.course}</span>
-                    </td>
-                    <td>
-                        <span class="status-badge ${statusClass}">
-                            ${statusText}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="events-summary">
-                            <span class="events-count">${student.events.length} eventos</span>
-                            <div class="events-status">
-                                ${student.events.filter(e => e.status === 'PAID').length} pagados,
-                                ${student.events.filter(e => e.status === 'PARTIAL').length} parciales,
-                                ${student.events.filter(e => e.status === 'PENDING').length} pendientes
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="debt-amount ${debtStatus}">
-                            ${formatCurrency(student.totalDebt)}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="paid-amount">
-                            ${formatCurrency(student.totalPaid)}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-info btn-sm" 
-                                    onclick="viewStudent('${student.id}')" 
-                                    title="Ver detalles">
-                                👁️
-                            </button>
-                            <button class="btn btn-warning btn-sm" 
-                                    onclick="editStudent('${student.id}')" 
-                                    title="Editar estudiante">
-                                ✏️
-                            </button>
-                            <button class="btn btn-success btn-sm" 
-                                    onclick="viewStudentEvents('${student.id}')" 
-                                    title="Ver eventos">
-                                📅
-                            </button>
-                            <button class="btn btn-primary btn-sm" 
-                                    onclick="viewStudentAccount('${student.id}')" 
-                                    title="Estado de cuenta">
-                                💰
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }).join('');
+            const paidEvents = student.events.filter(e => e.status === 'PAID').length;
+            const partialEvents = student.events.filter(e => e.status === 'PARTIAL').length;
+            const pendingEvents = student.events.filter(e => e.status === 'PENDING').length;
+            
+            htmlContent += '<tr class="student-row">';
+            htmlContent += '<td>';
+            htmlContent += '<div class="student-info">';
+            htmlContent += '<div class="student-avatar">' + student.firstName.charAt(0) + student.lastName.charAt(0) + '</div>';
+            htmlContent += '<div class="student-details">';
+            htmlContent += '<strong class="student-name">' + student.fullName + '</strong>';
+            htmlContent += '<span class="student-document">' + student.documentType + ': ' + student.document + '</span>';
+            htmlContent += '</div>';
+            htmlContent += '</div>';
+            htmlContent += '</td>';
+            htmlContent += '<td>';
+            htmlContent += '<div class="contact-info">';
+            htmlContent += '<div class="email">' + student.email + '</div>';
+            htmlContent += '<div class="phone">' + student.phone + '</div>';
+            htmlContent += '</div>';
+            htmlContent += '</td>';
+            htmlContent += '<td>';
+            htmlContent += '<span class="grade-course">' + student.grade + '° ' + student.course + '</span>';
+            htmlContent += '</td>';
+            htmlContent += '<td>';
+            htmlContent += '<span class="status-badge ' + statusClass + '">' + statusText + '</span>';
+            htmlContent += '</td>';
+            htmlContent += '<td>';
+            htmlContent += '<div class="events-summary">';
+            htmlContent += '<span class="events-count">' + student.events.length + ' eventos</span>';
+            htmlContent += '<div class="events-status">';
+            htmlContent += paidEvents + ' pagados, ' + partialEvents + ' parciales, ' + pendingEvents + ' pendientes';
+            htmlContent += '</div>';
+            htmlContent += '</div>';
+            htmlContent += '</td>';
+            htmlContent += '<td>';
+            htmlContent += '<span class="debt-amount ' + debtStatus + '">' + formatCurrency(student.totalDebt) + '</span>';
+            htmlContent += '</td>';
+            htmlContent += '<td>';
+            htmlContent += '<span class="paid-amount">' + formatCurrency(student.totalPaid) + '</span>';
+            htmlContent += '</td>';
+            htmlContent += '<td>';
+            htmlContent += '<div class="action-buttons">';
+            htmlContent += '<button class="btn btn-info btn-sm" onclick="viewStudent(\'' + student.id + '\')" title="Ver detalles">👁️</button>';
+            htmlContent += '<button class="btn btn-warning btn-sm" onclick="editStudent(\'' + student.id + '\')" title="Editar estudiante">✏️</button>';
+            htmlContent += '<button class="btn btn-success btn-sm" onclick="viewStudentEvents(\'' + student.id + '\')" title="Ver eventos">📅</button>';
+            htmlContent += '<button class="btn btn-primary btn-sm" onclick="viewStudentAccount(\'' + student.id + '\')" title="Estado de cuenta">💰</button>';
+            htmlContent += '</div>';
+            htmlContent += '</td>';
+            htmlContent += '</tr>';
+        });
 
+        tbody.innerHTML = htmlContent;
         this.renderPagination();
     }
 
@@ -614,36 +610,24 @@ class StudentsManagementPage {
         let paginationHTML = '';
         
         // Botón anterior
-        paginationHTML += `
-            <button class="pagination-btn ${this.currentPage === 1 ? 'disabled' : ''}" 
-                    onclick="studentsPage.changePage(${this.currentPage - 1})"
-                    ${this.currentPage === 1 ? 'disabled' : ''}>
-                ‹ Anterior
-            </button>
-        `;
+        const prevDisabled = this.currentPage === 1 ? 'disabled' : '';
+        const prevDisabledAttr = this.currentPage === 1 ? 'disabled' : '';
+        paginationHTML += '<button class="pagination-btn ' + prevDisabled + '" onclick="studentsPage.changePage(' + (this.currentPage - 1) + ')" ' + prevDisabledAttr + '>‹ Anterior</button>';
 
         // Números de página
         for (let i = 1; i <= totalPages; i++) {
             if (i === 1 || i === totalPages || (i >= this.currentPage - 2 && i <= this.currentPage + 2)) {
-                paginationHTML += `
-                    <button class="pagination-btn ${i === this.currentPage ? 'active' : ''}" 
-                            onclick="studentsPage.changePage(${i})">
-                        ${i}
-                    </button>
-                `;
+                const activeClass = i === this.currentPage ? 'active' : '';
+                paginationHTML += '<button class="pagination-btn ' + activeClass + '" onclick="studentsPage.changePage(' + i + ')">' + i + '</button>';
             } else if (i === this.currentPage - 3 || i === this.currentPage + 3) {
                 paginationHTML += '<span class="pagination-ellipsis">...</span>';
             }
         }
 
         // Botón siguiente
-        paginationHTML += `
-            <button class="pagination-btn ${this.currentPage === totalPages ? 'disabled' : ''}" 
-                    onclick="studentsPage.changePage(${this.currentPage + 1})"
-                    ${this.currentPage === totalPages ? 'disabled' : ''}>
-                Siguiente ›
-            </button>
-        `;
+        const nextDisabled = this.currentPage === totalPages ? 'disabled' : '';
+        const nextDisabledAttr = this.currentPage === totalPages ? 'disabled' : '';
+        paginationHTML += '<button class="pagination-btn ' + nextDisabled + '" onclick="studentsPage.changePage(' + (this.currentPage + 1) + ')" ' + nextDisabledAttr + '>Siguiente ›</button>';
 
         paginationContainer.innerHTML = paginationHTML;
     }
@@ -663,27 +647,32 @@ class StudentsManagementPage {
         const totalPaid = this.filteredStudents.reduce((sum, s) => sum + s.totalPaid, 0);
 
         // Actualizar elementos del DOM
-        const elements = {
-            'totalStudents': totalStudents,
-            'activeStudents': activeStudents,
-            'totalDebt': formatCurrency(totalDebt),
-            'totalPaid': formatCurrency(totalPaid)
-        };
+        const elements = [
+            { id: 'totalStudents', value: totalStudents },
+            { id: 'activeStudents', value: activeStudents },
+            { id: 'totalDebt', value: formatCurrency(totalDebt) },
+            { id: 'totalPaid', value: formatCurrency(totalPaid) }
+        ];
 
-        Object.entries(elements).forEach(([id, value]) => {
-            const element = document.getElementById(id);
+        elements.forEach(item => {
+            const element = document.getElementById(item.id);
             if (element) {
-                element.textContent = value;
+                element.textContent = item.value;
             }
         });
     }
 
     clearFilters() {
         // Limpiar filtros
-        document.getElementById('gradeFilter').value = '';
-        document.getElementById('courseFilter').value = '';
-        document.getElementById('statusFilter').value = '';
-        document.getElementById('studentSearch').value = '';
+        const gradeFilter = document.getElementById('gradeFilter');
+        const courseFilter = document.getElementById('courseFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const studentSearch = document.getElementById('studentSearch');
+
+        if (gradeFilter) gradeFilter.value = '';
+        if (courseFilter) courseFilter.value = '';
+        if (statusFilter) statusFilter.value = '';
+        if (studentSearch) studentSearch.value = '';
         
         // Resetear datos
         this.filteredStudents = [...this.students];
@@ -710,5 +699,56 @@ class StudentsManagementPage {
     }
 }
 
+// Funciones globales auxiliares
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0
+    }).format(amount || 0);
+}
+
+// Funciones de interacción
+function viewStudent(studentId) {
+    console.log('Ver estudiante:', studentId);
+    showAlert('Vista de estudiante en desarrollo', 'info');
+}
+
+function editStudent(studentId) {
+    console.log('Editar estudiante:', studentId);
+    showAlert('Edición de estudiante en desarrollo', 'info');
+}
+
+function viewStudentEvents(studentId) {
+    console.log('Ver eventos del estudiante:', studentId);
+    showAlert('Vista de eventos en desarrollo', 'info');
+}
+
+function viewStudentAccount(studentId) {
+    console.log('Ver cuenta del estudiante:', studentId);
+    showAlert('Estado de cuenta en desarrollo', 'info');
+}
+
+// Función de alerta global
+function showAlert(message, type) {
+    type = type || 'info';
+    console.log('[' + type.toUpperCase() + '] ' + message);
+    
+    // Si existe una función de alerta personalizada, usarla
+    if (typeof window.showAlert === 'function') {
+        window.showAlert(message, type);
+    } else {
+        // Fallback simple
+        alert(message);
+    }
+}
+
 // Hacer disponible globalmente
 window.StudentsManagementPage = StudentsManagementPage;
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('studentsTableBody')) {
+        window.studentsPage = new StudentsManagementPage();
+    }
+});

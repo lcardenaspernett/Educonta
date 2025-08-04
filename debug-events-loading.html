@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Carga de Eventos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="public/css/events-enterprise.css">
+    <style>
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+        .debug-success { border-color: #28a745; background: #d4edda; }
+        .debug-error { border-color: #dc3545; background: #f8d7da; }
+        .debug-warning { border-color: #ffc107; background: #fff3cd; }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <h1>🐛 Debug - Sistema de Eventos</h1>
+        
+        <div id="debugInfo"></div>
+        
+        <!-- Botón de prueba -->
+        <div class="mb-4">
+            <button class="btn btn-primary" id="newEventBtn">
+                <i class="fas fa-plus"></i> Nuevo Evento
+            </button>
+            <button class="btn btn-secondary" onclick="runDebug()">
+                <i class="fas fa-bug"></i> Ejecutar Debug
+            </button>
+        </div>
+        
+        <!-- Estadísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);">
+                    <div class="card-body text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2 opacity-90">Total Eventos</h6>
+                                <h2 class="mb-1 fw-bold" id="totalEvents">0</h2>
+                                <small class="opacity-75">
+                                    <i class="fas fa-circle text-success me-1" style="font-size: 8px;"></i>
+                                    Activos: <span id="activeEvents" class="fw-semibold">0</span>
+                                </small>
+                            </div>
+                            <div class="align-self-center">
+                                <div class="bg-white bg-opacity-20 rounded-circle p-3">
+                                    <i class="fas fa-calendar-alt fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
+                    <div class="card-body text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2 opacity-90">Meta Total</h6>
+                                <h2 class="mb-1 fw-bold" id="totalTarget">$0</h2>
+                                <small class="opacity-75">
+                                    <i class="fas fa-arrow-up me-1"></i>
+                                    Objetivo de recaudación
+                                </small>
+                            </div>
+                            <div class="align-self-center">
+                                <div class="bg-white bg-opacity-20 rounded-circle p-3">
+                                    <i class="fas fa-bullseye fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);">
+                    <div class="card-body text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2 opacity-90">Recaudado</h6>
+                                <h2 class="mb-1 fw-bold" id="totalRaised">$0</h2>
+                                <div class="progress mt-2 bg-white bg-opacity-30" style="height: 6px;">
+                                    <div class="progress-bar bg-white" id="overallProgress" style="width: 0%"></div>
+                                </div>
+                                <small class="opacity-75 mt-1 d-block">
+                                    <span id="collectionPercentage">0%</span> del objetivo
+                                </small>
+                            </div>
+                            <div class="align-self-center">
+                                <div class="bg-white bg-opacity-20 rounded-circle p-3">
+                                    <i class="fas fa-coins fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);">
+                    <div class="card-body text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2 opacity-90">Por Recaudar</h6>
+                                <h2 class="mb-1 fw-bold" id="totalPending">$0</h2>
+                                <small class="opacity-75">
+                                    <i class="fas fa-clock me-1"></i>
+                                    <span id="pendingPercentage">0%</span> restante
+                                </small>
+                            </div>
+                            <div class="align-self-center">
+                                <div class="bg-white bg-opacity-20 rounded-circle p-3">
+                                    <i class="fas fa-hourglass-half fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenedor de eventos -->
+        <div class="row" id="eventsContainer">
+            <!-- Los eventos se cargarán aquí -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="public/js/accounting/events-page.js"></script>
+    
+    <script>
+        function addDebugInfo(message, type = 'info') {
+            const debugDiv = document.getElementById('debugInfo');
+            const debugClass = type === 'success' ? 'debug-success' : 
+                              type === 'error' ? 'debug-error' : 
+                              type === 'warning' ? 'debug-warning' : '';
+            
+            debugDiv.innerHTML += `<div class="debug-info ${debugClass}">${new Date().toLocaleTimeString()}: ${message}</div>`;
+        }
+        
+        function runDebug() {
+            addDebugInfo('🔍 Iniciando debug...', 'info');
+            
+            // Verificar Bootstrap
+            if (typeof bootstrap !== 'undefined') {
+                addDebugInfo('✅ Bootstrap cargado correctamente', 'success');
+            } else {
+                addDebugInfo('❌ Bootstrap NO cargado', 'error');
+            }
+            
+            // Verificar EventsManagementPage
+            if (typeof EventsManagementPage !== 'undefined') {
+                addDebugInfo('✅ EventsManagementPage definida', 'success');
+            } else {
+                addDebugInfo('❌ EventsManagementPage NO definida', 'error');
+            }
+            
+            // Verificar instancia global
+            if (typeof window.eventsPage !== 'undefined') {
+                addDebugInfo('✅ window.eventsPage existe', 'success');
+                addDebugInfo(`📊 Eventos cargados: ${window.eventsPage.events?.length || 0}`, 'info');
+            } else {
+                addDebugInfo('❌ window.eventsPage NO existe', 'error');
+            }
+            
+            // Verificar elementos HTML
+            const elementos = ['newEventBtn', 'eventsContainer', 'totalEvents'];
+            elementos.forEach(id => {
+                const elemento = document.getElementById(id);
+                if (elemento) {
+                    addDebugInfo(`✅ Elemento ${id} encontrado`, 'success');
+                } else {
+                    addDebugInfo(`❌ Elemento ${id} NO encontrado`, 'error');
+                }
+            });
+            
+            // Verificar errores en consola
+            const originalError = console.error;
+            let erroresCapturados = [];
+            
+            console.error = function(...args) {
+                erroresCapturados.push(args.join(' '));
+                addDebugInfo(`🚨 Error: ${args.join(' ')}`, 'error');
+                originalError.apply(console, args);
+            };
+            
+            setTimeout(() => {
+                if (erroresCapturados.length === 0) {
+                    addDebugInfo('✅ Sin errores detectados', 'success');
+                } else {
+                    addDebugInfo(`❌ ${erroresCapturados.length} errores detectados`, 'error');
+                }
+                console.error = originalError;
+            }, 1000);
+        }
+        
+        // Ejecutar debug automáticamente
+        document.addEventListener('DOMContentLoaded', () => {
+            addDebugInfo('📄 DOM cargado', 'success');
+            setTimeout(runDebug, 1000);
+        });
+        
+        // Capturar errores globales
+        window.addEventListener('error', (e) => {
+            addDebugInfo(`🚨 Error global: ${e.message} en ${e.filename}:${e.lineno}`, 'error');
+        });
+        
+        // Capturar errores de promesas
+        window.addEventListener('unhandledrejection', (e) => {
+            addDebugInfo(`🚨 Promise rechazada: ${e.reason}`, 'error');
+        });
+    </script>
+</body>
+</html>

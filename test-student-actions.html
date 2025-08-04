@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Acciones de Estudiantes</title>
+    <link rel="stylesheet" href="public/css/accounting-dashboard.css">
+    <link rel="stylesheet" href="public/css/students-improved.css">
+    <link rel="stylesheet" href="public/css/student-modals.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .test-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .test-student { 
+            background: #f5f5f5; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .student-avatar-test {
+            width: 40px; height: 40px; border-radius: 50%; 
+            background: #3b82f6; color: white; 
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test - Sistema de Acciones de Estudiantes</h1>
+    
+    <div class="test-section">
+        <h2>📋 Estudiantes de Prueba</h2>
+        <p>Haz clic en los botones para probar las diferentes acciones:</p>
+        
+        <div class="test-student">
+            <div class="student-avatar-test">JG</div>
+            <div>
+                <strong>Juan García López</strong><br>
+                <small>6°-01 • TI: 1001234567</small>
+            </div>
+            <div class="test-buttons">
+                <button class="btn btn-info btn-sm" onclick="viewStudent('test1')">👁️ Ver</button>
+                <button class="btn btn-warning btn-sm" onclick="editStudent('test1')">✏️ Editar</button>
+                <button class="btn btn-success btn-sm" onclick="viewStudentEvents('test1')">📅 Eventos</button>
+                <button class="btn btn-primary btn-sm" onclick="viewStudentAccount('test1')">💰 Cuenta</button>
+            </div>
+        </div>
+        
+        <div class="test-student">
+            <div class="student-avatar-test">MR</div>
+            <div>
+                <strong>María Rodríguez Pérez</strong><br>
+                <small>10°-02 • TI: 1007654321</small>
+            </div>
+            <div class="test-buttons">
+                <button class="btn btn-info btn-sm" onclick="viewStudent('test2')">👁️ Ver</button>
+                <button class="btn btn-warning btn-sm" onclick="editStudent('test2')">✏️ Editar</button>
+                <button class="btn btn-success btn-sm" onclick="viewStudentEvents('test2')">📅 Eventos</button>
+                <button class="btn btn-primary btn-sm" onclick="viewStudentAccount('test2')">💰 Cuenta</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎯 Funcionalidades Implementadas</h2>
+        <ul>
+            <li>✅ <strong>Ver Detalles:</strong> Modal con información completa del estudiante</li>
+            <li>✅ <strong>Editar:</strong> Formulario completo para modificar datos</li>
+            <li>✅ <strong>Eventos:</strong> Gestión de eventos asignados y disponibles</li>
+            <li>✅ <strong>Estado de Cuenta:</strong> Movimientos, pagos y deudas</li>
+            <li>✅ <strong>Modales Responsivos:</strong> Adaptados para móvil y desktop</li>
+            <li>✅ <strong>Navegación por Tabs:</strong> Organización clara de información</li>
+            <li>✅ <strong>Validaciones:</strong> Campos requeridos y formatos</li>
+            <li>✅ <strong>Alertas:</strong> Notificaciones de acciones</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>⚙️ Próximas Mejoras</h2>
+        <ul>
+            <li>🔄 Integración con API real</li>
+            <li>📊 Gráficos de estado financiero</li>
+            <li>📄 Generación de PDFs</li>
+            <li>📧 Notificaciones por email</li>
+            <li>🔍 Búsqueda avanzada en modales</li>
+            <li>📱 Optimización móvil adicional</li>
+        </ul>
+    </div>
+
+    <!-- Scripts -->
+    <script src="public/js/students-data.js"></script>
+    <script>
+        // Datos de prueba para el test
+        window.studentsPage = {
+            students: [
+                {
+                    id: 'test1',
+                    firstName: 'Juan',
+                    lastName: 'García López',
+                    fullName: 'Juan García López',
+                    documentType: 'TI',
+                    document: '1001234567',
+                    email: 'juan.garcia@villasanpablo.edu.co',
+                    phone: '+57 300 123 4567',
+                    grade: '6',
+                    course: '01',
+                    status: 'ACTIVE',
+                    address: 'Calle 123 #45-67',
+                    guardian: {
+                        name: 'María López',
+                        phone: '+57 301 234 5678',
+                        email: 'maria.lopez@email.com'
+                    },
+                    events: [
+                        {
+                            eventId: 'event1',
+                            eventName: 'Rifa Navideña',
+                            amount: 50000,
+                            paid: 25000,
+                            status: 'PARTIAL'
+                        }
+                    ],
+                    totalPaid: 25000,
+                    totalDebt: 25000
+                },
+                {
+                    id: 'test2',
+                    firstName: 'María',
+                    lastName: 'Rodríguez Pérez',
+                    fullName: 'María Rodríguez Pérez',
+                    documentType: 'TI',
+                    document: '1007654321',
+                    email: 'maria.rodriguez@villasanpablo.edu.co',
+                    phone: '+57 302 987 6543',
+                    grade: '10',
+                    course: '02',
+                    status: 'ACTIVE',
+                    address: 'Carrera 45 #12-34',
+                    guardian: {
+                        name: 'Carlos Rodríguez',
+                        phone: '+57 303 456 7890',
+                        email: 'carlos.rodriguez@email.com'
+                    },
+                    events: [
+                        {
+                            eventId: 'event2',
+                            eventName: 'Derecho de Grado',
+                            amount: 150000,
+                            paid: 150000,
+                            status: 'PAID'
+                        }
+                    ],
+                    totalPaid: 150000,
+                    totalDebt: 0
+                }
+            ]
+        };
+    </script>
+    <script src="public/js/accounting/student-actions.js"></script>
+</body>
+</html>

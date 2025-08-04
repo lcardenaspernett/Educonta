@@ -27,16 +27,20 @@ class DebtManagement {
     // Eliminada la función setupDebtSection y addDebtButton
 
     setupSidebarDebtButton() {
-        // Busca el botón del sidebar por texto y/o href
+        // Funcionalidad de Deudas y Abonos deshabilitada
+        // Esta funcionalidad ha sido removida del sistema
+        console.log('⚠️ Funcionalidad de Deudas y Abonos deshabilitada');
+        
+        // Remover cualquier enlace de "Deudas y Abonos" del sidebar si existe
         const sidebar = document.querySelector('.sidebar-nav');
-        if (!sidebar) return;
-        // Busca el enlace que contiene "Deudas y Abonos"
-        const debtLink = Array.from(sidebar.querySelectorAll('a')).find(a => a.textContent.includes('Deudas y Abonos'));
-        if (debtLink) {
-            debtLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.showDebtManagement();
-            });
+        if (sidebar) {
+            const debtLink = Array.from(sidebar.querySelectorAll('a')).find(a => 
+                a.textContent.includes('Deudas y Abonos')
+            );
+            if (debtLink) {
+                debtLink.style.display = 'none';
+                console.log('🚫 Enlace de Deudas y Abonos ocultado');
+            }
         }
     }
 

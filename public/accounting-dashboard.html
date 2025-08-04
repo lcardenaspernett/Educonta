@@ -7,10 +7,13 @@
     <title>Educonta - Dashboard Contable</title>
     <link rel="stylesheet" href="css/accounting-dashboard.css">
     <link rel="stylesheet" href="css/approval-status.css">
+    <link rel="stylesheet" href="css/dark-theme-tables.css">
+    <link rel="stylesheet" href="css/dark-theme-forms.css">
+    <link rel="stylesheet" href="css/dark-theme-modals.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <style>
         /* Z-Index Hierarchy */
         :root {
@@ -21,81 +24,40 @@
             --z-header: 100;
             --z-sidebar: 50;
             --z-content: 1;
+
+            /* Color Variables */
+            --primary: #3b82f6;
+            --primary-rgb: 59, 130, 246;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --bg-card: #ffffff;
+            --border: #e5e7eb;
+            --bg-hover: #f3f4f6;
         }
-        
-        /* Sidebar Navigation Improvements */
-        .nav-group {
-            position: relative;
+
+        [data-theme="dark"] {
+            --text: #ffffff;
+            --text-light: #d1d5db;
+            --bg-card: #374151;
+            --border: #4b5563;
+            --bg-hover: #4b5563;
         }
-        
-        .nav-parent {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-        }
-        
-        .nav-arrow {
-            transition: transform 0.2s ease;
-            opacity: 0.6;
-        }
-        
-        .nav-group.expanded .nav-arrow {
-            transform: rotate(90deg);
-        }
-        
-        .nav-submenu {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 0 0 8px 8px;
-            margin-top: 2px;
-        }
-        
-        .nav-group.expanded .nav-submenu {
-            max-height: 200px;
-        }
-        
-        .nav-subitem {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px 12px 48px;
-            color: var(--text-light);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-            border-left: 3px solid transparent;
-        }
-        
-        .nav-subitem:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text);
-            border-left-color: var(--primary);
-        }
-        
-        .nav-subitem.active {
-            background: rgba(var(--primary-rgb), 0.1);
-            color: var(--primary);
-            border-left-color: var(--primary);
-        }
-        
-        .nav-subitem svg {
-            opacity: 0.7;
-        }
-        
+
+        /* Inicialización de tema se hace en JavaScript */
+
+        /* CSS del sidebar complejo removido - ahora usa sidebar unificado */
+
         /* Notification fixes */
         .notification-dropdown {
             z-index: var(--z-notification) !important;
         }
-        
+
         /* Header button fixes */
         .header-actions {
             z-index: var(--z-header);
             position: relative;
         }
-        
+
         /* Toast notifications */
         .toast-container {
             z-index: var(--z-notification) !important;
@@ -107,109 +69,9 @@
     <!-- MAIN CONTAINER -->
     <div class="app-container">
         <!-- SIDEBAR -->
+        <!-- SIDEBAR UNIFICADO -->
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <svg width="32" height="32" fill="currentColor" class="logo-icon">
-                        <path
-                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                    </svg>
-                    <span class="logo-text">Educonta</span>
-                </div>
-            </div>
-
-            <nav class="sidebar-nav">
-                <a href="accounting-dashboard.html" class="nav-item active">
-                    <svg width="20" height="20" fill="currentColor">
-                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
-                    </svg>
-                    <span>Dashboard</span>
-                </a>
-                <a href="movements-management.html" class="nav-item">
-                    <svg width="20" height="20" fill="currentColor">
-                        <path d="M7 4V2c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2v2h4c.6 0 1 .4 1 1s-.4 1-1 1h-1v16c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6H1c-.6 0-1-.4-1-1s.4-1 1-1h6z" />
-                    </svg>
-                    <span>Movimientos</span>
-                </a>
-                <div class="nav-group">
-                    <a href="invoices-management.html" class="nav-item nav-parent">
-                        <svg width="20" height="20" fill="currentColor">
-                            <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z" />
-                        </svg>
-                        <span>Facturas</span>
-                        <svg width="12" height="12" fill="currentColor" class="nav-arrow">
-                            <path d="M8.5 3L13 7.5 8.5 12 7 10.5 10 7.5 7 4.5 8.5 3z"/>
-                        </svg>
-                    </a>
-                    <div class="nav-submenu">
-                        <a href="pending-invoices.html" class="nav-subitem">
-                            <svg width="16" height="16" fill="currentColor">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                            </svg>
-                            <span>Facturas Pendientes</span>
-                        </a>
-                    </div>
-                </div>
-                <a href="students-management.html" class="nav-item">
-                    <svg width="20" height="20" fill="currentColor">
-                        <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-1c0-1.1.9-2 2-2h2l1.5-4.5L7.91 8.5C7.66 8.04 7.66 7.96 7.91 7.5L9.5 5H8c-.55 0-1-.45-1-1s.45-1 1-1h8c.55 0 1 .45 1 1s-.45 1-1 1h-1.5L12.09 7.5c.25.46.25.54 0 1L10.5 10.5 12 15h2c1.1 0 2 .9 2 2v1H4z" />
-                    </svg>
-                    <span>Estudiantes</span>
-                </a>
-                <a href="events-management.html" class="nav-item">
-                    <svg width="20" height="20" fill="currentColor">
-                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
-                    </svg>
-                    <span>Eventos</span>
-                </a>
-                <a href="clients-management.html" class="nav-item">
-                    <svg width="20" height="20" fill="currentColor">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                    </svg>
-                    <span>Clientes</span>
-                </a>
-                <a href="reports.html" class="nav-item">
-                    <svg width="20" height="20" fill="currentColor">
-                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
-                    </svg>
-                    <span>Reportes</span>
-                </a>
-                <a href="settings.html" class="nav-item">
-                    <svg width="20" height="20" fill="currentColor">
-                        <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z" />
-                    </svg>
-                    <span>Configuración</span>
-                </a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <!-- THEME TOGGLE -->
-                <div class="theme-toggle-container">
-                    <span class="theme-label" id="light-label">CLARO</span>
-                    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Cambiar tema"></button>
-                    <span class="theme-label" id="dark-label">OSCURO</span>
-                </div>
-                
-                <div class="user-section">
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            <svg width="20" height="20" fill="currentColor">
-                                <path
-                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                            </svg>
-                        </div>
-                        <div class="user-details">
-                            <span class="user-name">Contador</span>
-                            <span class="user-role">Contabilidad</span>
-                        </div>
-                    </div>
-                <button class="logout-btn" onclick="logout()">
-                    <svg width="18" height="18" fill="currentColor">
-                        <path
-                            d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
-                    </svg>
-                </button>
-            </div>
+            <!-- El contenido se cargará dinámicamente con sidebar.js -->
         </aside>
 
         <!-- MAIN CONTENT -->
@@ -291,7 +153,9 @@
                             <div class="stat-content">
                                 <h3 class="stat-title">Transacciones Pendientes</h3>
                                 <p class="stat-value" id="totalTransactions">0</p>
-                                <span class="stat-change neutral" title="Transacciones de ingreso esperando aprobación contable">Esperando aprobación</span>
+                                <span class="stat-change neutral"
+                                    title="Transacciones de ingreso esperando aprobación contable">Esperando
+                                    aprobación</span>
                             </div>
                         </div>
                     </div>
@@ -301,7 +165,8 @@
                         <div class="dashboard-card">
                             <div class="card-header">
                                 <h3 class="card-title">Actividad Reciente</h3>
-                                <button class="btn btn-ghost btn-sm" onclick="showSection('movements')">Ver Todo</button>
+                                <button class="btn btn-ghost btn-sm" onclick="showSection('movements')">Ver
+                                    Todo</button>
                             </div>
                             <div class="card-content">
                                 <div class="activity-list" id="recentActivity">
@@ -400,35 +265,43 @@
                                     placeholder="Concepto, referencia...">
                             </div>
                         </div>
-                        
+
                         <div class="filter-row">
                             <div class="filter-group">
-                                <label class="filter-label" data-tooltip="Buscar movimientos con valor mayor o igual a este monto">Valor mínimo:</label>
-                                <input type="number" class="filter-input" id="minAmountFilter" 
-                                    placeholder="$0" min="0" step="1000">
+                                <label class="filter-label"
+                                    data-tooltip="Buscar movimientos con valor mayor o igual a este monto">Valor
+                                    mínimo:</label>
+                                <input type="number" class="filter-input" id="minAmountFilter" placeholder="$0" min="0"
+                                    step="1000">
                             </div>
                             <div class="filter-group">
-                                <label class="filter-label" data-tooltip="Buscar movimientos con valor menor o igual a este monto">Valor máximo:</label>
-                                <input type="number" class="filter-input" id="maxAmountFilter" 
-                                    placeholder="Sin límite" min="0" step="1000">
+                                <label class="filter-label"
+                                    data-tooltip="Buscar movimientos con valor menor o igual a este monto">Valor
+                                    máximo:</label>
+                                <input type="number" class="filter-input" id="maxAmountFilter" placeholder="Sin límite"
+                                    min="0" step="1000">
                             </div>
                             <div class="filter-group">
-                                <label class="filter-label" data-tooltip="Buscar movimientos con este valor exacto (desactiva min/max)">Valor exacto:</label>
-                                <input type="number" class="filter-input" id="exactAmountFilter" 
+                                <label class="filter-label"
+                                    data-tooltip="Buscar movimientos con este valor exacto (desactiva min/max)">Valor
+                                    exacto:</label>
+                                <input type="number" class="filter-input" id="exactAmountFilter"
                                     placeholder="Buscar valor específico" min="0" step="1000">
                             </div>
                         </div>
-                        
+
                         <div class="filter-actions">
                             <button class="btn btn-ghost" onclick="clearFilters()">
                                 <svg width="16" height="16" fill="currentColor">
-                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                    <path
+                                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
                                 </svg>
                                 Limpiar Filtros
                             </button>
                             <button class="btn btn-outline" onclick="applyAdvancedFilters()">
                                 <svg width="16" height="16" fill="currentColor">
-                                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                                    <path
+                                        d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                                 </svg>
                                 Buscar
                             </button>
@@ -444,6 +317,8 @@
                                 <p>Cargando movimientos...</p>
                             </div>
                         </div>
+                        <!-- PAGINACIÓN -->
+                        <div id="movementsPagination" class="pagination-container"></div>
                     </div>
                 </section>
 
@@ -513,19 +388,21 @@
                         <div class="section-actions">
                             <button class="btn btn-outline" onclick="clientManager.downloadStudentTemplate()">
                                 <svg width="16" height="16" fill="currentColor">
-                                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6z"/>
+                                    <path
+                                        d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6z" />
                                 </svg>
                                 Plantilla Estudiantes
                             </button>
                             <button class="btn btn-secondary" onclick="clientManager.showBulkUploadModal()">
                                 <svg width="16" height="16" fill="currentColor">
-                                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6z"/>
+                                    <path
+                                        d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6z" />
                                 </svg>
                                 Cargar Masivo
                             </button>
                             <button class="btn btn-primary" onclick="clientManager.showNewClientForm()">
                                 <svg width="16" height="16" fill="currentColor">
-                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
                                 </svg>
                                 Nuevo Cliente
                             </button>
@@ -586,8 +463,8 @@
                             </div>
                             <div class="filter-group">
                                 <label>Buscar:</label>
-                                <input type="text" id="clientSearchFilter" placeholder="Nombre, documento..." 
-                                       onkeyup="clientManager.filterClients()">
+                                <input type="text" id="clientSearchFilter" placeholder="Nombre, documento..."
+                                    onkeyup="clientManager.filterClients()">
                             </div>
                         </div>
 
@@ -697,19 +574,20 @@
                         <div class="section-actions">
                             <button class="btn btn-outline" onclick="debtManagement.refreshDebts()">
                                 <svg width="16" height="16" fill="currentColor">
-                                    <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    <path
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
                                 Actualizar
                             </button>
                             <button class="btn btn-primary" onclick="debtManagement.showNewDebtForm()">
                                 <svg width="16" height="16" fill="currentColor">
-                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
                                 </svg>
                                 Nueva Deuda
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="debts-page-container" id="debtsPageContainer">
                         <!-- El contenido se cargará aquí -->
                     </div>
@@ -726,14 +604,110 @@
 
                     <div class="settings-container">
                         <div class="settings-tabs">
-                            <button class="tab-btn active" data-tab="institution">Institución</button>
+                            <button class="tab-btn active" data-tab="initial-balance">Saldo Inicial</button>
+                            <button class="tab-btn" data-tab="institution">Institución</button>
                             <button class="tab-btn" data-tab="accounts">Cuentas</button>
                             <button class="tab-btn" data-tab="categories">Categorías</button>
                             <button class="tab-btn" data-tab="users">Usuarios</button>
                         </div>
 
                         <div class="settings-content">
-                            <div id="institution-tab" class="tab-content active">
+                            <!-- SALDO INICIAL TAB -->
+                            <div id="initial-balance-tab" class="tab-content active">
+                                <div class="initial-balance-setup">
+                                    <div class="setup-header">
+                                        <h3>Configurar Saldo Inicial</h3>
+                                        <p>Establece el saldo inicial del sistema contable de la institución</p>
+                                    </div>
+
+                                    <form id="initialBalanceForm" class="settings-form">
+                                        <div class="form-group">
+                                            <label for="initialAmount">Monto Inicial Total</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" id="initialAmount" class="form-control"
+                                                    placeholder="0" min="0" step="1000" required>
+                                            </div>
+                                            <small class="form-text">Este monto se distribuirá en las cuentas del
+                                                sistema</small>
+                                        </div>
+
+                                        <div class="distribution-section">
+                                            <h4>Distribución por Cuentas</h4>
+                                            <div class="account-distribution">
+                                                <div class="form-group">
+                                                    <label>Caja General (1105)</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">$</span>
+                                                        <input type="number" id="cajaAmount"
+                                                            class="form-control distribution-input" placeholder="0"
+                                                            min="0" step="1000">
+                                                        <span class="input-group-text">%</span>
+                                                        <input type="number" id="cajaPercent"
+                                                            class="form-control percent-input" placeholder="70" min="0"
+                                                            max="100" value="70">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label>Bancos (1110)</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">$</span>
+                                                        <input type="number" id="bancosAmount"
+                                                            class="form-control distribution-input" placeholder="0"
+                                                            min="0" step="1000">
+                                                        <span class="input-group-text">%</span>
+                                                        <input type="number" id="bancosPercent"
+                                                            class="form-control percent-input" placeholder="30" min="0"
+                                                            max="100" value="30">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="distribution-summary">
+                                                <div class="summary-item">
+                                                    <span>Total Distribuido:</span>
+                                                    <span id="totalDistributed">$0</span>
+                                                </div>
+                                                <div class="summary-item">
+                                                    <span>Diferencia:</span>
+                                                    <span id="difference">$0</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-actions">
+                                            <button type="button" class="btn btn-outline-secondary"
+                                                onclick="resetInitialBalance()">
+                                                Limpiar
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-2"></i>Configurar Saldo Inicial
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                    <div class="current-status mt-4">
+                                        <h4>Estado Actual</h4>
+                                        <div class="status-cards">
+                                            <div class="status-card">
+                                                <div class="status-label">Transacciones</div>
+                                                <div class="status-value" id="currentTransactions">0</div>
+                                            </div>
+                                            <div class="status-card">
+                                                <div class="status-label">Saldo Total</div>
+                                                <div class="status-value" id="currentBalance">$0</div>
+                                            </div>
+                                            <div class="status-card">
+                                                <div class="status-label">Cuentas</div>
+                                                <div class="status-value" id="currentAccounts">0</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="institution-tab" class="tab-content">
                                 <form class="settings-form">
                                     <div class="form-group">
                                         <label>Nombre de la Institución</label>
@@ -842,8 +816,7 @@
     <script src="js/accounting/client-manager.js"></script>
     <script src="js/accounting/notification-system.js"></script>
     <script src="js/accounting/debt-management.js"></script>
-    <script src="js/accounting/invoice-viewer.js"></script>
-    <script src="force-update-dashboard.js"></script>
+    <script src="js/accounting/invoice-system.js"></script>
 
     <script>
         // THEME MANAGEMENT
@@ -854,7 +827,7 @@
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
             console.log(`🎨 Cambiando tema de ${currentTheme} a ${newTheme}`);
-            
+
             html.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
 
@@ -865,18 +838,18 @@
             const savedTheme = localStorage.getItem('theme') || 'light';
             console.log(`🎨 Inicializando tema: ${savedTheme}`);
             document.documentElement.setAttribute('data-theme', savedTheme);
-            
+
             // Verificar que el toggle esté presente
             setTimeout(() => {
                 const toggle = document.getElementById('themeToggle');
                 if (toggle) {
                     console.log('✅ Toggle de tema encontrado y listo');
-                    
+
                     // Test de funcionalidad
                     console.log('🧪 Probando funcionalidad del toggle...');
                     const currentTheme = document.documentElement.getAttribute('data-theme');
                     console.log(`📋 Tema actual: ${currentTheme}`);
-                    
+
                     // Verificar que las etiquetas cambien de color
                     const lightLabel = document.getElementById('light-label');
                     const darkLabel = document.getElementById('dark-label');
@@ -1063,10 +1036,18 @@
                     // Simulate API call
                     await new Promise(resolve => setTimeout(resolve, 500));
 
-                    if (window.DemoData && window.DemoData.transactions) {
-                        this.movements = [...window.DemoData.transactions]; // Crear copia
-                        this.renderMovements();
-                    } else {
+                    // Cargar movimientos desde la API
+                    try {
+                        const response = await fetch('/api/accounting/transactions');
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.movements = data.transactions || [];
+                            this.renderMovements();
+                        } else {
+                            this.movements = [];
+                            this.renderMovements();
+                        }
+                    } catch (error) {
                         // Crear datos de prueba si no existen
                         this.movements = this.createTestMovements();
                         this.renderMovements();
@@ -1184,20 +1165,20 @@
                                     <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                                 </svg>
                             </button>
-                            ${hasInvoice ? 
-                                `<button class="btn btn-invoice btn-sm" onclick="viewInvoice('${movement.id}')">
+                            ${hasInvoice ?
+                            `<button class="btn btn-invoice btn-sm" onclick="viewInvoice('${movement.id}')">
                                     <svg width="16" height="16" fill="currentColor">
                                         <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6z"/>
                                     </svg>
                                     Ver Factura
                                 </button>` :
-                                `<button class="btn btn-outline btn-sm" onclick="generateInvoiceForMovement('${movement.id}')">
+                            `<button class="btn btn-outline btn-sm" onclick="generateInvoiceForMovement('${movement.id}')">
                                     <svg width="16" height="16" fill="currentColor">
                                         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                                     </svg>
                                     Generar Factura
                                 </button>`
-                            }
+                        }
                         </div>
                     </div>
                 `;
@@ -1209,7 +1190,7 @@
             setupFilters() {
                 const filters = [
                     'typeFilter',
-                    'dateFilter', 
+                    'dateFilter',
                     'searchFilter',
                     'minAmountFilter',
                     'maxAmountFilter',
@@ -1303,7 +1284,7 @@
                 }
 
                 this.renderMovements(filtered);
-                
+
                 // Mostrar estadísticas de filtrado
                 this.showFilterStats(filtered.length, this.movements.length);
             }
@@ -1334,32 +1315,28 @@
             async saveMovement(data) {
                 try {
                     console.log('💾 Guardando movimiento:', data);
-                    
-                    if (window.DemoData) {
-                        const transactionData = {
-                            date: data.date,
-                            reference: `REF-${Date.now()}`,
-                            description: data.concept,
-                            amount: parseFloat(data.amount),
-                            type: data.type === 'income' ? 'INCOME' : 'EXPENSE',
-                            debitAccountId: '1',
-                            creditAccountId: '5',
-                            category: data.category,
-                            notes: data.notes
-                        };
 
-                        // Crear la transacción
-                        const result = await window.DemoData.createTransaction(transactionData);
-                        const createdTransaction = result.data;
-                        
-                        console.log('✅ Transacción creada:', createdTransaction);
+                    // Crear transacción usando la API
+                    const transactionData = {
+                        date: data.date,
+                        reference: data.reference,
+                        description: data.concept,
+                        amount: parseFloat(data.amount),
+                        type: data.type === 'income' ? 'INCOME' : 'EXPENSE',
+                        debitAccountId: '1',
+                        creditAccountId: '5',
+                        category: data.category,
+                        notes: data.notes
+                    };
 
-                        // Generar factura si está marcado el checkbox
-                        if (data.generateInvoice) {
-                            console.log('🧾 Generando factura automáticamente...');
-                            await this.generateInvoiceForMovement(createdTransaction, data);
-                        }
+                    // Crear la transacción usando fetch API
+                    const response = await fetch('/api/accounting/transactions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(transactionData)
+                    });
 
+                    if (response.ok) {
                         // Recargar movimientos
                         await this.loadMovements();
 
@@ -1380,7 +1357,7 @@
             async generateInvoiceForMovement(transaction, movementData) {
                 try {
                     console.log('🧾 Iniciando generación de factura para transacción:', transaction.id);
-                    
+
                     // Verificar que los managers estén disponibles
                     if (!window.invoiceManager) {
                         console.log('🔧 Inicializando InvoiceManager...');
@@ -1411,7 +1388,7 @@
 
                     // Generar PDF con notificación especial
                     const loadingNotification = this.showInvoiceGenerationProgress();
-                    
+
                     const pdfInfo = await window.invoicePDFGenerator.generateInvoicePDF(invoiceData);
                     console.log('📄 PDF generado:', pdfInfo);
 
@@ -1423,9 +1400,9 @@
                     if (loadingNotification) {
                         loadingNotification.remove();
                     }
-                    
+
                     notifications.show(`Factura ${invoiceData.invoiceNumber} generada exitosamente`, 'success');
-                    
+
                     return savedInvoice;
 
                 } catch (error) {
@@ -1447,7 +1424,7 @@
                 if (match && match[1]) {
                     return match[1].trim();
                 }
-                
+
                 // Si no se encuentra, usar un nombre genérico
                 return 'Cliente General';
             }
@@ -1490,8 +1467,8 @@
                 if (!window.invoiceManager || !window.invoiceManager.invoices) {
                     return false;
                 }
-                
-                return window.invoiceManager.invoices.some(invoice => 
+
+                return window.invoiceManager.invoices.some(invoice =>
                     invoice.transactionId === movementId
                 );
             }
@@ -1510,10 +1487,10 @@
 
             async updateStats() {
                 try {
-                    if (window.DemoData) {
-                        await window.DemoData.getStats();
-                        const stats = window.DemoData.stats;
-
+                    // Cargar estadísticas desde la API
+                    const response = await fetch('/api/accounting/stats');
+                    if (response.ok) {
+                        const stats = await response.json();
                         this.updateStatCard('monthlyIncome', stats.totalIncome || 0);
                         this.updateStatCard('monthlyExpenses', stats.totalExpenses || 0);
                         this.updateStatCard('netBalance', stats.netBalance || 0);
@@ -1545,14 +1522,16 @@
                 if (!container) return;
 
                 try {
-                    if (window.DemoData && window.DemoData.transactions) {
-                        const recent = window.DemoData.transactions.slice(0, 5);
+                    // Cargar actividad reciente desde la API
+                    const response = await fetch('/api/accounting/recent-transactions');
+                    if (response.ok) {
+                        const data = await response.json();
+                        const transactions = data.transactions || [];
 
-                        const html = recent.map(transaction => {
-                            const isIncome = transaction.type === 'INCOME';
-                            const typeClass = isIncome ? 'income' : 'expense';
-                            const icon = isIncome ? '💰' : '💸';
-                            const sign = isIncome ? '+' : '-';
+                        const html = transactions.map(transaction => {
+                            const typeClass = transaction.type === 'INCOME' ? 'income' : 'expense';
+                            const icon = transaction.type === 'INCOME' ? '💰' : '💸';
+                            const sign = transaction.type === 'INCOME' ? '+' : '-';
 
                             const formattedAmount = new Intl.NumberFormat('es-CO', {
                                 style: 'currency',
@@ -1565,14 +1544,16 @@
                                 <div class="activity-icon ${typeClass}">${icon}</div>
                                 <div class="activity-content">
                                     <p class="activity-title">${transaction.description}</p>
-                                    <p class="activity-meta">Ref: ${transaction.reference} • Hace 2 horas</p>
+                                    <p class="activity-meta">Ref: ${transaction.reference} • ${new Date(transaction.date).toLocaleDateString()}</p>
                                 </div>
                                 <div class="activity-amount ${typeClass}">${sign}${formattedAmount}</div>
                             </div>
                         `;
                         }).join('');
 
-                        container.innerHTML = html;
+                        container.innerHTML = html || '<p>No hay actividad reciente</p>';
+                    } else {
+                        container.innerHTML = '<p>No hay actividad reciente</p>';
                     }
                 } catch (error) {
                     console.error('Error loading recent activity:', error);
@@ -1644,7 +1625,7 @@
             // Limpiar todos los filtros
             const filterIds = [
                 'typeFilter',
-                'dateFilter', 
+                'dateFilter',
                 'searchFilter',
                 'minAmountFilter',
                 'maxAmountFilter',
@@ -1679,11 +1660,194 @@
             notifications.show('Filtros aplicados', 'success');
         }
 
+        // ===================================
+        // INITIAL BALANCE FUNCTIONS
+        // ===================================
+
+        function setupInitialBalance() {
+            const form = document.getElementById('initialBalanceForm');
+            const initialAmountInput = document.getElementById('initialAmount');
+            const cajaAmountInput = document.getElementById('cajaAmount');
+            const cajaPercentInput = document.getElementById('cajaPercent');
+            const bancosAmountInput = document.getElementById('bancosAmount');
+            const bancosPercentInput = document.getElementById('bancosPercent');
+
+            if (!form) return;
+
+            // Calcular distribución automática
+            function updateDistribution() {
+                const totalAmount = parseFloat(initialAmountInput.value) || 0;
+                const cajaPercent = parseFloat(cajaPercentInput.value) || 0;
+                const bancosPercent = parseFloat(bancosPercentInput.value) || 0;
+
+                const cajaAmount = (totalAmount * cajaPercent) / 100;
+                const bancosAmount = (totalAmount * bancosPercent) / 100;
+
+                cajaAmountInput.value = Math.round(cajaAmount);
+                bancosAmountInput.value = Math.round(bancosAmount);
+
+                updateSummary();
+            }
+
+            // Actualizar resumen
+            function updateSummary() {
+                const cajaAmount = parseFloat(cajaAmountInput.value) || 0;
+                const bancosAmount = parseFloat(bancosAmountInput.value) || 0;
+                const totalAmount = parseFloat(initialAmountInput.value) || 0;
+
+                const totalDistributed = cajaAmount + bancosAmount;
+                const difference = totalAmount - totalDistributed;
+
+                document.getElementById('totalDistributed').textContent = formatCurrency(totalDistributed);
+                document.getElementById('difference').textContent = formatCurrency(difference);
+
+                // Cambiar color según la diferencia
+                const differenceElement = document.getElementById('difference');
+                if (difference === 0) {
+                    differenceElement.style.color = 'var(--success)';
+                } else if (Math.abs(difference) < 1000) {
+                    differenceElement.style.color = 'var(--warning)';
+                } else {
+                    differenceElement.style.color = 'var(--error)';
+                }
+            }
+
+            // Event listeners
+            initialAmountInput.addEventListener('input', updateDistribution);
+            cajaPercentInput.addEventListener('input', updateDistribution);
+            bancosPercentInput.addEventListener('input', updateDistribution);
+
+            cajaAmountInput.addEventListener('input', () => {
+                const totalAmount = parseFloat(initialAmountInput.value) || 0;
+                const cajaAmount = parseFloat(cajaAmountInput.value) || 0;
+                if (totalAmount > 0) {
+                    cajaPercentInput.value = Math.round((cajaAmount / totalAmount) * 100);
+                }
+                updateSummary();
+            });
+
+            bancosAmountInput.addEventListener('input', () => {
+                const totalAmount = parseFloat(initialAmountInput.value) || 0;
+                const bancosAmount = parseFloat(bancosAmountInput.value) || 0;
+                if (totalAmount > 0) {
+                    bancosPercentInput.value = Math.round((bancosAmount / totalAmount) * 100);
+                }
+                updateSummary();
+            });
+
+            // Submit form
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await submitInitialBalance();
+            });
+
+            // Cargar estado actual
+            loadCurrentStatus();
+        }
+
+        async function submitInitialBalance() {
+            const totalAmount = parseFloat(document.getElementById('initialAmount').value) || 0;
+            const cajaAmount = parseFloat(document.getElementById('cajaAmount').value) || 0;
+            const bancosAmount = parseFloat(document.getElementById('bancosAmount').value) || 0;
+
+            if (totalAmount <= 0) {
+                notifications.show('Por favor ingresa un monto inicial válido', 'error');
+                return;
+            }
+
+            const difference = totalAmount - (cajaAmount + bancosAmount);
+            if (Math.abs(difference) > 1000) {
+                notifications.show('La distribución no coincide con el monto total', 'error');
+                return;
+            }
+
+            try {
+                notifications.show('Configurando saldo inicial...', 'info');
+
+                const response = await fetch('/api/accounting/setup-initial-balance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        totalAmount,
+                        distribution: {
+                            caja: cajaAmount,
+                            bancos: bancosAmount
+                        }
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    notifications.show('Saldo inicial configurado correctamente', 'success');
+                    loadCurrentStatus();
+
+                    // Actualizar dashboard
+                    if (window.dashboardManager) {
+                        window.dashboardManager.loadStats();
+                    }
+                } else {
+                    notifications.show(result.message || 'Error configurando saldo inicial', 'error');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                notifications.show('Error de conexión', 'error');
+            }
+        }
+
+        async function loadCurrentStatus() {
+            try {
+                const response = await fetch('/api/accounting/current-status');
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('currentTransactions').textContent = data.transactions || 0;
+                    document.getElementById('currentBalance').textContent = formatCurrency(data.balance || 0);
+                    document.getElementById('currentAccounts').textContent = data.accounts || 0;
+                }
+            } catch (error) {
+                console.error('Error loading current status:', error);
+            }
+        }
+
+        function resetInitialBalance() {
+            document.getElementById('initialBalanceForm').reset();
+            document.getElementById('cajaPercent').value = 70;
+            document.getElementById('bancosPercent').value = 30;
+            document.getElementById('totalDistributed').textContent = '$0';
+            document.getElementById('difference').textContent = '$0';
+        }
+
+        async function checkInitialSetup() {
+            try {
+                const response = await fetch('/api/accounting/current-status');
+                const data = await response.json();
+
+                // Si no hay transacciones y el balance total es 0, mostrar modal de configuración
+                if (data.success && (!data.transactions || data.transactions === 0) && (!data.balance || data.balance === 0)) {
+                    setTimeout(() => {
+                        ModalManager.open('initialBalanceModal');
+                        notifications.show('¡Bienvenido! Configura el saldo inicial de tu institución para comenzar.', 'info');
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('Error checking initial setup:', error);
+                // Si hay error de conexión, también mostrar el modal después de un tiempo
+                setTimeout(() => {
+                    ModalManager.open('initialBalanceModal');
+                    notifications.show('Configura el saldo inicial para comenzar a usar el sistema.', 'info');
+                }, 2000);
+            }
+        }
+
         // Función para formatear valores en tiempo real
         function setupAmountFormatting() {
             const amountInputs = [
                 'minAmountFilter',
-                'maxAmountFilter', 
+                'maxAmountFilter',
                 'exactAmountFilter'
             ];
 
@@ -1691,11 +1855,11 @@
                 const input = document.getElementById(inputId);
                 if (input) {
                     // Solo permitir números
-                    input.addEventListener('input', function(e) {
+                    input.addEventListener('input', function (e) {
                         // Remover caracteres no numéricos
                         let value = e.target.value.replace(/[^\d]/g, '');
                         e.target.value = value;
-                        
+
                         console.log(`💰 Valor ingresado en ${inputId}:`, value);
                     });
                 }
@@ -1755,7 +1919,7 @@
 
         function generateInvoiceForMovement(movementId) {
             console.log('🧾 Generando factura para movimiento:', movementId);
-            
+
             if (window.movementsManager) {
                 // Buscar el movimiento
                 const movement = window.movementsManager.movements.find(m => m.id === movementId);
@@ -1770,7 +1934,7 @@
                         notes: '',
                         generateInvoice: true
                     };
-                    
+
                     // Usar la función existente
                     window.movementsManager.generateInvoiceForMovement(movement, movementData)
                         .then(() => {
@@ -1788,54 +1952,14 @@
             }
         }
 
-        // SIDEBAR MANAGEMENT
-        function initializeSidebar() {
-            // Manejar submenús
-            const navGroups = document.querySelectorAll('.nav-group');
-            navGroups.forEach(group => {
-                const parent = group.querySelector('.nav-parent');
-                if (parent) {
-                    parent.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        
-                        // Cerrar otros submenús
-                        navGroups.forEach(otherGroup => {
-                            if (otherGroup !== group) {
-                                otherGroup.classList.remove('expanded');
-                            }
-                        });
-                        
-                        // Toggle el submenú actual
-                        group.classList.toggle('expanded');
-                    });
-                }
-            });
-            
-            // Marcar página activa
-            const currentPage = window.location.pathname.split('/').pop();
-            const navItems = document.querySelectorAll('.nav-item, .nav-subitem');
-            
-            navItems.forEach(item => {
-                const href = item.getAttribute('href');
-                if (href && href.includes(currentPage)) {
-                    item.classList.add('active');
-                    
-                    // Si es un subitem, expandir el grupo padre
-                    const parentGroup = item.closest('.nav-group');
-                    if (parentGroup) {
-                        parentGroup.classList.add('expanded');
-                    }
-                }
-            });
-        }
+        // Función de sidebar removida - ahora usa sidebar unificado
 
         // INITIALIZATION
         document.addEventListener('DOMContentLoaded', function () {
             // Initialize theme
             initTheme();
-            
-            // Initialize sidebar
-            initializeSidebar();
+
+            // Sidebar unificado se inicializa automáticamente
 
             // Initialize core managers
             window.navigationManager = new NavigationManager();
@@ -1856,6 +1980,12 @@
             // Setup amount formatting for filter inputs
             setupAmountFormatting();
 
+            // Setup initial balance form
+            setupInitialBalance();
+
+            // Check if system needs initial setup
+            checkInitialSetup();
+
             // Setup modal close on outside click
             document.addEventListener('click', function (e) {
                 if (e.target.classList.contains('modal')) {
@@ -1872,7 +2002,16 @@
 
             console.log('✅ Educonta Dashboard initialized successfully');
         });
+
+        // Inicialización de tema
+        (function () {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.body.setAttribute('data-theme', savedTheme);
+        })();
     </script>
+    <script src="js/shared/pagination.js"></script>
+    <script src="js/shared/sidebar.js"></script>
 </body>
 
 </html>

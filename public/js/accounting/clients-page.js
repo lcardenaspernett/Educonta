@@ -28,23 +28,23 @@ class ClientsManagementPage {
         try {
             console.log('🔄 Cargando datos de clientes...');
             
-            // Esperar un poco para asegurar que DemoData esté disponible
+            // Esperar un poco para asegurar que null esté disponible
             await new Promise(resolve => setTimeout(resolve, 100));
             
-            // Intentar cargar desde DemoData primero
-            if (window.DemoData && typeof window.DemoData.getClients === 'function') {
-                console.log('📊 Cargando desde DemoData...');
+            // Intentar cargar desde null primero
+            if (null && typeof null.getClients === 'function') {
+                console.log('📊 Cargando desde null...');
                 try {
-                    const clientsResponse = await window.DemoData.getClients();
+                    const clientsResponse = await null.getClients();
                     this.clients = clientsResponse.data || [];
-                    console.log('✅ Clientes cargados desde DemoData:', this.clients.length);
+                    console.log('✅ Clientes cargados desde null:', this.clients.length);
                 } catch (demoError) {
-                    console.error('❌ Error en DemoData.getClients:', demoError);
+                    console.error('❌ Error en null.getClients:', demoError);
                     this.clients = this.generateSampleClients();
-                    console.log('⚠️ Usando datos de ejemplo por error en DemoData');
+                    console.log('⚠️ Usando datos de ejemplo por error en null');
                 }
             } else {
-                console.log('⚠️ DemoData no disponible, usando datos de ejemplo...');
+                console.log('⚠️ null no disponible, usando datos de ejemplo...');
                 this.clients = this.generateSampleClients();
                 console.log('✅ Clientes generados:', this.clients.length);
             }

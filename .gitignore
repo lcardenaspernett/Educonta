@@ -1,17 +1,29 @@
-# ===================================
-# EDUCONTA - Git Ignore Configuration
-# ===================================
-
-# ===================================
-# NODE.JS
-# ===================================
-
-# Dependency directories
+# Dependencies
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+database.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
 # Runtime data
 pids
@@ -26,14 +38,15 @@ coverage/
 # nyc test coverage
 .nyc_output
 
-# node-waf configuration
-.lock-wscript
-
-# Compiled binary addons
-build/Release
+# Dependency directories
+node_modules/
+jspm_packages/
 
 # Optional npm cache directory
 .npm
+
+# Optional eslint cache
+.eslintcache
 
 # Optional REPL history
 .node_repl_history
@@ -44,359 +57,59 @@ build/Release
 # Yarn Integrity file
 .yarn-integrity
 
-# ===================================
-# ENVIRONMENT VARIABLES
-# ===================================
-
-# Environment files
+# dotenv environment variables file
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.backup
+.env.test
 
-# Railway specific
-.railway/
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
 
-# ===================================
-# PRISMA
-# ===================================
+# next.js build output
+.next
 
-# Prisma generated client (will be regenerated)
-# node_modules/.prisma/
-# node_modules/@prisma/
+# nuxt.js build output
+.nuxt
 
-# Database files (if using SQLite)
-*.db
-*.sqlite
-*.sqlite3
+# vuepress build output
+.vuepress/dist
 
-# Migration lock file (keep this in some cases)
-# prisma/migrations/migration_lock.toml
+# Serverless directories
+.serverless/
 
-# ===================================
-# UPLOADS & USER CONTENT
-# ===================================
+# FuseBox cache
+.fusebox/
 
-# Uploaded files
-uploads/**/*
-!uploads/.gitkeep
-!uploads/logos/.gitkeep
-!uploads/student-data/.gitkeep
-!uploads/invoices/.gitkeep
-!uploads/documents/.gitkeep
-!uploads/bulk-import/.gitkeep
+# DynamoDB Local files
+.dynamodb/
 
-# Generated PDFs and documents
-*.pdf
-temp/
-tmp/
+# TernJS port file
+.tern-port
 
-# ===================================
-# LOGS
-# ===================================
-
-# Log files
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# Runtime logs
-combined.log
-error.log
-access.log
-
-# PM2 logs
-.pm2/
-
-# ===================================
-# OPERATING SYSTEM
-# ===================================
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-Icon?
-._*
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
-.com.apple.timemachine.donotpresent
-
-# Windows
-Thumbs.db
-Thumbs.db:encryptable
-ehthumbs.db
-ehthumbs_vista.db
-*.stackdump
-[Dd]esktop.ini
-$RECYCLE.BIN/
-*.cab
-*.msi
-*.msix
-*.msm
-*.msp
-*.lnk
-
-# Linux
-*~
-.fuse_hidden*
-.directory
-.Trash-*
-.nfs*
-
-# ===================================
-# IDEs & EDITORS
-# ===================================
-
-# Visual Studio Code
+# IDE files
 .vscode/
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# WebStorm / IntelliJ
 .idea/
 *.swp
 *.swo
 *~
 
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# Vim
-*.swp
-*.swo
-*.swn
-.netrwhist
-
-# Emacs
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
-*.elc
-auto-save-list
-tramp
-.\#*
-
-# ===================================
-# TESTING
-# ===================================
-
-# Jest
-coverage/
-.nyc_output/
-
-# Test databases
-test.db
-test.sqlite
-*.test.db
-
-# Test uploads
-test-uploads/
-test-files/
-
-# ===================================
-# BUILD & DISTRIBUTION
-# ===================================
+# Temporary files
+tmp/
+temp/
+*.tmp
 
 # Build directories
 dist/
 build/
-out/
 
-# Webpack
-.webpack/
-
-# Parcel
-.cache/
-.parcel-cache/
-
-# ===================================
-# DEPLOYMENT
-# ===================================
-
-# Docker
-Dockerfile.prod
-docker-compose.override.yml
-.dockerignore
-
-# Kubernetes
-k8s/secrets/
-*.kubeconfig
-
-# Terraform
-*.tfstate
-*.tfstate.*
-.terraform/
-.terraform.lock.hcl
-
-# ===================================
-# CERTIFICATES & KEYS
-# ===================================
-
-# SSL certificates
-*.pem
-*.key
-*.crt
-*.cer
-*.p12
-*.pfx
-
-# SSH keys
-id_rsa
-id_rsa.pub
-*.ssh
-
-# GPG keys
-*.gpg
-*.asc
-
-# ===================================
-# BACKUP & TEMPORARY FILES
-# ===================================
-
-# Database backups
-*.backup
-*.bak
-*.sql.gz
-backup/
-backups/
-
-# Excel temporary files
-~$*.xlsx
-~$*.xls
-
-# Temporary files
-*.tmp
-*.temp
-.tmp/
-.temp/
-
-# Archive files
-*.zip
-*.rar
-*.7z
-*.tar.gz
-*.tgz
-
-# ===================================
-# ANALYTICS & MONITORING
-# ===================================
-
-# Error tracking
-.sentry/
-
-# Analytics
-google-analytics.json
-analytics/
-
-# Monitoring
-monitoring/
-metrics/
-
-# ===================================
-# DOCUMENTATION BUILD
-# ===================================
-
-# Generated documentation
-docs/build/
-docs/_build/
-docs/.build/
-
-# API documentation
-api-docs/
-swagger-ui/
-
-# ===================================
-# PACKAGE MANAGERS
-# ===================================
-
-# Yarn
-yarn.lock
-
-# pnpm
-pnpm-lock.yaml
-.pnpm-store/
-
-# Bun
-bun.lockb
-
-# ===================================
-# MISC
-# ===================================
-
-# macOS Finder
-.DS_Store?
-
-# Thumbnail cache files
-._*
-
-# Files that might appear on external disks
-.Spotlight-V100
-.Trashes
-
-# NPM package-lock (if using yarn)
-# package-lock.json
-
-# Local configuration files
-local.json
-local.js
-config.local.js
-
-# Debug files
-debug.log
-*.debug
-
-# Performance monitoring
-perf/
-performance/
-
-# ===================================
-# PROJECT SPECIFIC
-# ===================================
-
-# Educonta specific
-educonta-backup/
-migration-backup/
-student-imports/
-invoice-exports/
-
-# Development seeds (if not wanted in production)
-# prisma/seeds/dev/
-
-# Local development overrides
-docker-compose.dev.yml
-.env.dev
-
-# Generated reports
-reports/
-exports/
-
-# Email templates testing
-email-preview/
-email-test/
-
-# Financial calculation cache
-calculations-cache/
-accounting-temp/
-
-# ===================================
-# KEEP FILES (create empty folders)
-# ===================================
-
-# These files ensure empty directories are tracked
-# uploads/.gitkeep
-# logs/.gitkeep
-# temp/.gitkeep
+# Prisma
+prisma/migrations/

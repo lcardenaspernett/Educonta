@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Tema Oscuro Completo</title>
+    <link rel="stylesheet" href="public/css/accounting-dashboard.css">
+    <link rel="stylesheet" href="public/css/dark-theme-tables.css">
+    <link rel="stylesheet" href="public/css/dark-theme-forms.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-secondary);
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--card-bg);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .test-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .theme-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .demo-item {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+        }
+        
+        .demo-item h4 {
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <button class="btn btn-primary theme-toggle-btn" onclick="toggleTheme()">
+        🌓 Cambiar Tema
+    </button>
+    
+    <div class="test-container">
+        <h1 style="text-align: center; color: var(--text-primary); margin-bottom: 2rem;">
+            🌙 Test Completo - Tema Oscuro Optimizado
+        </h1>
+        
+        <!-- Tarjetas de Estadísticas -->
+        <div class="test-section">
+            <h2 class="test-title">📊 Tarjetas de Estadísticas</h2>
+            <div class="stats-grid">
+                <div class="stat-card students">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-content">
+                        <div class="stat-title">Total Estudiantes</div>
+                        <div class="stat-value">1,340</div>
+                        <div class="stat-label">Activos</div>
+                    </div>
+                </div>
+                <div class="stat-card income">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <div class="stat-title">Ingresos del Mes</div>
+                        <div class="stat-value">$2,450,000</div>
+                        <div class="stat-label">+12.5% vs mes anterior</div>
+                    </div>
+                </div>
+                <div class="stat-card expense">
+                    <div class="stat-icon">💸</div>
+                    <div class="stat-content">
+                        <div class="stat-title">Egresos del Mes</div>
+                        <div class="stat-value">$1,200,000</div>
+                        <div class="stat-label">-8.2% vs mes anterior</div>
+                    </div>
+                </div>
+                <div class="stat-card balance">
+                    <div class="stat-icon">⚖️</div>
+                    <div class="stat-content">
+                        <div class="stat-title">Balance Neto</div>
+                        <div class="stat-value">$1,250,000</div>
+                        <div class="stat-label">+4.3% vs mes anterior</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros y Búsqueda -->
+        <div class="test-section">
+            <h2 class="test-title">🔍 Sistema de Filtros (Tamaño Consistente)</h2>
+            <div class="search-section">
+                <div class="search-container">
+                    <div class="search-input-group">
+                        <svg width="20" height="20" fill="currentColor" class="search-icon">
+                            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        </svg>
+                        <input type="text" id="demoSearch" class="search-input" placeholder="Buscar estudiantes por nombre, documento...">
+                        <button class="search-clear" style="display: none;">
+                            <svg width="16" height="16" fill="currentColor">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="search-filters">
+                        <select class="filter-select">
+                            <option value="">Todos los grados</option>
+                            <option value="6">6° (Sexto)</option>
+                            <option value="7">7° (Séptimo)</option>
+                            <option value="8">8° (Octavo)</option>
+                            <option value="9">9° (Noveno)</option>
+                            <option value="10">10° (Décimo)</option>
+                            <option value="11">11° (Undécimo)</option>
+                        </select>
+                        <select class="filter-select">
+                            <option value="">Todos los cursos</option>
+                            <option value="01">Curso 01</option>
+                            <option value="02">Curso 02</option>
+                            <option value="03">Curso 03</option>
+                        </select>
+                        <select class="filter-select">
+                            <option value="">Todos los estados</option>
+                            <option value="current">Al día</option>
+                            <option value="partial">Con abonos</option>
+                            <option value="overdue">Con deudas</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem;">
+                ✅ Todos los elementos tienen la misma altura (44px)<br>
+                ✅ Una sola flecha por select, limpia y consistente<br>
+                ✅ Bordes más sutiles (1px en lugar de 2px)
+            </p>
+        </div>
+
+        <!-- Filtros Avanzados -->
+        <div class="test-section">
+            <h2 class="test-title">⚙️ Filtros Avanzados</h2>
+            <div class="filters-bar">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">Tipo de Movimiento:</label>
+                        <select class="filter-select">
+                            <option value="">Todos</option>
+                            <option value="income">Ingresos</option>
+                            <option value="expense">Egresos</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Fecha:</label>
+                        <input type="date" class="filter-input">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Monto Mínimo:</label>
+                        <input type="number" class="filter-input" placeholder="$0" min="0">
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">Concepto:</label>
+                        <input type="text" class="filter-input" placeholder="Buscar por concepto...">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Estado:</label>
+                        <select class="filter-select">
+                            <option value="">Todos los estados</option>
+                            <option value="approved">Aprobado</option>
+                            <option value="pending">Pendiente</option>
+                            <option value="rejected">Rechazado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-ghost">
+                        <svg width="16" height="16" fill="currentColor">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                        </svg>
+                        Limpiar Filtros
+                    </button>
+                    <button class="btn btn-outline">
+                        <svg width="16" height="16" fill="currentColor">
+                            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        </svg>
+                        Buscar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Estudiantes -->
+        <div class="test-section">
+            <h2 class="test-title">📋 Tabla de Estudiantes</h2>
+            <div class="table-container">
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>👤 Estudiante</th>
+                            <th>📧 Contacto</th>
+                            <th>🎓 Grado/Curso</th>
+                            <th>✅ Estado</th>
+                            <th>🎯 Eventos</th>
+                            <th>💰 Deuda</th>
+                            <th>💳 Pagado</th>
+                            <th>⚙️ Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="student-info">
+                                    <div class="student-avatar">JD</div>
+                                    <div class="student-details">
+                                        <div class="student-name">Juan David Pérez</div>
+                                        <div class="student-document">TI: 1234567890</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="contact-info">
+                                    <div class="email">juan.perez@email.com</div>
+                                    <div class="phone">+57 300 123 4567</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="grade-course">11°-01</span>
+                            </td>
+                            <td>
+                                <span class="status-badge active">Activo</span>
+                            </td>
+                            <td>
+                                <div class="events-summary">
+                                    <span class="events-count">5 eventos</span>
+                                    <div class="events-status">3 pagados, 1 parcial, 1 pendiente</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="debt-amount debt">$150,000</span>
+                            </td>
+                            <td>
+                                <span class="paid-amount">$350,000</span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-info" title="Ver detalles">👁️</button>
+                                    <button class="btn btn-warning" title="Editar">✏️</button>
+                                    <button class="btn btn-success" title="Pagar">💳</button>
+                                    <button class="btn btn-error" title="Eliminar">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="student-info">
+                                    <div class="student-avatar">MG</div>
+                                    <div class="student-details">
+                                        <div class="student-name">María García López</div>
+                                        <div class="student-document">TI: 0987654321</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="contact-info">
+                                    <div class="email">maria.garcia@email.com</div>
+                                    <div class="phone">+57 301 987 6543</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="grade-course">10°-02</span>
+                            </td>
+                            <td>
+                                <span class="status-badge active">Activo</span>
+                            </td>
+                            <td>
+                                <div class="events-summary">
+                                    <span class="events-count">3 eventos</span>
+                                    <div class="events-status">3 pagados, 0 parciales, 0 pendientes</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="debt-amount clear">$0</span>
+                            </td>
+                            <td>
+                                <span class="paid-amount">$500,000</span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-info" title="Ver detalles">👁️</button>
+                                    <button class="btn btn-warning" title="Editar">✏️</button>
+                                    <button class="btn btn-success" title="Pagar">💳</button>
+                                    <button class="btn btn-error" title="Eliminar">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="student-info">
+                                    <div class="student-avatar">AR</div>
+                                    <div class="student-details">
+                                        <div class="student-name">Andrés Rodríguez</div>
+                                        <div class="student-document">TI: 1122334455</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="contact-info">
+                                    <div class="email">andres.rodriguez@email.com</div>
+                                    <div class="phone">+57 302 555 7788</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="grade-course">9°-03</span>
+                            </td>
+                            <td>
+                                <span class="status-badge inactive">Inactivo</span>
+                            </td>
+                            <td>
+                                <div class="events-summary">
+                                    <span class="events-count">2 eventos</span>
+                                    <div class="events-status">0 pagados, 1 parcial, 1 pendiente</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="debt-amount debt">$300,000</span>
+                            </td>
+                            <td>
+                                <span class="paid-amount">$100,000</span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-info" title="Ver detalles">👁️</button>
+                                    <button class="btn btn-warning" title="Editar">✏️</button>
+                                    <button class="btn btn-success" title="Pagar">💳</button>
+                                    <button class="btn btn-error" title="Eliminar">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Formularios -->
+        <div class="test-section">
+            <h2 class="test-title">📝 Formularios</h2>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h4>Inputs Básicos</h4>
+                    <div class="form-group">
+                        <label>Nombre Completo</label>
+                        <input type="text" placeholder="Ingresa tu nombre completo">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" placeholder="correo@ejemplo.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="tel" placeholder="+57 300 123 4567">
+                    </div>
+                </div>
+                
+                <div class="demo-item">
+                    <h4>Selects y Fechas</h4>
+                    <div class="form-group">
+                        <label>Grado</label>
+                        <select>
+                            <option>Selecciona un grado</option>
+                            <option>6° (Sexto)</option>
+                            <option>7° (Séptimo)</option>
+                            <option>8° (Octavo)</option>
+                            <option>9° (Noveno)</option>
+                            <option>10° (Décimo)</option>
+                            <option>11° (Undécimo)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Nacimiento</label>
+                        <input type="date">
+                    </div>
+                    <div class="form-group">
+                        <label>Monto</label>
+                        <input type="number" placeholder="0" min="0">
+                    </div>
+                </div>
+                
+                <div class="demo-item">
+                    <h4>Checkboxes y Radios</h4>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="check1">
+                            <label for="check1">Opción 1</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="check2">
+                            <label for="check2">Opción 2</label>
+                        </div>
+                    </div>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="radio1" name="demo">
+                            <label for="radio1">Radio 1</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="radio2" name="demo">
+                            <label for="radio2">Radio 2</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="demo-item">
+                    <h4>Textarea</h4>
+                    <div class="form-group">
+                        <label>Observaciones</label>
+                        <textarea rows="4" placeholder="Escribe tus observaciones aquí..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertas -->
+        <div class="test-section">
+            <h2 class="test-title">🚨 Alertas y Notificaciones</h2>
+            <div class="alert alert-success">
+                <span>✅</span>
+                <span>Operación completada exitosamente</span>
+            </div>
+            <div class="alert alert-warning">
+                <span>⚠️</span>
+                <span>Advertencia: Revisa los datos ingresados</span>
+            </div>
+            <div class="alert alert-error">
+                <span>❌</span>
+                <span>Error: No se pudo completar la operación</span>
+            </div>
+            <div class="alert alert-info">
+                <span>ℹ️</span>
+                <span>Información: Los cambios se guardarán automáticamente</span>
+            </div>
+        </div>
+
+        <!-- Progress Bars -->
+        <div class="test-section">
+            <h2 class="test-title">📊 Barras de Progreso</h2>
+            <div class="demo-grid">
+                <div class="demo-item">
+                    <h4>Progreso Normal</h4>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 75%"></div>
+                    </div>
+                </div>
+                <div class="demo-item">
+                    <h4>Progreso Exitoso</h4>
+                    <div class="progress">
+                        <div class="progress-bar success" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="demo-item">
+                    <h4>Progreso Advertencia</h4>
+                    <div class="progress">
+                        <div class="progress-bar warning" style="width: 45%"></div>
+                    </div>
+                </div>
+                <div class="demo-item">
+                    <h4>Progreso Error</h4>
+                    <div class="progress">
+                        <div class="progress-bar error" style="width: 25%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.body.setAttribute('data-theme', newTheme);
+            
+            localStorage.setItem('theme', newTheme);
+            console.log(`🎨 Tema cambiado a: ${newTheme}`);
+        }
+        
+        // Inicializar tema
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.body.setAttribute('data-theme', savedTheme);
+            
+            console.log('✅ Test de tema oscuro inicializado');
+        });
+    </script>
+</body>
+</html>

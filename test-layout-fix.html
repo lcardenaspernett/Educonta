@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Layout Fix</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="public/css/accounting-dashboard.css">
+    <link rel="stylesheet" href="public/css/modal-fix.css">
+    <style>
+        .test-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 9999;
+            max-width: 300px;
+        }
+        .status-indicator {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .status-success { background: #d4edda; color: #155724; }
+        .status-error { background: #f8d7da; color: #721c24; }
+        .status-info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-text">Educonta</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span>Eventos</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span>Estudiantes</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1 class="page-title">Test Layout Fix</h1>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-primary" id="testModalBtn">
+                        Abrir Modal
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper" style="padding: 20px;">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Contenido Principal</h5>
+                        <p>Este contenido debe mantenerse en su lugar cuando se abra el modal.</p>
+                        <p>El sidebar debe permanecer fijo a la izquierda.</p>
+                        <p>No debe haber desplazamiento horizontal.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Test Controls -->
+    <div class="test-controls">
+        <h6>Controles de Prueba</h6>
+        <div id="statusIndicator" class="status-indicator status-info">
+            Listo para probar
+        </div>
+        <button class="btn btn-primary btn-sm w-100 mb-2" id="openModalBtn">
+            Abrir Modal
+        </button>
+        <button class="btn btn-secondary btn-sm w-100 mb-2" id="diagnoseBtn">
+            Diagnosticar Layout
+        </button>
+        <button class="btn btn-warning btn-sm w-100 mb-2" id="fixLayoutBtn">
+            Corregir Layout
+        </button>
+        <div id="diagnosticInfo" style="font-size: 12px; margin-top: 10px;"></div>
+    </div>
+
+    <!-- Modal de Prueba -->
+    <div class="modal fade" id="testModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal de Prueba</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Este modal debe abrirse sin afectar el layout del sidebar.</p>
+                    <p>Debes poder ver el sidebar a la izquierda.</p>
+                    <p>No debe haber desplazamiento horizontal.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="public/layout-fix.js"></script>
+    <script src="public/fix-modal-events.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusIndicator = document.getElementById('statusIndicator');
+            const diagnosticInfo = document.getElementById('diagnosticInfo');
+
+            function updateStatus(message, type) {
+                statusIndicator.textContent = message;
+                statusIndicator.className = `status-indicator status-${type}`;
+            }
+
+            function updateDiagnostic() {
+                const sidebar = document.querySelector('.sidebar');
+                const mainContent = document.querySelector('.main-content');
+                const body = document.body;
+
+                const info = {
+                    bodyModalOpen: body.classList.contains('modal-open'),
+                    bodyPaddingRight: body.style.paddingRight || 'normal',
+                    sidebarLeft: sidebar ? (sidebar.style.left || 'normal') : 'not found',
+                    mainContentMargin: mainContent ? (mainContent.style.marginLeft || 'normal') : 'not found',
+                    backdropsCount: document.querySelectorAll('.modal-backdrop').length
+                };
+
+                diagnosticInfo.innerHTML = Object.entries(info)
+                    .map(([key, value]) => `<div><strong>${key}:</strong> ${value}</div>`)
+                    .join('');
+            }
+
+            // Event listeners
+            document.getElementById('openModalBtn').addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('testModal'), {
+                    backdrop: true,
+                    keyboard: true
+                });
+                modal.show();
+                updateStatus('Modal abierto', 'info');
+            });
+
+            document.getElementById('diagnoseBtn').addEventListener('click', function() {
+                updateDiagnostic();
+                if (window.ModalFixer) {
+                    window.ModalFixer.diagnoseLayout();
+                }
+                updateStatus('Diagnóstico completado', 'success');
+            });
+
+            document.getElementById('fixLayoutBtn').addEventListener('click', function() {
+                if (window.LayoutFixer) {
+                    window.LayoutFixer.forceLayoutFix();
+                }
+                if (window.ModalFixer) {
+                    window.ModalFixer.forceCleanup();
+                }
+                updateStatus('Layout corregido', 'success');
+                updateDiagnostic();
+            });
+
+            // Modal event listeners
+            document.getElementById('testModal').addEventListener('hidden.bs.modal', function() {
+                updateStatus('Modal cerrado', 'success');
+                setTimeout(updateDiagnostic, 100);
+            });
+
+            // Initial diagnostic
+            setTimeout(updateDiagnostic, 1000);
+        });
+    </script>
+</body>
+</html>

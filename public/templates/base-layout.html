@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{PAGE_TITLE}} - Educonta</title>
+    <link rel="stylesheet" href="css/accounting-dashboard.css">
+    <link rel="stylesheet" href="css/approval-status.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {{ADDITIONAL_CSS}}
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR UNIFICADO -->
+        <aside class="sidebar">
+            <!-- El contenido se cargará dinámicamente con sidebar.js -->
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            {{MAIN_CONTENT}}
+        </main>
+    </div>
+
+    <!-- Scripts base -->
+    <script src="js/shared/sidebar.js"></script>
+    {{ADDITIONAL_SCRIPTS}}
+</body>
+</html>

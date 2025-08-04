@@ -39,6 +39,7 @@ model Institution {
   invoices      Invoice[]
   categories    Category[]
   auditLogs     AuditLog[]
+  events        Event[]
 
   @@map("institutions")
 }
@@ -110,20 +111,20 @@ model UserPermission {
 // ===================================
 model Student {
   id              String    @id @default(cuid())
-  studentCode     String    // Código único del estudiante
-  firstName       String
-  lastName        String
-  documentType    DocumentType
-  documentNumber  String
-  grade           String
-  section         String?
-  birthDate       DateTime?
-  parentName      String?
-  parentPhone     String?
-  parentEmail     String?
-  address         String?
-  isActive        Boolean   @default(true)
-  enrollmentDate  DateTime  @default(now())
+  documento       String    // Número de documento
+  nombre          String    // Nombre
+  apellido        String    // Apellido
+  email           String?   // Email del estudiante
+  telefono        String?   // Teléfono del estudiante
+  grado           String    // Grado (6, 7, 8, 9, 10, 11)
+  curso           String    // Curso (A, B, C)
+  genero          String    // Género (M, F)
+  fechaNacimiento DateTime? // Fecha de nacimiento
+  direccion       String?   // Dirección
+  acudienteNombre String?   // Nombre del acudiente
+  acudienteTelefono String? // Teléfono del acudiente
+  acudienteEmail  String?   // Email del acudiente
+  estado          String    @default("activo") // Estado (activo, inactivo)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -134,9 +135,9 @@ model Student {
   // Relaciones
   paymentAssignments PaymentAssignment[]
   invoices          Invoice[]
+  eventParticipations EventParticipation[]
 
-  @@unique([institutionId, studentCode])
-  @@unique([institutionId, documentNumber])
+  @@unique([institutionId, documento])
   @@map("students")
 }
 
@@ -234,6 +235,80 @@ enum TransactionStatus {
   PENDING   // Pendiente
   APPROVED  // Aprobado
   REJECTED  // Rechazado
+}
+
+// ===================================
+// EVENTOS (RIFAS, BINGOS, ETC.)
+// ===================================
+model Event {
+  id              String    @id @default(cuid())
+  nombre          String    // Nombre del evento
+  tipo            String    // Tipo: raffle, bingo, graduation, etc.
+  descripcion     String?   // Descripción del evento
+  fechaInicio     DateTime  // Fecha de inicio
+  fechaFin        DateTime  // Fecha de fin
+  metaRecaudacion Decimal   @db.Decimal(15, 2) // Meta de recaudación
+  montoRecaudado  Decimal   @default(0) @db.Decimal(15, 2) // Monto recaudado
+  estado          String    @default("planning") // planning, active, completed, cancelled
+  
+  // Campos específicos por tipo de evento
+  precioBoletaRifa Decimal? @db.Decimal(10, 2) // Para rifas
+  maxBoletasRifa   Int?     // Para rifas
+  boletasVendidas  Int?     @default(0) // Para rifas
+  
+  precioCartonBingo Decimal? @db.Decimal(10, 2) // Para bingos
+  maxCartonesBingo  Int?     // Para bingos
+  
+  valorDerecho     Decimal? @db.Decimal(10, 2) // Para derecho a grado
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Multi-tenant
+  institutionId   String
+  institution     Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  // Relaciones
+  participations  EventParticipation[]
+  transactions    EventTransaction[]
+
+  @@map("events")
+}
+
+model EventParticipation {
+  id              String    @id @default(cuid())
+  montoPagado     Decimal   @default(0) @db.Decimal(10, 2)
+  fechaPago       DateTime?
+  estado          String    @default("pending") // pending, paid, partial
+  notas           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relaciones
+  eventId         String
+  event           Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  studentId       String
+  student         Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, studentId])
+  @@map("event_participations")
+}
+
+model EventTransaction {
+  id              String    @id @default(cuid())
+  monto           Decimal   @db.Decimal(10, 2)
+  descripcion     String
+  fecha           DateTime  @default(now())
+  tipo            String    // payment, expense, adjustment
+  referencia      String?   // Número de recibo, comprobante, etc.
+  createdAt       DateTime  @default(now())
+
+  // Relaciones
+  eventId         String
+  event           Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("event_transactions")
 }
 
 // ===================================

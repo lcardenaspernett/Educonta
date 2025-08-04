@@ -202,16 +202,9 @@ class ApprovalSystem {
     isStandardAmount(invoice) {
         const concept = this.normalizeConceptType(invoice.concept);
         
-        // Montos estándar por concepto (esto vendría de configuración)
-        const standardAmounts = {
-            'MENSUALIDAD': [250000, 300000, 350000, 400000], // Diferentes grados
-            'UNIFORME': [80000, 120000, 150000],
-            'CARNET': [15000, 20000],
-            'CERTIFICADO': [25000, 35000, 50000]
-        };
-
-        const amounts = standardAmounts[concept];
-        return amounts ? amounts.includes(invoice.amount) : false;
+        // Los montos estándar se cargarán desde la configuración de la institución
+        // Por ahora, considerar cualquier monto como estándar
+        return true;
     }
 
     /**

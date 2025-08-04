@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Guardar Estudiante</title>
+    <link rel="stylesheet" href="public/css/student-modals.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.2s ease;
+        }
+        .test-button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test - Funciones de Guardado</h1>
+        
+        <div id="status" class="status" style="display: none;"></div>
+        
+        <h3>Pruebas de Funcionalidad:</h3>
+        
+        <button class="test-button" onclick="testShowLoading()">
+            🔄 Probar Loading
+        </button>
+        
+        <button class="test-button" onclick="testHideLoading()">
+            ✅ Ocultar Loading
+        </button>
+        
+        <button class="test-button" onclick="testShowAlert()">
+            📢 Probar Alerta
+        </button>
+        
+        <button class="test-button" onclick="testEditStudent()">
+            ✏️ Probar Editar Estudiante
+        </button>
+        
+        <button class="test-button" onclick="testSaveStudent()">
+            💾 Probar Guardar (Simulado)
+        </button>
+        
+        <h3>Estado del Sistema:</h3>
+        <div id="systemInfo">
+            <p>Cargando información del sistema...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="public/js/students-data.js"></script>
+    <script src="public/js/filter-config.js"></script>
+    <script src="public/js/accounting/student-actions.js"></script>
+    
+    <script>
+        // Datos de prueba
+        const testStudent = {
+            id: 'test-student-1',
+            firstName: 'María',
+            lastName: 'González López',
+            fullName: 'María González López',
+            documentType: 'TI',
+            document: '1234567890',
+            email: 'maria.gonzalez@villasanpablo.edu.co',
+            phone: '+57 300 123 4567',
+            grade: '10',
+            course: '02',
+            status: 'ACTIVE',
+            address: 'Calle 123 #45-67, Bogotá',
+            guardian: {
+                name: 'Carlos González',
+                phone: '+57 301 234 5678',
+                email: 'carlos.gonzalez@email.com'
+            },
+            events: [],
+            totalDebt: 0,
+            totalPaid: 0
+        };
+
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function testShowLoading() {
+            try {
+                if (window.studentActions && typeof window.studentActions.showLoading === 'function') {
+                    window.studentActions.showLoading('Probando loading...');
+                    showStatus('✅ showLoading funciona correctamente', 'success');
+                } else {
+                    showStatus('❌ showLoading no está disponible', 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Error en showLoading: ${error.message}`, 'error');
+            }
+        }
+
+        function testHideLoading() {
+            try {
+                if (window.studentActions && typeof window.studentActions.hideLoading === 'function') {
+                    window.studentActions.hideLoading();
+                    showStatus('✅ hideLoading funciona correctamente', 'success');
+                } else {
+                    showStatus('❌ hideLoading no está disponible', 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Error en hideLoading: ${error.message}`, 'error');
+            }
+        }
+
+        function testShowAlert() {
+            try {
+                if (window.studentActions && typeof window.studentActions.showAlert === 'function') {
+                    window.studentActions.showAlert('Esta es una alerta de prueba', 'success');
+                    showStatus('✅ showAlert funciona correctamente', 'success');
+                } else {
+                    showStatus('❌ showAlert no está disponible', 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Error en showAlert: ${error.message}`, 'error');
+            }
+        }
+
+        function testEditStudent() {
+            try {
+                // Configurar datos de prueba
+                if (!window.studentsPage) {
+                    window.studentsPage = {
+                        students: [testStudent],
+                        renderStudents: function() {
+                            console.log('🔄 Simulando actualización de tabla');
+                        }
+                    };
+                }
+
+                if (window.studentActions && typeof window.studentActions.editStudent === 'function') {
+                    window.studentActions.editStudent('test-student-1');
+                    showStatus('✅ Modal de edición abierto correctamente', 'success');
+                } else {
+                    showStatus('❌ editStudent no está disponible', 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Error en editStudent: ${error.message}`, 'error');
+            }
+        }
+
+        function testSaveStudent() {
+            try {
+                // Configurar datos de prueba
+                if (!window.studentsPage) {
+                    window.studentsPage = {
+                        students: [testStudent],
+                        renderStudents: function() {
+                            console.log('🔄 Simulando actualización de tabla');
+                        }
+                    };
+                }
+
+                if (window.studentActions) {
+                    // Simular que hay un estudiante seleccionado
+                    window.studentActions.currentStudent = testStudent;
+                    
+                    // Crear formulario simulado
+                    const mockForm = document.createElement('div');
+                    mockForm.innerHTML = `
+                        <input type="text" id="editFirstName" value="María">
+                        <input type="text" id="editLastName" value="González López">
+                        <select id="editDocumentType"><option value="TI" selected>TI</option></select>
+                        <input type="text" id="editDocument" value="1234567890">
+                        <select id="editGrade"><option value="10" selected>10</option></select>
+                        <select id="editCourse"><option value="02" selected>02</option></select>
+                        <input type="email" id="editEmail" value="maria.gonzalez@villasanpablo.edu.co">
+                        <input type="tel" id="editPhone" value="+57 300 123 4567">
+                        <input type="text" id="editAddress" value="Calle 123 #45-67, Bogotá">
+                        <input type="text" id="editGuardianName" value="Carlos González">
+                        <input type="tel" id="editGuardianPhone" value="+57 301 234 5678">
+                        <input type="email" id="editGuardianEmail" value="carlos.gonzalez@email.com">
+                    `;
+                    document.body.appendChild(mockForm);
+                    
+                    if (typeof window.studentActions.saveStudent === 'function') {
+                        window.studentActions.saveStudent();
+                        showStatus('✅ saveStudent ejecutado correctamente', 'success');
+                    } else {
+                        showStatus('❌ saveStudent no está disponible', 'error');
+                    }
+                    
+                    // Limpiar formulario simulado
+                    setTimeout(() => {
+                        document.body.removeChild(mockForm);
+                    }, 1000);
+                } else {
+                    showStatus('❌ studentActions no está disponible', 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ Error en saveStudent: ${error.message}`, 'error');
+                console.error('Error completo:', error);
+            }
+        }
+
+        function updateSystemInfo() {
+            const infoDiv = document.getElementById('systemInfo');
+            let info = '<h4>Estado del Sistema:</h4>';
+            
+            // Verificar studentActions
+            if (window.studentActions) {
+                info += '<p>✅ window.studentActions: Disponible</p>';
+                info += `<p>✅ Tipo: ${typeof window.studentActions}</p>';
+                
+                // Verificar funciones específicas
+                const functions = ['showLoading', 'hideLoading', 'showAlert', 'saveStudent', 'editStudent'];
+                functions.forEach(func => {
+                    if (typeof window.studentActions[func] === 'function') {
+                        info += `<p>✅ ${func}: Disponible</p>`;
+                    } else {
+                        info += `<p>❌ ${func}: No disponible</p>`;
+                    }
+                });
+            } else {
+                info += '<p>❌ window.studentActions: No disponible</p>';
+            }
+            
+            // Verificar datos
+            if (window.STUDENTS_DATA) {
+                info += `<p>✅ STUDENTS_DATA: ${window.STUDENTS_DATA.length} estudiantes</p>`;
+            } else {
+                info += '<p>⚠️ STUDENTS_DATA: No disponible</p>';
+            }
+            
+            infoDiv.innerHTML = info;
+        }
+
+        // Inicializar cuando se cargue la página
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                updateSystemInfo();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

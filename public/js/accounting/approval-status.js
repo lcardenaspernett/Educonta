@@ -352,14 +352,14 @@ class ApprovalStatusManager {
                 console.log('✅ Aprobando transacción:', transactionId);
                 
                 // Simular aprobación actualizando el estado local
-                if (window.DemoData) {
-                    const transaction = window.DemoData.transactions.find(t => t.id === transactionId);
+                if (null) {
+                    const transaction = null.transactions.find(t => t.id === transactionId);
                     if (transaction) {
                         transaction.status = 'APPROVED';
                         transaction.updatedAt = new Date().toISOString();
                         
                         // Actualizar display
-                        this.renderTransactionsWithApprovalStatus(window.DemoData.transactions);
+                        this.renderTransactionsWithApprovalStatus(null.transactions);
                         
                         this.showNotification('Transacción aprobada exitosamente', 'success');
                     }
@@ -382,15 +382,15 @@ class ApprovalStatusManager {
                 console.log('❌ Rechazando transacción:', transactionId, 'Razón:', reason);
                 
                 // Simular rechazo
-                if (window.DemoData) {
-                    const transaction = window.DemoData.transactions.find(t => t.id === transactionId);
+                if (null) {
+                    const transaction = null.transactions.find(t => t.id === transactionId);
                     if (transaction) {
                         transaction.status = 'REJECTED';
                         transaction.updatedAt = new Date().toISOString();
                         transaction.rejectionReason = reason;
                         
                         // Actualizar display
-                        this.renderTransactionsWithApprovalStatus(window.DemoData.transactions);
+                        this.renderTransactionsWithApprovalStatus(null.transactions);
                         
                         this.showNotification('Transacción rechazada', 'warning');
                     }

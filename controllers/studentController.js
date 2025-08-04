@@ -1,718 +1,407 @@
 // ===================================
-// EDUCONTA - Controlador de Estudiantes
+// EDUCONTA - Controlador de Estudiantes (Corregido)
 // ===================================
 
-const { validationResult } = require('express-validator');
-const { ValidationError, NotFoundError, ConflictError } = require('../middleware/errorHandler');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-/**
- * Helper para obtener la institución del usuario
- */
-const getInstitutionId = async (req) => {
-  if (req.user.role === 'SUPER_ADMIN') {
-    if (req.query.institutionId) {
-      return req.query.institutionId;
-    } else {
-      try {
-        const firstInstitution = await req.prisma.institution.findFirst({
-          where: { isActive: true }
+// Obtener todos los estudiantes de una institución
+async function getStudents(req, res) {
+    try {
+        const institutionId = req.params.institutionId;
+        
+        console.log('🔍 Obteniendo estudiantes para institución:', institutionId);
+        
+        const studentsFromDB = await prisma.student.findMany({
+            where: {
+                institutionId: institutionId
+            },
+            orderBy: [
+                { grado: 'asc' },
+                { curso: 'asc' },
+                { apellido: 'asc' },
+                { nombre: 'asc' }
+            ]
         });
-        if (firstInstitution) {
-          return firstInstitution.id;
-        } else {
-          // Si no hay instituciones, crear una de ejemplo para Super Admin
-          console.log('⚠️ No hay instituciones disponibles, creando institución de ejemplo...');
-          const exampleInstitution = await req.prisma.institution.create({
-            data: {
-              name: 'Institución de Ejemplo',
-              nit: '000000000-0',
-              address: 'Dirección de ejemplo',
-              phone: '000-000-0000',
-              email: 'ejemplo@educonta.com',
-              city: 'Ciudad Ejemplo',
-              department: 'Departamento Ejemplo',
-              educationLevel: 'MIXTA',
-              isActive: true
+
+        console.log('📊 Estudiantes encontrados en DB:', studentsFromDB.length);
+
+        // Transformar datos para que coincidan con el formato esperado por el frontend
+        const students = studentsFromDB.map(student => ({
+            id: student.id,
+            firstName: student.nombre || '',
+            lastName: student.apellido || '',
+            fullName: `${student.nombre || ''} ${student.apellido || ''}`.trim(),
+            documentType: 'TI',
+            document: student.documento || '',
+            email: student.email || `${(student.nombre || '').toLowerCase().replace(' ', '.')}@estudiante.edu.co`,
+            phone: student.telefono || '+57 300 000 0000',
+            grade: student.grado || '',
+            course: student.curso || '',
+            status: student.estado === 'activo' ? 'ACTIVE' : 'INACTIVE',
+            enrollmentDate: student.createdAt || new Date().toISOString(),
+            birthDate: student.fechaNacimiento || new Date('2008-01-01').toISOString(),
+            guardian: {
+                name: student.acudienteNombre || 'Acudiente',
+                phone: student.acudienteTelefono || '+57 300 000 0000',
+                email: student.acudienteEmail || 'acudiente@email.com'
+            },
+            address: student.direccion || 'Dirección pendiente',
+            events: [],
+            totalDebt: 0,
+            totalPaid: 0,
+            createdAt: student.createdAt || new Date().toISOString()
+        }));
+
+        console.log('✅ Estudiantes transformados:', students.length);
+
+        res.json({
+            success: true,
+            students: students
+        });
+
+    } catch (error) {
+        console.error('❌ Error obteniendo estudiantes:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error obteniendo estudiantes',
+            error: error.message
+        });
+    }
+}
+
+// Obtener un estudiante específico
+async function getStudent(req, res) {
+    try {
+        const studentId = req.params.studentId;
+        
+        console.log('🔍 Obteniendo estudiante:', studentId);
+        
+        const student = await prisma.student.findUnique({
+            where: { id: studentId }
+        });
+
+        if (!student) {
+            return res.status(404).json({
+                success: false,
+                message: 'Estudiante no encontrado'
+            });
+        }
+
+        // Transformar al formato del frontend
+        const transformedStudent = {
+            id: student.id,
+            firstName: student.nombre || '',
+            lastName: student.apellido || '',
+            fullName: `${student.nombre || ''} ${student.apellido || ''}`.trim(),
+            documentType: 'TI',
+            document: student.documento || '',
+            email: student.email || '',
+            phone: student.telefono || '',
+            grade: student.grado || '',
+            course: student.curso || '',
+            status: student.estado === 'activo' ? 'ACTIVE' : 'INACTIVE',
+            address: student.direccion || '',
+            guardian: {
+                name: student.acudienteNombre || '',
+                phone: student.acudienteTelefono || '',
+                email: student.acudienteEmail || ''
+            },
+            events: [],
+            totalDebt: 0,
+            totalPaid: 0
+        };
+
+        res.json({
+            success: true,
+            student: transformedStudent
+        });
+
+    } catch (error) {
+        console.error('❌ Error obteniendo estudiante:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error obteniendo estudiante',
+            error: error.message
+        });
+    }
+}
+
+// Actualizar un estudiante
+async function updateStudent(req, res) {
+    try {
+        const studentId = req.params.studentId;
+        const updateData = req.body;
+        
+        console.log('🔧 Actualizando estudiante:', studentId);
+        console.log('📝 Datos recibidos:', updateData);
+
+        // Verificar que el estudiante existe
+        const existingStudent = await prisma.student.findUnique({
+            where: { id: studentId }
+        });
+
+        if (!existingStudent) {
+            return res.status(404).json({
+                success: false,
+                message: 'Estudiante no encontrado'
+            });
+        }
+
+        // Preparar datos para actualización
+        const dataToUpdate = {};
+        
+        if (updateData.nombre !== undefined) dataToUpdate.nombre = updateData.nombre;
+        if (updateData.apellido !== undefined) dataToUpdate.apellido = updateData.apellido;
+        if (updateData.documento !== undefined) dataToUpdate.documento = updateData.documento;
+        if (updateData.email !== undefined) dataToUpdate.email = updateData.email;
+        if (updateData.telefono !== undefined) dataToUpdate.telefono = updateData.telefono;
+        if (updateData.grado !== undefined) dataToUpdate.grado = updateData.grado;
+        if (updateData.curso !== undefined) dataToUpdate.curso = updateData.curso;
+        if (updateData.direccion !== undefined) dataToUpdate.direccion = updateData.direccion;
+        if (updateData.acudienteNombre !== undefined) dataToUpdate.acudienteNombre = updateData.acudienteNombre;
+        if (updateData.acudienteTelefono !== undefined) dataToUpdate.acudienteTelefono = updateData.acudienteTelefono;
+        if (updateData.acudienteEmail !== undefined) dataToUpdate.acudienteEmail = updateData.acudienteEmail;
+
+        console.log('💾 Datos a actualizar en BD:', dataToUpdate);
+
+        // Actualizar en la base de datos
+        const updatedStudent = await prisma.student.update({
+            where: { id: studentId },
+            data: dataToUpdate
+        });
+
+        console.log('✅ Estudiante actualizado en BD:', updatedStudent.nombre, updatedStudent.apellido);
+
+        // Transformar respuesta al formato del frontend
+        const transformedStudent = {
+            id: updatedStudent.id,
+            firstName: updatedStudent.nombre || '',
+            lastName: updatedStudent.apellido || '',
+            fullName: `${updatedStudent.nombre || ''} ${updatedStudent.apellido || ''}`.trim(),
+            documentType: 'TI',
+            document: updatedStudent.documento || '',
+            email: updatedStudent.email || '',
+            phone: updatedStudent.telefono || '',
+            grade: updatedStudent.grado || '',
+            course: updatedStudent.curso || '',
+            status: updatedStudent.estado === 'activo' ? 'ACTIVE' : 'INACTIVE',
+            address: updatedStudent.direccion || '',
+            guardian: {
+                name: updatedStudent.acudienteNombre || '',
+                phone: updatedStudent.acudienteTelefono || '',
+                email: updatedStudent.acudienteEmail || ''
             }
-          });
-          return exampleInstitution.id;
+        };
+
+        // Regenerar archivo de datos estático después de actualizar
+        try {
+            const { regenerateStudentsData } = require('../scripts/regenerate-students-data');
+            regenerateStudentsData().catch(err => {
+                console.log('⚠️ Error regenerando archivo estático:', err.message);
+            });
+        } catch (err) {
+            console.log('⚠️ No se pudo regenerar archivo estático:', err.message);
         }
-      } catch (error) {
-        console.error('Error obteniendo institución:', error);
-        return null;
-      }
+
+        res.json({
+            success: true,
+            message: 'Estudiante actualizado exitosamente',
+            student: transformedStudent
+        });
+
+    } catch (error) {
+        console.error('❌ Error actualizando estudiante:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error actualizando estudiante',
+            error: error.message
+        });
     }
-  } else {
-    return req.user.institutionId;
-  }
-};
+}
 
-/**
- * Obtener lista de estudiantes con filtros y paginación
- */
-const getStudents = async (req, res, next) => {
-  try {
-    const {
-      page = 1,
-      limit = 20,
-      search = '',
-      grade = '',
-      section = '',
-      isActive = 'true',
-      sortBy = 'lastName',
-      sortOrder = 'asc'
-    } = req.query;
+// Crear un nuevo estudiante
+async function createStudent(req, res) {
+    try {
+        const institutionId = req.params.institutionId;
+        const {
+            documento,
+            nombre,
+            apellido,
+            email,
+            telefono,
+            grado,
+            curso,
+            genero,
+            fechaNacimiento,
+            direccion,
+            acudienteNombre,
+            acudienteTelefono,
+            acudienteEmail,
+            estado
+        } = req.body;
 
-    // Obtener institución usando la función helper
-    const institutionId = await getInstitutionId(req);
-    
-    if (!institutionId) {
-      return res.status(400).json({
-        success: false,
-        error: 'No hay instituciones disponibles'
-      });
-    }
+        console.log('➕ Creando nuevo estudiante para institución:', institutionId);
 
-    const where = {
-      institutionId: institutionId
-    };
-
-    // Filtro por estado activo
-    if (isActive !== 'all') {
-      where.isActive = isActive === 'true';
-    }
-
-    // Filtro por grado
-    if (grade) {
-      where.grade = grade;
-    }
-
-    // Filtro por sección
-    if (section) {
-      where.section = section;
-    }
-
-    // Búsqueda por texto
-    if (search) {
-      where.OR = [
-        { firstName: { contains: search, mode: 'insensitive' } },
-        { lastName: { contains: search, mode: 'insensitive' } },
-        { studentCode: { contains: search, mode: 'insensitive' } },
-        { documentNumber: { contains: search, mode: 'insensitive' } },
-        { parentName: { contains: search, mode: 'insensitive' } }
-      ];
-    }
-
-    // Configurar ordenamiento
-    const orderBy = {};
-    orderBy[sortBy] = sortOrder;
-
-    // Calcular paginación
-    const pageNum = parseInt(page) || 1;
-    const limitNum = parseInt(limit) || 20;
-    const skip = (pageNum - 1) * limitNum;
-    const take = limitNum;
-
-    // Ejecutar consultas
-    const [students, totalCount] = await Promise.all([
-      req.prisma.student.findMany({
-        where,
-        orderBy,
-        skip,
-        take,
-        select: {
-          id: true,
-          studentCode: true,
-          firstName: true,
-          lastName: true,
-          documentType: true,
-          documentNumber: true,
-          grade: true,
-          section: true,
-          birthDate: true,
-          parentName: true,
-          parentPhone: true,
-          parentEmail: true,
-          address: true,
-          isActive: true,
-          enrollmentDate: true,
-          createdAt: true,
-          updatedAt: true
+        // Validaciones básicas
+        if (!documento || !nombre || !apellido || !grado || !curso) {
+            return res.status(400).json({
+                success: false,
+                message: 'Faltan campos requeridos: documento, nombre, apellido, grado, curso'
+            });
         }
-      }),
-      req.prisma.student.count({ where })
-    ]);
 
-    // Calcular metadatos de paginación
-    const totalPages = Math.ceil(totalCount / take);
-    const hasNextPage = pageNum < totalPages;
-    const hasPrevPage = pageNum > 1;
+        // Verificar si el estudiante ya existe
+        const existingStudent = await prisma.student.findFirst({
+            where: {
+                documento: documento,
+                institutionId: institutionId
+            }
+        });
 
-    res.json({
-      success: true,
-      data: students,
-      pagination: {
-        currentPage: pageNum,
-        totalPages,
-        totalCount,
-        limit: take,
-        hasNextPage,
-        hasPrevPage
-      }
-    });
-
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Obtener un estudiante por ID
- */
-const getStudentById = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-
-    // Obtener institución usando la función helper
-    const institutionId = await getInstitutionId(req);
-    
-    if (!institutionId) {
-      return res.status(400).json({
-        success: false,
-        error: 'No hay instituciones disponibles'
-      });
-    }
-
-    const student = await req.prisma.student.findFirst({
-      where: {
-        id,
-        institutionId: institutionId
-      },
-      include: {
-        paymentAssignments: {
-          include: {
-            paymentEvent: true
-          },
-          orderBy: {
-            assignedDate: 'desc'
-          }
-        },
-        invoices: {
-          orderBy: {
-            date: 'desc'
-          },
-          take: 10
+        if (existingStudent) {
+            return res.status(409).json({
+                success: false,
+                message: 'Ya existe un estudiante con este documento en la institución'
+            });
         }
-      }
-    });
 
-    if (!student) {
-      return next(new NotFoundError('Estudiante no encontrado'));
+        // Crear el estudiante
+        const student = await prisma.student.create({
+            data: {
+                documento,
+                nombre,
+                apellido,
+                email: email || null,
+                telefono: telefono || null,
+                grado,
+                curso,
+                genero: genero || 'M',
+                fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : null,
+                direccion: direccion || null,
+                acudienteNombre: acudienteNombre || null,
+                acudienteTelefono: acudienteTelefono || null,
+                acudienteEmail: acudienteEmail || null,
+                estado: estado || 'activo',
+                institutionId: institutionId
+            }
+        });
+
+        console.log('✅ Estudiante creado:', student.nombre, student.apellido);
+
+        res.status(201).json({
+            success: true,
+            message: 'Estudiante creado exitosamente',
+            student: student
+        });
+
+    } catch (error) {
+        console.error('❌ Error creando estudiante:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error creando estudiante',
+            error: error.message
+        });
     }
+}
 
-    res.json({
-      success: true,
-      data: student
-    });
+// Eliminar un estudiante
+async function deleteStudent(req, res) {
+    try {
+        const studentId = req.params.studentId;
 
-  } catch (error) {
-    next(error);
-  }
-};
+        console.log('🗑️ Eliminando estudiante:', studentId);
 
-/**
- * Crear nuevo estudiante
- */
-const createStudent = async (req, res, next) => {
-  try {
-    // Validar datos de entrada
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return next(new ValidationError('Datos de estudiante inválidos', errors.array()));
-    }
+        // Verificar si el estudiante existe
+        const existingStudent = await prisma.student.findUnique({
+            where: { id: studentId }
+        });
 
-    const {
-      studentCode,
-      firstName,
-      lastName,
-      documentType,
-      documentNumber,
-      grade,
-      section,
-      birthDate,
-      parentName,
-      parentPhone,
-      parentEmail,
-      address
-    } = req.body;
-
-    const institutionId = await getInstitutionId(req);
-    
-    if (!institutionId) {
-      return res.status(400).json({
-        success: false,
-        error: 'No hay instituciones disponibles'
-      });
-    }
-
-    // Verificar que no exista estudiante con el mismo código
-    const existingByCode = await req.prisma.student.findUnique({
-      where: {
-        institutionId_studentCode: {
-          institutionId,
-          studentCode
+        if (!existingStudent) {
+            return res.status(404).json({
+                success: false,
+                message: 'Estudiante no encontrado'
+            });
         }
-      }
-    });
 
-    if (existingByCode) {
-      return next(new ConflictError('Ya existe un estudiante con este código'));
+        // Eliminar el estudiante
+        await prisma.student.delete({
+            where: { id: studentId }
+        });
+
+        console.log('✅ Estudiante eliminado:', existingStudent.nombre, existingStudent.apellido);
+
+        res.json({
+            success: true,
+            message: 'Estudiante eliminado exitosamente'
+        });
+
+    } catch (error) {
+        console.error('❌ Error eliminando estudiante:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error eliminando estudiante',
+            error: error.message
+        });
     }
+}
 
-    // Verificar que no exista estudiante con el mismo documento
-    const existingByDocument = await req.prisma.student.findUnique({
-      where: {
-        institutionId_documentNumber: {
-          institutionId,
-          documentNumber
-        }
-      }
-    });
+// Obtener estadísticas de estudiantes
+async function getStudentStats(req, res) {
+    try {
+        const institutionId = req.params.institutionId;
 
-    if (existingByDocument) {
-      return next(new ConflictError('Ya existe un estudiante con este número de documento'));
+        console.log('📊 Obteniendo estadísticas para institución:', institutionId);
+
+        const totalStudents = await prisma.student.count({
+            where: { institutionId: institutionId }
+        });
+
+        const activeStudents = await prisma.student.count({
+            where: { 
+                institutionId: institutionId,
+                estado: 'activo'
+            }
+        });
+
+        const byGrade = await prisma.student.groupBy({
+            by: ['grado'],
+            where: { institutionId: institutionId },
+            _count: { id: true }
+        });
+
+        const byCourse = await prisma.student.groupBy({
+            by: ['grado', 'curso'],
+            where: { institutionId: institutionId },
+            _count: { id: true }
+        });
+
+        res.json({
+            success: true,
+            stats: {
+                totalStudents,
+                activeStudents,
+                inactiveStudents: totalStudents - activeStudents,
+                byGrade,
+                byCourse
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Error obteniendo estadísticas:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error obteniendo estadísticas',
+            error: error.message
+        });
     }
-
-    // Crear estudiante
-    const student = await req.prisma.student.create({
-      data: {
-        studentCode,
-        firstName,
-        lastName,
-        documentType,
-        documentNumber,
-        grade,
-        section,
-        birthDate: birthDate ? new Date(birthDate) : null,
-        parentName,
-        parentPhone,
-        parentEmail,
-        address,
-        institutionId,
-        isActive: true,
-        enrollmentDate: new Date()
-      }
-    });
-
-    // Registrar auditoría
-    await req.prisma.auditLog.create({
-      data: {
-        action: 'CREATE',
-        tableName: 'students',
-        recordId: student.id,
-        newValues: {
-          studentCode,
-          firstName,
-          lastName,
-          grade
-        },
-        ipAddress: req.ip,
-        userAgent: req.get('User-Agent'),
-        institutionId,
-        userId: req.user.id
-      }
-    });
-
-    res.status(201).json({
-      success: true,
-      message: 'Estudiante creado exitosamente',
-      data: student
-    });
-
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Actualizar estudiante
- */
-const updateStudent = async (req, res, next) => {
-  try {
-    console.log('🔧 UPDATE STUDENT - Datos recibidos:', JSON.stringify(req.body, null, 2));
-    console.log('🔧 UPDATE STUDENT - ID:', req.params.id);
-    
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      console.log('❌ Errores de validación de estudiante detallados:', JSON.stringify(errors.array(), null, 2));
-      console.log('📝 Datos recibidos completos:', JSON.stringify(req.body, null, 2));
-      
-      // Enviar respuesta más detallada para debug
-      return res.status(400).json({
-        success: false,
-        error: 'Datos de estudiante inválidos',
-        details: errors.array(),
-        receivedData: req.body
-      });
-    }
-
-    const { id } = req.params;
-    const {
-      studentCode,
-      firstName,
-      lastName,
-      documentType,
-      documentNumber,
-      grade,
-      section,
-      birthDate,
-      parentName,
-      parentPhone,
-      parentEmail,
-      address,
-      isActive
-    } = req.body;
-
-    const institutionId = await getInstitutionId(req);
-    
-    if (!institutionId) {
-      return res.status(400).json({
-        success: false,
-        error: 'No hay instituciones disponibles'
-      });
-    }
-
-    // Verificar que el estudiante existe
-    const existingStudent = await req.prisma.student.findFirst({
-      where: {
-        id,
-        institutionId
-      }
-    });
-
-    if (!existingStudent) {
-      return next(new NotFoundError('Estudiante no encontrado'));
-    }
-
-    // Verificar unicidad de código (si cambió)
-    if (studentCode && studentCode !== existingStudent.studentCode) {
-      const existingByCode = await req.prisma.student.findUnique({
-        where: {
-          institutionId_studentCode: {
-            institutionId,
-            studentCode
-          }
-        }
-      });
-
-      if (existingByCode) {
-        return next(new ConflictError('Ya existe un estudiante con este código'));
-      }
-    }
-
-    // Verificar unicidad de documento (si cambió)
-    if (documentNumber && documentNumber !== existingStudent.documentNumber) {
-      const existingByDocument = await req.prisma.student.findUnique({
-        where: {
-          institutionId_documentNumber: {
-            institutionId,
-            documentNumber
-          }
-        }
-      });
-
-      if (existingByDocument) {
-        return next(new ConflictError('Ya existe un estudiante con este número de documento'));
-      }
-    }
-
-    // Actualizar estudiante
-    const updatedStudent = await req.prisma.student.update({
-      where: { id },
-      data: {
-        studentCode,
-        firstName,
-        lastName,
-        documentType,
-        documentNumber,
-        grade,
-        section,
-        birthDate: birthDate ? new Date(birthDate) : null,
-        parentName,
-        parentPhone,
-        parentEmail,
-        address,
-        isActive: isActive !== undefined ? isActive : existingStudent.isActive
-      }
-    });
-
-    // Registrar auditoría
-    await req.prisma.auditLog.create({
-      data: {
-        action: 'UPDATE',
-        tableName: 'students',
-        recordId: id,
-        oldValues: {
-          studentCode: existingStudent.studentCode,
-          firstName: existingStudent.firstName,
-          lastName: existingStudent.lastName,
-          grade: existingStudent.grade
-        },
-        newValues: {
-          studentCode,
-          firstName,
-          lastName,
-          grade
-        },
-        ipAddress: req.ip,
-        userAgent: req.get('User-Agent'),
-        institutionId,
-        userId: req.user.id
-      }
-    });
-
-    res.json({
-      success: true,
-      message: 'Estudiante actualizado exitosamente',
-      data: updatedStudent
-    });
-
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Eliminar estudiante (soft delete)
- */
-const deleteStudent = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const institutionId = await getInstitutionId(req);
-    
-    if (!institutionId) {
-      return res.status(400).json({
-        success: false,
-        error: 'No hay instituciones disponibles'
-      });
-    }
-
-    // Verificar que el estudiante existe
-    const student = await req.prisma.student.findFirst({
-      where: {
-        id,
-        institutionId
-      }
-    });
-
-    if (!student) {
-      return next(new NotFoundError('Estudiante no encontrado'));
-    }
-
-    // Verificar si tiene pagos o facturas asociadas
-    const [paymentsCount, invoicesCount] = await Promise.all([
-      req.prisma.paymentAssignment.count({
-        where: { studentId: id }
-      }),
-      req.prisma.invoice.count({
-        where: { studentId: id }
-      })
-    ]);
-
-    if (paymentsCount > 0 || invoicesCount > 0) {
-      // Solo desactivar si tiene registros asociados
-      const updatedStudent = await req.prisma.student.update({
-        where: { id },
-        data: { isActive: false }
-      });
-
-      // Registrar auditoría
-      await req.prisma.auditLog.create({
-        data: {
-          action: 'DEACTIVATE',
-          tableName: 'students',
-          recordId: id,
-          oldValues: { isActive: true },
-          newValues: { isActive: false },
-          ipAddress: req.ip,
-          userAgent: req.get('User-Agent'),
-          institutionId,
-          userId: req.user.id
-        }
-      });
-
-      return res.json({
-        success: true,
-        message: 'Estudiante desactivado exitosamente (tiene registros asociados)',
-        data: updatedStudent
-      });
-    }
-
-    // Eliminar completamente si no tiene registros asociados
-    await req.prisma.student.delete({
-      where: { id }
-    });
-
-    // Registrar auditoría
-    await req.prisma.auditLog.create({
-      data: {
-        action: 'DELETE',
-        tableName: 'students',
-        recordId: id,
-        oldValues: {
-          studentCode: student.studentCode,
-          firstName: student.firstName,
-          lastName: student.lastName
-        },
-        ipAddress: req.ip,
-        userAgent: req.get('User-Agent'),
-        institutionId,
-        userId: req.user.id
-      }
-    });
-
-    res.json({
-      success: true,
-      message: 'Estudiante eliminado exitosamente'
-    });
-
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Obtener estadísticas de estudiantes
- */
-const getStudentStats = async (req, res, next) => {
-  try {
-    const institutionId = await getInstitutionId(req);
-    
-    if (!institutionId) {
-      return res.status(400).json({
-        success: false,
-        error: 'No hay instituciones disponibles'
-      });
-    }
-
-    const [
-      totalStudents,
-      activeStudents,
-      inactiveStudents,
-      gradeStats,
-      recentEnrollments
-    ] = await Promise.all([
-      // Total de estudiantes
-      req.prisma.student.count({
-        where: { institutionId }
-      }),
-      
-      // Estudiantes activos
-      req.prisma.student.count({
-        where: { institutionId, isActive: true }
-      }),
-      
-      // Estudiantes inactivos
-      req.prisma.student.count({
-        where: { institutionId, isActive: false }
-      }),
-      
-      // Estadísticas por grado
-      req.prisma.student.groupBy({
-        by: ['grade'],
-        where: { institutionId, isActive: true },
-        _count: { grade: true },
-        orderBy: { grade: 'asc' }
-      }),
-      
-      // Matrículas recientes (últimos 30 días)
-      req.prisma.student.count({
-        where: {
-          institutionId,
-          enrollmentDate: {
-            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-          }
-        }
-      })
-    ]);
-
-    res.json({
-      success: true,
-      data: {
-        total: totalStudents,
-        active: activeStudents,
-        inactive: inactiveStudents,
-        recentEnrollments,
-        byGrade: gradeStats.map(stat => ({
-          grade: stat.grade,
-          count: stat._count.grade
-        }))
-      }
-    });
-
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Obtener opciones para formularios (grados, secciones, etc.)
- */
-const getStudentOptions = async (req, res, next) => {
-  try {
-    const institutionId = await getInstitutionId(req);
-    
-    if (!institutionId) {
-      return res.status(400).json({
-        success: false,
-        error: 'No hay instituciones disponibles'
-      });
-    }
-
-    const [grades, sections] = await Promise.all([
-      // Grados únicos
-      req.prisma.student.findMany({
-        where: { institutionId, isActive: true },
-        select: { grade: true },
-        distinct: ['grade'],
-        orderBy: { grade: 'asc' }
-      }),
-      
-      // Secciones únicas
-      req.prisma.student.findMany({
-        where: { institutionId, isActive: true, section: { not: null } },
-        select: { section: true },
-        distinct: ['section'],
-        orderBy: { section: 'asc' }
-      })
-    ]);
-
-    res.json({
-      success: true,
-      data: {
-        grades: grades.map(g => g.grade),
-        sections: sections.map(s => s.section),
-        documentTypes: [
-          { value: 'TI', label: 'Tarjeta de Identidad' },
-          { value: 'CC', label: 'Cédula de Ciudadanía' },
-          { value: 'CE', label: 'Cédula de Extranjería' },
-          { value: 'PP', label: 'Pasaporte' },
-          { value: 'RC', label: 'Registro Civil' }
-        ]
-      }
-    });
-
-  } catch (error) {
-    next(error);
-  }
-};
+}
 
 module.exports = {
-  getStudents,
-  getStudentById,
-  createStudent,
-  updateStudent,
-  deleteStudent,
-  getStudentStats,
-  getStudentOptions
+    getStudents,
+    getStudent,
+    createStudent,
+    updateStudent,
+    deleteStudent,
+    getStudentStats
 };

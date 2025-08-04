@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Event Button Fix</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; background: #f8f9fa; }
+        .test-section { 
+            background: white; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .console-output {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .status-indicator {
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .status-success { background: #d4edda; color: #155724; }
+        .status-error { background: #f8d7da; color: #721c24; }
+        .status-warning { background: #fff3cd; color: #856404; }
+        .status-info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test: Corrección del Botón "Nuevo Evento"</h1>
+        
+        <div class="test-section">
+            <h3>Estado del Sistema</h3>
+            <div id="systemStatus">
+                <div class="status-info">Verificando sistema...</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>Botones de Prueba</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <button class="btn btn-primary w-100 mb-2" id="newEventBtnHeader">
+                        <i class="fas fa-plus"></i> Nuevo Evento (Header)
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-success w-100 mb-2" id="newEventBtn">
+                        <i class="fas fa-plus"></i> Nuevo Evento (Card)
+                    </button>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-4">
+                    <button class="btn btn-info w-100" onclick="runDiagnostic()">
+                        🔍 Diagnóstico
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-warning w-100" onclick="applyFixes()">
+                        🔧 Aplicar Correcciones
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-secondary w-100" onclick="testModal()">
+                        🧪 Test Modal
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>Consola de Debug</h3>
+            <div id="consoleOutput" class="console-output">
+                Esperando actividad...
+            </div>
+            <button class="btn btn-outline-secondary btn-sm" onclick="clearConsole()">
+                Limpiar Consola
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Evento -->
+    <div class="modal fade" id="eventModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalTitle">Nuevo Evento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="eventForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="eventName" class="form-label">Nombre del Evento *</label>
+                                    <input type="text" class="form-control" id="eventName" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="eventType" class="form-label">Tipo de Evento *</label>
+                                    <select class="form-select" id="eventType" name="type" required>
+                                        <option value="">Seleccionar tipo</option>
+                                        <option value="raffle">🎟️ Rifa</option>
+                                        <option value="bingo">🎱 Bingo</option>
+                                        <option value="graduation">🎓 Derecho a Grado</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventDescription" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="eventDescription" name="description" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Guardar Evento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simular EventsTableView simplificada
+        class TestEventsTableView {
+            constructor() {
+                this.events = [];
+                this.currentEvent = null;
+                this.consoleOutput = [];
+                this.init();
+            }
+
+            init() {
+                this.log('🚀 Inicializando TestEventsTableView...');
+                this.setupEventListeners();
+                this.updateSystemStatus();
+            }
+
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logMessage = `[${timestamp}] ${message}`;
+                this.consoleOutput.push(logMessage);
+                console.log(message);
+                this.updateConsoleDisplay();
+            }
+
+            updateConsoleDisplay() {
+                const consoleDiv = document.getElementById('consoleOutput');
+                consoleDiv.innerHTML = this.consoleOutput.slice(-20).join('<br>');
+                consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            }
+
+            updateSystemStatus() {
+                const statusDiv = document.getElementById('systemStatus');
+                const checks = [
+                    { name: 'Bootstrap', check: typeof bootstrap !== 'undefined' },
+                    { name: 'Modal Element', check: !!document.getElementById('eventModal') },
+                    { name: 'Form Element', check: !!document.getElementById('eventForm') },
+                    { name: 'Header Button', check: !!document.getElementById('newEventBtnHeader') },
+                    { name: 'Card Button', check: !!document.getElementById('newEventBtn') }
+                ];
+
+                let html = '';
+                let allGood = true;
+
+                checks.forEach(check => {
+                    const status = check.check ? 'success' : 'error';
+                    const icon = check.check ? '✅' : '❌';
+                    html += `<div class="status-${status}">${icon} ${check.name}</div>`;
+                    if (!check.check) allGood = false;
+                });
+
+                if (allGood) {
+                    html += '<div class="status-success">🎉 Sistema listo para pruebas</div>';
+                } else {
+                    html += '<div class="status-warning">⚠️ Algunos componentes faltan</div>';
+                }
+
+                statusDiv.innerHTML = html;
+            }
+
+            setupEventListeners() {
+                this.log('🎯 Configurando event listeners...');
+                
+                // Botón header
+                const headerBtn = document.getElementById('newEventBtnHeader');
+                if (headerBtn) {
+                    headerBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.log('🔘 Botón Header clickeado');
+                        this.showEventModal();
+                    });
+                    this.log('✅ Event listener agregado al botón header');
+                }
+
+                // Botón card
+                const cardBtn = document.getElementById('newEventBtn');
+                if (cardBtn) {
+                    cardBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.log('🔘 Botón Card clickeado');
+                        this.showEventModal();
+                    });
+                    this.log('✅ Event listener agregado al botón card');
+                }
+            }
+
+            showEventModal(eventId = null) {
+                this.log('📝 showEventModal llamado');
+                
+                this.currentEvent = eventId ? this.events.find(e => e.id === eventId) : null;
+                
+                const modalElement = document.getElementById('eventModal');
+                const modalTitle = document.getElementById('eventModalTitle');
+                
+                if (!modalElement) {
+                    this.log('❌ Modal eventModal no encontrado');
+                    return;
+                }
+
+                if (modalTitle) {
+                    modalTitle.textContent = this.currentEvent ? 'Editar Evento' : 'Nuevo Evento';
+                }
+
+                this.resetEventForm();
+
+                // Mostrar modal con método robusto
+                try {
+                    this.log('🔧 Intentando mostrar modal...');
+                    
+                    // Limpiar estado previo
+                    this.cleanupPreviousModal();
+                    
+                    // Método 1: Bootstrap normal
+                    try {
+                        const modal = new bootstrap.Modal(modalElement, {
+                            backdrop: true,
+                            keyboard: true,
+                            focus: true
+                        });
+                        
+                        modal.show();
+                        this.log('✅ Modal mostrado con Bootstrap');
+                        return;
+                        
+                    } catch (bootstrapError) {
+                        this.log('⚠️ Bootstrap falló, usando método manual');
+                    }
+                    
+                    // Método 2: Manual
+                    this.showModalManually(modalElement);
+                    
+                } catch (error) {
+                    this.log('❌ Error mostrando modal: ' + error.message);
+                }
+            }
+
+            cleanupPreviousModal() {
+                // Limpiar backdrops
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+                
+                // Restaurar body
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+                
+                this.log('🧹 Estado previo limpiado');
+            }
+
+            showModalManually(modalElement) {
+                // Mostrar modal
+                modalElement.classList.add('show');
+                modalElement.style.display = 'block';
+                modalElement.setAttribute('aria-modal', 'true');
+                modalElement.removeAttribute('aria-hidden');
+                
+                // Agregar backdrop
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop fade show';
+                backdrop.style.zIndex = '1040';
+                document.body.appendChild(backdrop);
+                
+                // Agregar clase al body
+                document.body.classList.add('modal-open');
+                
+                // Event listeners para cerrar
+                const closeModal = () => {
+                    modalElement.classList.remove('show');
+                    modalElement.style.display = 'none';
+                    backdrop.remove();
+                    document.body.classList.remove('modal-open');
+                    this.log('🔒 Modal cerrado manualmente');
+                };
+                
+                backdrop.addEventListener('click', closeModal);
+                
+                const closeBtn = modalElement.querySelector('.btn-close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', closeModal, { once: true });
+                }
+                
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        closeModal();
+                    }
+                }, { once: true });
+                
+                this.log('✅ Modal mostrado manualmente');
+            }
+
+            resetEventForm() {
+                const form = document.getElementById('eventForm');
+                if (form) {
+                    form.reset();
+                    this.log('🧹 Formulario reseteado');
+                }
+                this.currentEvent = null;
+            }
+
+            showNotification(message, type = 'info') {
+                this.log(`🔔 ${type.toUpperCase()}: ${message}`);
+            }
+        }
+
+        // Funciones globales
+        function runDiagnostic() {
+            if (window.testEventsPage) {
+                window.testEventsPage.log('🔍 Ejecutando diagnóstico...');
+                window.testEventsPage.updateSystemStatus();
+            }
+        }
+
+        function applyFixes() {
+            if (window.testEventsPage) {
+                window.testEventsPage.log('🔧 Aplicando correcciones...');
+                window.testEventsPage.cleanupPreviousModal();
+                window.testEventsPage.setupEventListeners();
+            }
+        }
+
+        function testModal() {
+            if (window.testEventsPage) {
+                window.testEventsPage.log('🧪 Probando modal directamente...');
+                window.testEventsPage.showEventModal();
+            }
+        }
+
+        function clearConsole() {
+            if (window.testEventsPage) {
+                window.testEventsPage.consoleOutput = [];
+                window.testEventsPage.updateConsoleDisplay();
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            window.testEventsPage = new TestEventsTableView();
+        });
+    </script>
+</body>
+</html>

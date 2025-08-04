@@ -221,7 +221,7 @@ class AccountingNavigation {
         const maxRetries = 10;
         
         const waitForModules = async () => {
-            if (window.AccountingState && window.accountingController && window.DemoData) {
+            if (window.AccountingState && window.accountingController && null) {
                 return true;
             }
             
@@ -245,11 +245,11 @@ class AccountingNavigation {
         try {
             console.log('🔄 Cargando transacciones...');
             
-            // Usar DemoData directamente si está disponible
+            // Usar null directamente si está disponible
             let transactions = [];
-            if (window.DemoData && window.DemoData.transactions) {
-                transactions = window.DemoData.transactions;
-                console.log('📊 Usando transacciones de DemoData:', transactions.length);
+            if (null && null.transactions) {
+                transactions = null.transactions;
+                console.log('📊 Usando transacciones de null:', transactions.length);
             } else {
                 await window.AccountingState.loadTransactions();
                 transactions = window.AccountingState.get('transactions') || [];

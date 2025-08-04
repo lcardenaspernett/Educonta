@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Dashboard Mejorado</title>
+    <link rel="stylesheet" href="public/css/accounting-dashboard.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--card-bg);
+        }
+        
+        .test-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .theme-demo {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .sample-movements {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .sample-movement {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        
+        .sample-movement:hover {
+            background: var(--hover-bg);
+        }
+        
+        .sample-movement:last-child {
+            border-bottom: none;
+        }
+        
+        .movement-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .income .movement-icon {
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .expense .movement-icon {
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .movement-info {
+            flex: 1;
+        }
+        
+        .movement-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .movement-meta {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .movement-amount {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .movement-amount.income {
+            color: var(--success);
+        }
+        
+        .movement-amount.expense {
+            color: var(--error);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test Dashboard Mejorado</h1>
+        
+        <!-- Test de Tema -->
+        <div class="test-section">
+            <h2 class="test-title">🎨 Sistema de Temas</h2>
+            <div class="theme-demo">
+                <span>Tema actual:</span>
+                <button class="btn btn-primary" onclick="toggleTheme()">Cambiar Tema</button>
+                <span id="currentTheme">Claro</span>
+            </div>
+            <p>El tema debe cambiar inmediatamente al presionar el botón, sin necesidad de recargar la página.</p>
+        </div>
+        
+        <!-- Test de Movimientos con Paginación -->
+        <div class="test-section">
+            <h2 class="test-title">📄 Sistema de Paginación</h2>
+            <div class="sample-movements">
+                <div id="testMovementsList">
+                    <!-- Los movimientos se cargarán aquí -->
+                </div>
+                <div id="testPagination" class="pagination-container"></div>
+            </div>
+        </div>
+        
+        <!-- Test de Elementos Visuales -->
+        <div class="test-section">
+            <h2 class="test-title">🎯 Elementos Visuales</h2>
+            <div class="sample-movements">
+                <div class="sample-movement income">
+                    <div class="movement-icon">💰</div>
+                    <div class="movement-info">
+                        <div class="movement-title">Pago de Matrícula</div>
+                        <div class="movement-meta">15/01/2025 • Ingreso • Ref: MAT-001</div>
+                    </div>
+                    <div class="movement-amount income">+$500.000</div>
+                </div>
+                <div class="sample-movement expense">
+                    <div class="movement-icon">💸</div>
+                    <div class="movement-info">
+                        <div class="movement-title">Compra de Materiales</div>
+                        <div class="movement-meta">14/01/2025 • Egreso • Ref: MAT-002</div>
+                    </div>
+                    <div class="movement-amount expense">-$150.000</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="public/js/shared/pagination.js"></script>
+    <script>
+        // Función para cambiar tema
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.body.setAttribute('data-theme', newTheme);
+            
+            document.getElementById('currentTheme').textContent = newTheme === 'dark' ? 'Oscuro' : 'Claro';
+            
+            localStorage.setItem('theme', newTheme);
+            console.log(`🎨 Tema cambiado a: ${newTheme}`);
+        }
+        
+        // Datos de prueba para paginación
+        const testMovements = [
+            { id: 1, concept: 'Pago de Matrícula', type: 'income', amount: 500000, date: '2025-01-15' },
+            { id: 2, concept: 'Compra de Materiales', type: 'expense', amount: 150000, date: '2025-01-14' },
+            { id: 3, concept: 'Pago de Pensión', type: 'income', amount: 300000, date: '2025-01-13' },
+            { id: 4, concept: 'Servicios Públicos', type: 'expense', amount: 80000, date: '2025-01-12' },
+            { id: 5, concept: 'Venta de Uniformes', type: 'income', amount: 200000, date: '2025-01-11' },
+            { id: 6, concept: 'Mantenimiento', type: 'expense', amount: 120000, date: '2025-01-10' },
+            { id: 7, concept: 'Donación', type: 'income', amount: 100000, date: '2025-01-09' },
+            { id: 8, concept: 'Papelería', type: 'expense', amount: 50000, date: '2025-01-08' },
+            { id: 9, concept: 'Evento Escolar', type: 'income', amount: 400000, date: '2025-01-07' },
+            { id: 10, concept: 'Transporte', type: 'expense', amount: 75000, date: '2025-01-06' },
+            { id: 11, concept: 'Matrícula Tardía', type: 'income', amount: 550000, date: '2025-01-05' },
+            { id: 12, concept: 'Limpieza', type: 'expense', amount: 90000, date: '2025-01-04' }
+        ];
+        
+        let testPagination = null;
+        
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        function renderTestMovements() {
+            const list = document.getElementById('testMovementsList');
+            if (!list || !testPagination) return;
+            
+            const currentMovements = testPagination.getPageItems(testMovements);
+            
+            list.innerHTML = currentMovements.map(m => `
+                <div class="sample-movement ${m.type}">
+                    <div class="movement-icon">
+                        ${m.type === 'income' ? '💰' : '💸'}
+                    </div>
+                    <div class="movement-info">
+                        <div class="movement-title">${m.concept}</div>
+                        <div class="movement-meta">
+                            ${new Date(m.date).toLocaleDateString('es-CO')} • 
+                            ${m.type === 'income' ? 'Ingreso' : 'Egreso'}
+                        </div>
+                    </div>
+                    <div class="movement-amount ${m.type}">
+                        ${m.type === 'income' ? '+' : '-'}${formatCurrency(Math.abs(m.amount))}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Inicializar cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar tema guardado
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('currentTheme').textContent = savedTheme === 'dark' ? 'Oscuro' : 'Claro';
+            
+            // Inicializar paginación de prueba
+            testPagination = new PaginationManager({
+                itemsPerPage: 5,
+                containerId: 'testPagination',
+                onPageChange: (page) => {
+                    console.log(`📄 Página cambiada a: ${page}`);
+                    renderTestMovements();
+                }
+            });
+            
+            testPagination.updateTotal(testMovements.length);
+            renderTestMovements();
+            
+            console.log('✅ Test dashboard inicializado');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Facturas - Educonta</title>
+    <style>
+        /* CSS VARIABLES - TEMA CLARO */
+        :root {
+          /* Colors */
+          --primary: #3b82f6;
+          --primary-dark: #2563eb;
+          --text-secondary: #6b7280;
+          --bg-secondary: #f8fafc;
+          --bg-active: #e2e8f0;
+          --primary-light: #60a5fa;
+          --secondary: #6366f1;
+          --success: #10b981;
+          --warning: #f59e0b;
+          --error: #ef4444;
+          --info: #06b6d4;
+
+          /* Backgrounds */
+          --bg-primary: #ffffff;
+          --bg-secondary: #f8fafc;
+          --bg-tertiary: #f1f5f9;
+          --card-bg: #ffffff;
+          --sidebar-bg: #1e293b;
+          --hover-bg: #f1f5f9;
+
+          /* Text */
+          --text-primary: #1e293b;
+          --text-secondary: #64748b;
+          --text-light: #94a3b8;
+          --text-inverse: #ffffff;
+
+          /* Borders */
+          --border: #e2e8f0;
+          --border-light: #f1f5f9;
+          --border-dark: #cbd5e1;
+
+          /* Shadows */
+          --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+          --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+          --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+          /* Spacing */
+          --spacing-xs: 0.25rem;
+          --spacing-sm: 0.5rem;
+          --spacing-md: 1rem;
+          --spacing-lg: 1.5rem;
+          --spacing-xl: 2rem;
+          --spacing-2xl: 3rem;
+
+          /* Border radius */
+          --radius-sm: 0.25rem;
+          --radius: 0.5rem;
+          --radius-md: 0.75rem;
+          --radius-lg: 1rem;
+
+          /* Typography */
+          --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          --font-size-xs: 0.75rem;
+          --font-size-sm: 0.875rem;
+          --font-size-base: 1rem;
+          --font-size-lg: 1.125rem;
+          --font-size-xl: 1.25rem;
+          --font-size-2xl: 1.5rem;
+          --font-size-3xl: 1.875rem;
+
+          /* Transitions */
+          --transition: all 0.2s ease-in-out;
+          --transition-fast: all 0.15s ease-in-out;
+        }
+
+        /* RESET Y BASE */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        html {
+          font-size: 16px;
+          scroll-behavior: smooth;
+        }
+
+        body {
+          font-family: var(--font-family);
+          font-size: var(--font-size-base);
+          line-height: 1.6;
+          color: var(--text-primary);
+          background-color: var(--bg-secondary);
+          transition: var(--transition);
+        }
+
+        /* LAYOUT PRINCIPAL - CORREGIDO */
+        .app-container {
+          display: flex;
+          min-height: 100vh;
+        }
+
+        /* SIDEBAR - CORREGIDO PARA FUNCIONAR CON sidebar.js */
+        .sidebar {
+          width: 280px;
+          background: var(--sidebar-bg);
+          color: var(--text-inverse);
+          display: flex;
+          flex-direction: column;
+          position: fixed;
+          height: 100vh;
+          left: 0;
+          top: 0;
+          z-index: 100;
+          transition: var(--transition);
+          overflow-y: auto;
+        }
+
+        .sidebar-header {
+          padding: var(--spacing-xl);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          flex-shrink: 0;
+        }
+
+        .logo {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-md);
+        }
+
+        .logo-icon {
+          color: var(--primary);
+          flex-shrink: 0;
+        }
+
+        .logo-text {
+          font-size: var(--font-size-xl);
+          font-weight: 700;
+          color: var(--text-inverse);
+        }
+
+        .sidebar-nav {
+          flex: 1;
+          padding: var(--spacing-lg) 0;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .nav-item {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-md);
+          padding: var(--spacing-md) var(--spacing-xl);
+          color: rgba(255, 255, 255, 0.7);
+          text-decoration: none;
+          transition: var(--transition);
+          border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+          background: rgba(255, 255, 255, 0.05);
+          color: var(--text-inverse);
+        }
+
+        .nav-item.active {
+          background: rgba(59, 130, 246, 0.1);
+          color: var(--text-inverse);
+          border-left-color: var(--primary);
+        }
+
+        .nav-item svg {
+          flex-shrink: 0;
+          width: 20px;
+          height: 20px;
+        }
+
+        .nav-item span {
+          font-weight: 500;
+        }
+
+        .sidebar-footer {
+          padding: var(--spacing-lg) var(--spacing-xl);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-lg);
+          flex-shrink: 0;
+        }
+
+        /* THEME TOGGLE */
+        .theme-toggle-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--spacing-sm);
+          background: rgba(255, 255, 255, 0.05);
+          padding: var(--spacing-sm) var(--spacing-md);
+          border-radius: var(--radius-lg);
+          font-size: var(--font-size-xs);
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.7);
+          transition: var(--transition);
+        }
+
+        .theme-toggle-container:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        .theme-label {
+          font-size: var(--font-size-xs);
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.7);
+          transition: var(--transition);
+          user-select: none;
+        }
+
+        .theme-toggle {
+          position: relative;
+          width: 50px;
+          height: 25px;
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          border-radius: 15px;
+          background: rgba(255, 255, 255, 0.1);
+          cursor: pointer;
+          transition: var(--transition);
+          outline: none;
+        }
+
+        .theme-toggle::before {
+          content: '';
+          position: absolute;
+          top: 1px;
+          left: 1px;
+          width: 19px;
+          height: 19px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+          transition: var(--transition);
+          box-shadow: var(--shadow-sm);
+        }
+
+        .theme-toggle:hover {
+          border-color: var(--primary);
+          transform: scale(1.05);
+        }
+
+        /* USER SECTION */
+        .user-section {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .user-info {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-md);
+          flex: 1;
+        }
+
+        .user-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: var(--primary);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          flex-shrink: 0;
+        }
+
+        .user-details {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .user-name {
+          font-weight: 600;
+          font-size: var(--font-size-sm);
+          color: var(--text-inverse);
+        }
+
+        .user-role {
+          font-size: var(--font-size-xs);
+          color: rgba(255, 255, 255, 0.7);
+        }
+
+        .logout-btn {
+          width: 36px;
+          height: 36px;
+          border: none;
+          border-radius: var(--radius);
+          background: rgba(255, 255, 255, 0.1);
+          color: var(--text-inverse);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: var(--transition);
+          flex-shrink: 0;
+        }
+
+        .logout-btn:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* MAIN CONTENT - CORREGIDO */
+        .main-content {
+          flex: 1;
+          margin-left: 280px; /* Esto es crucial - debe coincidir con el ancho del sidebar */
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+        }
+
+        /* PAGE HEADER */
+        .page-header {
+          background: var(--bg-primary);
+          padding: var(--spacing-xl);
+          border-bottom: 1px solid var(--border);
+          box-shadow: var(--shadow-sm);
+          position: sticky;
+          top: 0;
+          z-index: 50;
+        }
+
+        .header-content {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          max-width: 100%;
+        }
+
+        .header-left {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-md);
+        }
+
+        .header-text {
+          flex: 1;
+        }
+
+        .page-title {
+          font-size: var(--font-size-3xl);
+          font-weight: 700;
+          margin-bottom: var(--spacing-xs);
+          color: var(--text-primary);
+        }
+
+        .page-subtitle {
+          color: var(--text-secondary);
+          font-size: var(--font-size-sm);
+        }
+
+        .header-actions {
+          display: flex;
+          gap: var(--spacing-md);
+          flex-shrink: 0;
+        }
+
+        /* BUTTONS */
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--spacing-sm);
+          padding: var(--spacing-sm) var(--spacing-lg);
+          border: 1px solid transparent;
+          border-radius: var(--radius);
+          font-size: var(--font-size-sm);
+          font-weight: 500;
+          text-decoration: none;
+          cursor: pointer;
+          transition: var(--transition);
+          white-space: nowrap;
+        }
+
+        .btn-primary {
+          background: var(--primary);
+          color: white;
+          border-color: var(--primary);
+          box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+          background: var(--primary-dark);
+          border-color: var(--primary-dark);
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-md);
+        }
+
+        .btn-outline {
+          border-color: var(--primary);
+          color: var(--primary);
+          background: var(--card-bg);
+          box-shadow: var(--shadow-sm);
+        }
+
+        .btn-outline:hover:not(:disabled) {
+          background: var(--primary);
+          color: white;
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-md);
+        }
+
+        /* STATS GRID */
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: var(--spacing-lg);
+          margin-bottom: var(--spacing-2xl);
+          padding: 0 var(--spacing-xl);
+        }
+
+        .stat-card {
+          background: var(--card-bg);
+          border-radius: var(--radius-lg);
+          padding: var(--spacing-xl);
+          box-shadow: var(--shadow);
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-lg);
+          transition: var(--transition);
+          border: 1px solid var(--border);
+        }
+
+        .stat-card:hover {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-lg);
+        }
+
+        .stat-icon {
+          font-size: 2rem;
+          flex-shrink: 0;
+        }
+
+        .stat-content {
+          flex: 1;
+        }
+
+        .stat-number {
+          font-size: var(--font-size-2xl);
+          font-weight: 700;
+          color: var(--text-primary);
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .stat-label {
+          font-size: var(--font-size-sm);
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+
+        /* CONTENT CARD */
+        .content-card {
+          background: var(--card-bg);
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow);
+          overflow: hidden;
+          margin: 0 var(--spacing-xl) var(--spacing-xl) var(--spacing-xl);
+          border: 1px solid var(--border);
+        }
+
+        .card-header {
+          padding: var(--spacing-xl);
+          border-bottom: 1px solid var(--border);
+          background: var(--card-bg);
+        }
+
+        .card-header h3 {
+          font-size: var(--font-size-lg);
+          font-weight: 600;
+          color: var(--text-primary);
+          margin: 0;
+        }
+
+        /* FILTERS */
+        .filters-grid {
+          display: grid;
+          grid-template-columns: 2fr 1fr 1fr;
+          gap: var(--spacing-lg);
+          padding: var(--spacing-xl);
+          align-items: end;
+        }
+
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-sm);
+        }
+
+        .form-group label {
+          font-size: var(--font-size-sm);
+          font-weight: 500;
+          color: var(--text-primary);
+        }
+
+        .form-control {
+          padding: var(--spacing-md);
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          font-size: var(--font-size-sm);
+          transition: var(--transition);
+        }
+
+        .form-control:focus {
+          outline: none;
+          border-color: var(--primary);
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* CONTENT CONTAINER */
+        #invoicesContainer {
+          padding: var(--spacing-xl);
+          min-height: 400px;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: var(--spacing-2xl);
+          text-align: center;
+          color: var(--text-secondary);
+        }
+
+        .empty-icon {
+          font-size: 4rem;
+          margin-bottom: var(--spacing-lg);
+          opacity: 0.5;
+        }
+
+        .empty-state h3 {
+          font-size: var(--font-size-lg);
+          margin-bottom: var(--spacing-sm);
+          color: var(--text-primary);
+        }
+
+        .empty-state p {
+          margin-bottom: var(--spacing-lg);
+          max-width: 400px;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1024px) {
+          .sidebar {
+            width: 240px;
+          }
+
+          .main-content {
+            margin-left: 240px;
+          }
+
+          .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          }
+        }
+
+        @media (max-width: 768px) {
+          .sidebar {
+            transform: translateX(-100%);
+            width: 280px;
+          }
+
+          .sidebar.open {
+            transform: translateX(0);
+          }
+
+          .main-content {
+            margin-left: 0;
+          }
+
+          .page-header {
+            padding: var(--spacing-lg);
+          }
+
+          .header-content {
+            flex-direction: column;
+            gap: var(--spacing-lg);
+            align-items: stretch;
+          }
+
+          .stats-grid {
+            grid-template-columns: 1fr;
+            padding: 0 var(--spacing-lg);
+          }
+
+          .content-card {
+            margin: 0 var(--spacing-lg) var(--spacing-lg) var(--spacing-lg);
+          }
+
+          .filters-grid {
+            grid-template-columns: 1fr;
+            gap: var(--spacing-md);
+          }
+        }
+
+        /* SIDEBAR OVERLAY PARA MÓVIL */
+        .sidebar-overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 99;
+          opacity: 0;
+          transition: var(--transition);
+        }
+
+        .sidebar-overlay.active {
+          opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+          .sidebar.open + .sidebar-overlay {
+            display: block;
+          }
+        }
+
+        /* MOBILE MENU TOGGLE */
+        .mobile-menu-toggle {
+          display: none;
+          width: 40px;
+          height: 40px;
+          border: none;
+          background: var(--card-bg);
+          color: var(--text-primary);
+          border-radius: var(--radius);
+          cursor: pointer;
+          align-items: center;
+          justify-content: center;
+          transition: var(--transition);
+          border: 1px solid var(--border);
+        }
+
+        .mobile-menu-toggle:hover {
+          background: var(--hover-bg);
+        }
+
+        @media (max-width: 768px) {
+          .mobile-menu-toggle {
+            display: flex;
+          }
+        }
+
+        /* LOADING SPINNER */
+        .loading-spinner {
+          width: 32px;
+          height: 32px;
+          border: 3px solid var(--border);
+          border-top: 3px solid var(--primary);
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: 0 auto;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR UNIFICADO -->
+        <aside class="sidebar">
+            <!-- El contenido se cargará dinámicamente con sidebar.js -->
+        </aside>
+
+        <!-- OVERLAY PARA MÓVIL -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <div class="page-header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                        <h1 class="page-title">📋 Gestión de Facturas</h1>
+                        <p class="page-subtitle">Facturación y documentos comerciales</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-outline" onclick="invoiceSystem.exportToExcel()">
+                            <svg width="16" height="16" fill="currentColor">
+                                <path d="M8.5 3L13 7.5 8.5 12 7 10.5 10 7.5 7 4.5 8.5 3z"/>
+                            </svg>
+                            Volver al Dashboard
+                        </button>
+                        <button class="btn btn-primary" onclick="invoiceSystem.showCreateModal()">
+                            <svg width="16" height="16" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            Nueva Factura
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalInvoices">0</div>
+                        <div class="stat-label">Total Facturas</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="paidInvoices">0</div>
+                        <div class="stat-label">Facturas Pagadas</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="pendingInvoices">0</div>
+                        <div class="stat-label">Facturas Pendientes</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalRevenue">$0</div>
+                        <div class="stat-label">Ingresos Totales</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="content-card">
+                <div class="card-header">
+                    <h3>Buscar facturas</h3>
+                </div>
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label for="invoiceSearch">Buscar</label>
+                        <input type="text" id="invoiceSearch" class="form-control" placeholder="Número, cliente, descripción...">
+                    </div>
+                    <div class="form-group">
+                        <label for="statusFilter">Estado</label>
+                        <select id="statusFilter" class="form-control">
+                            <option value="">Todos</option>
+                            <option value="PENDING">Pendientes</option>
+                            <option value="PAID">Pagadas</option>
+                            <option value="OVERDUE">Vencidas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-outline">
+                            <svg width="16" height="16" fill="currentColor">
+                                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+                            </svg>
+                            Exportar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoices List -->
+            <div class="content-card">
+                <div id="invoicesContainer">
+                    <div class="empty-state">
+                        <div class="empty-icon">📄</div>
+                        <h3>No hay facturas registradas</h3>
+                        <p>Comienza creando tu primera factura para un estudiante</p>
+                        <button class="btn btn-primary">Crear Primera Factura</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/shared/sidebar.js"></script>
+    <script src="js/accounting/invoice-system.js"></script>
+    <script>
+        // Mobile menu functionality for when sidebar.js loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for sidebar to load, then add mobile functionality
+            setTimeout(() => {
+                const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+                const sidebar = document.querySelector('.sidebar');
+                const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+                if (mobileMenuToggle && sidebar) {
+                    mobileMenuToggle.addEventListener('click', function() {
+                        sidebar.classList.toggle('open');
+                        if (sidebarOverlay) {
+                            sidebarOverlay.classList.toggle('active');
+                        }
+                    });
+                }
+
+                if (sidebarOverlay && sidebar) {
+                    sidebarOverlay.addEventListener('click', function() {
+                        sidebar.classList.remove('open');
+                        sidebarOverlay.classList.remove('active');
+                    });
+                }
+            }, 100);
+
+            // Load invoice stats
+            loadInvoiceStats();
+        });
+
+        // Sample data loading simulation
+        function loadInvoiceStats() {
+            // Simulate loading delay
+            setTimeout(() => {
+                document.getElementById('totalInvoices').textContent = '0';
+                document.getElementById('paidInvoices').textContent = '0';
+                document.getElementById('pendingInvoices').textContent = '0';
+                document.getElementById('totalRevenue').textContent = '$0';
+            }, 500);
+        }
+    </script>
+</body>
+</html>

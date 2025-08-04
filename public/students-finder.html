@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Estudiantes - Educonta</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        
+        .success { background: #d1fae5; border: 1px solid #10b981; color: #065f46; }
+        .error { background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; }
+        .info { background: #dbeafe; border: 1px solid #3b82f6; color: #1e40af; }
+        .warning { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; }
+        
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #10b981;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Buscador de Estudiantes CSV/Excel</h1>
+            <p>Encuentra y convierte tus 1340 estudiantes al formato correcto</p>
+        </div>
+        
+        <div class="content">
+            <!-- Búsqueda Automática -->
+            <div class="section">
+                <h2>🤖 Búsqueda Automática</h2>
+                <p>Busca automáticamente en TODAS las claves del localStorage los 1340 estudiantes.</p>
+                <button class="btn btn-primary" onclick="findStudentsAutomatically()">🔍 Buscar Estudiantes</button>
+                <div id="autoSearchResult" class="result info" style="display:none;"></div>
+            </div>
+            
+            <!-- Búsqueda Manual -->
+            <div class="section">
+                <h2>🔧 Búsqueda Manual</h2>
+                <p>Especifica claves específicas para buscar:</p>
+                <input type="text" id="customKey" placeholder="Ej: csvStudents, uploaded_data, etc." style="padding: 8px; margin: 0.5rem; width: 300px; border: 1px solid #ccc; border-radius: 4px;">
+                <button class="btn btn-warning" onclick="searchSpecificKey()">Buscar Clave</button>
+                <div id="manualSearchResult" class="result info" style="display:none;"></div>
+            </div>
+            
+            <!-- Listado de Todas las Claves -->
+            <div class="section">
+                <h2>🗝️ Explorador de LocalStorage</h2>
+                <button class="btn btn-primary" onclick="listAllKeys()">Ver Todas las Claves</button>
+                <div id="allKeysResult" class="result info" style="display:none;"></div>
+            </div>
+            
+            <!-- Conversión -->
+            <div class="section">
+                <h2>🔄 Conversión de Datos</h2>
+                <p>Una vez encontrados los datos, conviértelos al formato estándar:</p>
+                <button class="btn btn-success" onclick="convertFoundData()">✅ Convertir Datos</button>
+                <div class="progress" id="conversionProgress" style="display:none;">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div id="conversionResult" class="result success" style="display:none;"></div>
+            </div>
+            
+            <!-- Estadísticas -->
+            <div class="section">
+                <h2>📊 Estadísticas</h2>
+                <div class="stats" id="statsContainer">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalKeys">0</div>
+                        <div class="stat-label">Claves en Storage</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="foundStudents">0</div>
+                        <div class="stat-label">Estudiantes Encontrados</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="convertedStudents">0</div>
+                        <div class="stat-label">Estudiantes Convertidos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="targetCount">1340</div>
+                        <div class="stat-label">Meta Objetivo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let foundStudentsData = null;
+        let foundDataKey = null;
+        
+        // ===================================
+        // BÚSQUEDA AUTOMÁTICA
+        // ===================================
+        function findStudentsAutomatically() {
+            const resultDiv = document.getElementById('autoSearchResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = '🔍 Buscando estudiantes en localStorage...\n';
+            
+            try {
+                const results = [];
+                const targetCount = 1340;
+                
+                // Buscar en todas las claves
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const data = localStorage.getItem(key);
+                    
+                    if (!data) continue;
+                    
+                    try {
+                        const parsed = JSON.parse(data);
+                        
+                        // Verificar si es un array con muchos elementos
+                        if (Array.isArray(parsed)) {
+                            const count = parsed.length;
+                            
+                            // Si tiene cerca de 1340 elementos, es candidato
+                            if (count > 1000) {
+                                results.push({
+                                    key: key,
+                                    count: count,
+                                    sample: parsed[0],
+                                    isLikelyStudents: checkIfLooksLikeStudents(parsed[0], count)
+                                });
+                            }
+                        }
+                        
+                        // También verificar objetos que puedan contener arrays de estudiantes
+                        else if (typeof parsed === 'object' && parsed !== null) {
+                            Object.keys(parsed).forEach(subKey => {
+                                if (Array.isArray(parsed[subKey]) && parsed[subKey].length > 1000) {
+                                    results.push({
+                                        key: `${key}.${subKey}`,
+                                        count: parsed[subKey].length,
+                                        sample: parsed[subKey][0],
+                                        isLikelyStudents: checkIfLooksLikeStudents(parsed[subKey][0], parsed[subKey].length)
+                                    });
+                                }
+                            });
+                        }
+                        
+                    } catch (e) {
+                        // Ignorar errores de parsing
+                    }
+                }
+                
+                // Mostrar resultados
+                let output = `🔍 BÚSQUEDA COMPLETADA\n`;
+                output += `📊 Claves analizadas: ${localStorage.length}\n`;
+                output += `🎯 Candidatos encontrados: ${results.length}\n\n`;
+                
+                if (results.length === 0) {
+                    output += `❌ No se encontraron arrays grandes de datos.\n`;
+                    output += `💡 Posibles causas:\n`;
+                    output += `   - Los datos están en formato diferente\n`;
+                    output += `   - Los datos están en sessionStorage\n`;
+                    output += `   - Los datos están en una clave específica\n\n`;
+                    output += `🔧 Intentar búsqueda manual o ver todas las claves.`;
+                } else {
+                    output += `📋 CANDIDATOS ENCONTRADOS:\n`;
+                    output += `${'='.repeat(50)}\n`;
+                    
+                    results.forEach((result, index) => {
+                        output += `\n${index + 1}. CLAVE: ${result.key}\n`;
+                        output += `   📊 Cantidad: ${result.count} elementos\n`;
+                        output += `   🎯 Posibilidad: ${result.isLikelyStudents ? '✅ ALTA' : '⚠️ Media'}\n`;
+                        output += `   👤 Muestra: ${JSON.stringify(result.sample).substring(0, 100)}...\n`;
+                        
+                        // Si parece ser estudiantes y tiene aprox. 1340, marcarlo
+                        if (result.isLikelyStudents && Math.abs(result.count - targetCount) < 50) {
+                            output += `   🎉 ¡PROBABLE MATCH! Este parece ser tu archivo de estudiantes.\n`;
+                            foundStudentsData = localStorage.getItem(result.key.split('.')[0]);
+                            foundDataKey = result.key;
+                        }
+                    });
+                }
+                
+                resultDiv.textContent = output;
+                resultDiv.className = results.length > 0 ? 'result success' : 'result warning';
+                
+                // Actualizar estadísticas
+                updateStats();
+                
+            } catch (error) {
+                resultDiv.textContent = `❌ Error en búsqueda: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        // ===================================
+        // VERIFICAR SI PARECE ESTUDIANTES
+        // ===================================
+        function checkIfLooksLikeStudents(sample, count) {
+            if (!sample || typeof sample !== 'object') return false;
+            
+            const keys = Object.keys(sample);
+            const studentIndicators = [
+                'nombre', 'name', 'identificacion', 'documento', 'id', 'course', 'curso', 'grado', 'grade',
+                'Nombre Completo', 'Identificación', 'Curso', 'No.'
+            ];
+            
+            // Verificar si tiene campos típicos de estudiantes
+            const hasStudentFields = studentIndicators.some(indicator => 
+                keys.some(key => key.toLowerCase().includes(indicator.toLowerCase()))
+            );
+            
+            // Verificar si la cantidad es cercana a 1340
+            const isRightCount = Math.abs(count - 1340) < 100;
+            
+            return hasStudentFields && isRightCount;
+        }
+        
+        // ===================================
+        // BÚSQUEDA MANUAL
+        // ===================================
+        function searchSpecificKey() {
+            const customKey = document.getElementById('customKey').value.trim();
+            const resultDiv = document.getElementById('manualSearchResult');
+            
+            if (!customKey) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Por favor ingresa una clave para buscar.';
+                return;
+            }
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            
+            try {
+                const data = localStorage.getItem(customKey);
+                
+                if (!data) {
+                    resultDiv.textContent = `❌ No se encontró la clave: ${customKey}`;
+                    resultDiv.className = 'result error';
+                    return;
+                }
+                
+                const parsed = JSON.parse(data);
+                let output = `🔍 ANÁLISIS DE CLAVE: ${customKey}\n`;
+                output += `${'='.repeat(40)}\n\n`;
+                
+                if (Array.isArray(parsed)) {
+                    output += `📊 Tipo: Array\n`;
+                    output += `📊 Cantidad: ${parsed.length} elementos\n`;
+                    output += `👤 Primer elemento:\n${JSON.stringify(parsed[0], null, 2)}\n`;
+                    
+                    if (parsed.length > 1000) {
+                        output += `\n🎉 ¡POSIBLE MATCH! Cantidad alta de elementos.\n`;
+                        foundStudentsData = data;
+                        foundDataKey = customKey;
+                    }
+                } else if (typeof parsed === 'object') {
+                    output += `📊 Tipo: Objeto\n`;
+                    output += `🔑 Claves: ${Object.keys(parsed).join(', ')}\n`;
+                    
+                    // Buscar arrays dentro del objeto
+                    Object.keys(parsed).forEach(key => {
+                        if (Array.isArray(parsed[key])) {
+                            output += `\n📋 ${key}: Array con ${parsed[key].length} elementos\n`;
+                            if (parsed[key].length > 1000) {
+                                output += `   🎯 ¡Candidato encontrado!\n`;
+                            }
+                        }
+                    });
+                } else {
+                    output += `📊 Tipo: ${typeof parsed}\n`;
+                    output += `📄 Contenido: ${JSON.stringify(parsed).substring(0, 200)}...\n`;
+                }
+                
+                resultDiv.textContent = output;
+                resultDiv.className = 'result success';
+                
+            } catch (error) {
+                resultDiv.textContent = `❌ Error al analizar clave: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        // ===================================
+        // LISTAR TODAS LAS CLAVES
+        // ===================================
+        function listAllKeys() {
+            const resultDiv = document.getElementById('allKeysResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            
+            try {
+                let output = `🗝️ TODAS LAS CLAVES EN LOCALSTORAGE\n`;
+                output += `${'='.repeat(50)}\n\n`;
+                
+                const keysInfo = [];
+                
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const data = localStorage.getItem(key);
+                    const size = data ? data.length : 0;
+                    
+                    let type = 'String';
+                    let elements = 0;
+                    
+                    try {
+                        const parsed = JSON.parse(data);
+                        if (Array.isArray(parsed)) {
+                            type = 'Array';
+                            elements = parsed.length;
+                        } else if (typeof parsed === 'object' && parsed !== null) {
+                            type = 'Object';
+                        }
+                    } catch (e) {
+                        type = 'String/Other';
+                    }
+                    
+                    keysInfo.push({ key, size, type, elements });
+                }
+                
+                // Ordenar por tamaño (más grandes primero)
+                keysInfo.sort((a, b) => b.size - a.size);
+                
+                keysInfo.forEach((info, index) => {
+                    output += `${index + 1}. ${info.key}\n`;
+                    output += `   📊 Tamaño: ${formatBytes(info.size)}\n`;
+                    output += `   📄 Tipo: ${info.type}\n`;
+                    if (info.elements > 0) {
+                        output += `   📋 Elementos: ${info.elements}\n`;
+                        if (info.elements > 1000) {
+                            output += `   🎯 ¡CANDIDATO! (${info.elements} elementos)\n`;
+                        }
+                    }
+                    output += `\n`;
+                });
+                
+                resultDiv.textContent = output;
+                updateStats();
+                
+            } catch (error) {
+                resultDiv.textContent = `❌ Error al listar claves: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        // ===================================
+        // CONVERSIÓN DE DATOS
+        // ===================================
+        function convertFoundData() {
+            const resultDiv = document.getElementById('conversionResult');
+            const progressDiv = document.getElementById('conversionProgress');
+            const progressBar = document.getElementById('progressBar');
+            
+            if (!foundStudentsData) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ No se han encontrado datos para convertir. Ejecuta primero la búsqueda automática.';
+                return;
+            }
+            
+            resultDiv.style.display = 'block';
+            progressDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = '🔄 Iniciando conversión de datos...\n';
+            
+            try {
+                const rawData = JSON.parse(foundStudentsData);
+                let studentsArray = rawData;
+                
+                // Si los datos están anidados, extraerlos
+                if (!Array.isArray(rawData)) {
+                    // Buscar el array más grande dentro del objeto
+                    let largestArray = [];
+                    Object.keys(rawData).forEach(key => {
+                        if (Array.isArray(rawData[key]) && rawData[key].length > largestArray.length) {
+                            largestArray = rawData[key];
+                        }
+                    });
+                    studentsArray = largestArray;
+                }
+                
+                const totalStudents = studentsArray.length;
+                let convertedStudents = [];
+                let processed = 0;
+                
+                resultDiv.textContent += `📊 Procesando ${totalStudents} estudiantes...\n`;
+                
+                // Procesar estudiantes en lotes para no bloquear la UI
+                function processBatch(startIndex) {
+                    const batchSize = 50;
+                    const endIndex = Math.min(startIndex + batchSize, totalStudents);
+                    
+                    for (let i = startIndex; i < endIndex; i++) {
+                        const student = studentsArray[i];
+                        
+                        // Convertir al formato estándar
+                        const convertedStudent = {
+                            id: student['No.'] || student.id || i + 1,
+                            firstName: extractFirstName(student['Nombre Completo'] || student.name || student.nombre || ''),
+                            lastName: extractLastName(student['Nombre Completo'] || student.name || student.nombre || ''),
+                            fullName: student['Nombre Completo'] || student.name || student.nombre || '',
+                            documentNumber: student['Identificación'] || student.documento || student.id || '',
+                            documentType: determineDocumentType(student['Identificación'] || student.documento || ''),
+                            grade: extractGrade(student['Curso'] || student.curso || student.grade || ''),
+                            course: extractCourse(student['Curso'] || student.curso || student.grade || ''),
+                            status: 'activo',
+                            enrollmentDate: new Date().toISOString(),
+                            createdAt: new Date().toISOString(),
+                            source: 'excel_import'
+                        };
+                        
+                        convertedStudents.push(convertedStudent);
+                        processed++;
+                    }
+                    
+                    // Actualizar progreso
+                    const progress = (processed / totalStudents) * 100;
+                    progressBar.style.width = progress + '%';
+                    
+                    if (processed < totalStudents) {
+                        // Continuar con el siguiente lote
+                        setTimeout(() => processBatch(endIndex), 10);
+                    } else {
+                        // Conversión completada
+                        finishConversion(convertedStudents);
+                    }
+                }
+                
+                // Iniciar procesamiento
+                processBatch(0);
+                
+            } catch (error) {
+                resultDiv.textContent = `❌ Error en conversión: ${error.message}`;
+                resultDiv.className = 'result error';
+                progressDiv.style.display = 'none';
+            }
+        }
+        
+        function finishConversion(convertedStudents) {
+            const resultDiv = document.getElementById('conversionResult');
+            const progressDiv = document.getElementById('conversionProgress');
+            
+            try {
+                // Guardar en localStorage con múltiples claves para compatibilidad
+                localStorage.setItem('students', JSON.stringify(convertedStudents));
+                localStorage.setItem('estudiantes', JSON.stringify(convertedStudents));
+                localStorage.setItem('studentsData', JSON.stringify(convertedStudents));
+                
+                let output = `✅ CONVERSIÓN COMPLETADA\n`;
+                output += `${'='.repeat(40)}\n\n`;
+                output += `📊 Total convertidos: ${convertedStudents.length} estudiantes\n`;
+                output += `💾 Guardado en claves: students, estudiantes, studentsData\n\n`;
+                output += `👤 Ejemplo de estudiante convertido:\n`;
+                output += `${JSON.stringify(convertedStudents[0], null, 2)}\n\n`;
+                output += `🎉 ¡Los estudiantes ahora deberían aparecer en tu sistema!\n`;
+                output += `🔗 Ve a la página de gestión de estudiantes para verificar.`;
+                
+                resultDiv.textContent = output;
+                resultDiv.className = 'result success';
+                progressDiv.style.display = 'none';
+                
+                // Actualizar estadísticas
+                document.getElementById('convertedStudents').textContent = convertedStudents.length;
+                
+            } catch (error) {
+                resultDiv.textContent = `❌ Error al guardar: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        // ===================================
+        // FUNCIONES AUXILIARES
+        // ===================================
+        function extractFirstName(fullName) {
+            if (!fullName) return '';
+            const parts = fullName.trim().split(' ');
+            return parts.slice(0, Math.ceil(parts.length / 2)).join(' ');
+        }
+        
+        function extractLastName(fullName) {
+            if (!fullName) return '';
+            const parts = fullName.trim().split(' ');
+            return parts.slice(Math.ceil(parts.length / 2)).join(' ');
+        }
+        
+        function extractGrade(courseInfo) {
+            if (!courseInfo) return '';
+            // Extraer número del grado (ej: "Décimo 01" -> "10")
+            const match = courseInfo.match(/décimo|decimo|10/i);
+            if (match) return '10';
+            const match11 = courseInfo.match(/once|11/i);
+            if (match11) return '11';
+            const match9 = courseInfo.match(/noveno|9/i);
+            if (match9) return '9';
+            const match8 = courseInfo.match(/octavo|8/i);
+            if (match8) return '8';
+            return courseInfo;
+        }
+        
+        function extractCourse(courseInfo) {
+            if (!courseInfo) return '';
+            // Extraer sección (ej: "Décimo 01" -> "01")
+            const match = courseInfo.match(/\d+$/);
+            return match ? match[0] : '';
+        }
+        
+        function determineDocumentType(documentNumber) {
+            if (!documentNumber) return 'CC';
+            const num = documentNumber.toString();
+            if (num.length <= 8) return 'TI';
+            return 'CC';
+        }
+        
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function updateStats() {
+            document.getElementById('totalKeys').textContent = localStorage.length;
+            
+            // Contar estudiantes existentes
+            const existingStudents = localStorage.getItem('students');
+            if (existingStudents) {
+                try {
+                    const parsed = JSON.parse(existingStudents);
+                    document.getElementById('foundStudents').textContent = Array.isArray(parsed) ? parsed.length : 0;
+                } catch (e) {
+                    document.getElementById('foundStudents').textContent = 0;
+                }
+            }
+        }
+        
+        // Inicializar estadísticas al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+        });
+    </script>
+</body>
+</html>

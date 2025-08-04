@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparación de Temas - Claro vs Oscuro</title>
+    <link rel="stylesheet" href="public/css/accounting-dashboard.css">
+    <link rel="stylesheet" href="public/css/dark-theme-tables.css">
+    <link rel="stylesheet" href="public/css/dark-theme-forms.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-secondary);
+        }
+        
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .theme-section {
+            padding: 2rem;
+            border-radius: 16px;
+            border: 2px solid;
+        }
+        
+        .theme-section.light {
+            border-color: #e5e7eb;
+            background: #ffffff;
+        }
+        
+        .theme-section.dark {
+            border-color: #334155;
+            background: #1e293b;
+        }
+        
+        .theme-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        
+        .light .theme-title {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .dark .theme-title {
+            background: #1e40af;
+            color: white;
+        }
+        
+        .test-item {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid;
+        }
+        
+        .light .test-item {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+        
+        .dark .test-item {
+            background: #334155;
+            border-color: #475569;
+        }
+        
+        .test-label {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .light .test-label {
+            color: #374151;
+        }
+        
+        .dark .test-label {
+            color: #f1f5f9;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .control-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .light .control-label {
+            color: #6b7280;
+        }
+        
+        .dark .control-label {
+            color: #cbd5e1;
+        }
+        
+        .size-indicator {
+            font-size: 0.75rem;
+            font-family: monospace;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+        
+        .light .size-indicator {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .dark .size-indicator {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+        
+        .toggle-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 1200px) {
+            .comparison-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="toggle-container">
+        <button class="btn btn-primary" onclick="switchToLight()">☀️ Claro</button>
+        <button class="btn btn-primary" onclick="switchToDark()">🌙 Oscuro</button>
+        <button class="btn btn-outline" onclick="toggleComparison()">🔄 Comparar</button>
+    </div>
+    
+    <h1 style="text-align: center; margin-bottom: 2rem; color: var(--text-primary);">
+        🎨 Comparación de Temas - Elementos de Formulario
+    </h1>
+    
+    <div class="comparison-container" id="comparisonContainer">
+        <!-- TEMA CLARO -->
+        <div class="theme-section light" data-theme="light">
+            <h2 class="theme-title">☀️ Tema Claro</h2>
+            
+            <!-- Campo de Búsqueda -->
+            <div class="test-item">
+                <div class="test-label">🔍 Campo de Búsqueda</div>
+                <div class="search-input-group">
+                    <svg width="20" height="20" fill="currentColor" class="search-icon">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                    <input type="text" class="search-input" placeholder="Buscar estudiantes...">
+                </div>
+                <div class="size-indicator">Altura: 44px | Padding: 0.875rem | Border: 1px</div>
+            </div>
+            
+            <!-- Selects -->
+            <div class="test-item">
+                <div class="test-label">📋 Elementos Select</div>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <label class="control-label">Grado:</label>
+                        <select class="filter-select">
+                            <option>Todos los grados</option>
+                            <option>6° (Sexto)</option>
+                            <option>7° (Séptimo)</option>
+                            <option>8° (Octavo)</option>
+                        </select>
+                    </div>
+                    <div class="control-item">
+                        <label class="control-label">Curso:</label>
+                        <select class="filter-select">
+                            <option>Todos los cursos</option>
+                            <option>Curso 01</option>
+                            <option>Curso 02</option>
+                            <option>Curso 03</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="size-indicator">Altura: 44px | Una flecha por select | Appearance: none</div>
+            </div>
+            
+            <!-- Inputs Varios -->
+            <div class="test-item">
+                <div class="test-label">📝 Inputs de Formulario</div>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <label class="control-label">Texto:</label>
+                        <input type="text" placeholder="Nombre completo">
+                    </div>
+                    <div class="control-item">
+                        <label class="control-label">Email:</label>
+                        <input type="email" placeholder="correo@ejemplo.com">
+                    </div>
+                    <div class="control-item">
+                        <label class="control-label">Número:</label>
+                        <input type="number" placeholder="0">
+                    </div>
+                    <div class="control-item">
+                        <label class="control-label">Fecha:</label>
+                        <input type="date">
+                    </div>
+                </div>
+                <div class="size-indicator">Altura consistente: 44px | Font-size: 0.95rem</div>
+            </div>
+        </div>
+        
+        <!-- TEMA OSCURO -->
+        <div class="theme-section dark" data-theme="dark">
+            <h2 class="theme-title">🌙 Tema Oscuro</h2>
+            
+            <!-- Campo de Búsqueda -->
+            <div class="test-item">
+                <div class="test-label">🔍 Campo de Búsqueda</div>
+                <div class="search-input-group">
+                    <svg width="20" height="20" fill="currentColor" class="search-icon">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                    <input type="text" class="search-input" placeholder="Buscar estudiantes...">
+                </div>
+                <div class="size-indicator">Altura: 44px | Padding: 0.875rem | Border: 1px</div>
+            </div>
+            
+            <!-- Selects -->
+            <div class="test-item">
+                <div class="test-label">📋 Elementos Select</div>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <label class="control-label">Grado:</label>
+                        <select class="filter-select">
+                            <option>Todos los grados</option>
+                            <option>6° (Sexto)</option>
+                            <option>7° (Séptimo)</option>
+                            <option>8° (Octavo)</option>
+                        </select>
+                    </div>
+                    <div class="control-item">
+                        <label class="control-label">Curso:</label>
+                        <select class="filter-select">
+                            <option>Todos los cursos</option>
+                            <option>Curso 01</option>
+                            <option>Curso 02</option>
+                            <option>Curso 03</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="size-indicator">Altura: 44px | Una flecha por select | Appearance: none</div>
+            </div>
+            
+            <!-- Inputs Varios -->
+            <div class="test-item">
+                <div class="test-label">📝 Inputs de Formulario</div>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <label class="control-label">Texto:</label>
+                        <input type="text" placeholder="Nombre completo">
+                    </div>
+                    <div class="control-item">
+                        <label class="control-label">Email:</label>
+                        <input type="email" placeholder="correo@ejemplo.com">
+                    </div>
+                    <div class="control-item">
+                        <label class="control-label">Número:</label>
+                        <input type="number" placeholder="0">
+                    </div>
+                    <div class="control-item">
+                        <label class="control-label">Fecha:</label>
+                        <input type="date">
+                    </div>
+                </div>
+                <div class="size-indicator">Altura consistente: 44px | Font-size: 0.95rem</div>
+            </div>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 2rem; padding: 2rem; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);">
+        <h3 style="color: var(--text-primary); margin-bottom: 1rem;">✅ Problemas Corregidos</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; text-align: left;">
+            <div style="padding: 1rem; background: var(--success-bg); border: 1px solid var(--success-border); border-radius: 8px;">
+                <strong style="color: var(--success-text);">🔧 Tamaño Consistente</strong><br>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">Todos los elementos tienen exactamente 44px de altura en ambos temas</span>
+            </div>
+            <div style="padding: 1rem; background: var(--info-bg); border: 1px solid var(--info-border); border-radius: 8px;">
+                <strong style="color: var(--info-text);">🎯 Flechas Limpias</strong><br>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">Una sola flecha SVG personalizada por select, sin repeticiones</span>
+            </div>
+            <div style="padding: 1rem; background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 8px;">
+                <strong style="color: var(--warning-text);">🎨 Bordes Sutiles</strong><br>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">Bordes de 1px en lugar de 2px para mejor apariencia</span>
+            </div>
+            <div style="padding: 1rem; background: var(--error-bg); border: 1px solid var(--error-border); border-radius: 8px;">
+                <strong style="color: var(--error-text);">⚡ Focus Mejorado</strong><br>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">Efectos de focus más sutiles sin transformaciones bruscas</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchToLight() {
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.body.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+        }
+        
+        function switchToDark() {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        }
+        
+        function toggleComparison() {
+            const container = document.getElementById('comparisonContainer');
+            if (container.style.display === 'block') {
+                container.style.display = 'grid';
+            } else {
+                container.style.display = 'block';
+            }
+        }
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.body.setAttribute('data-theme', savedTheme);
+            
+            console.log('✅ Comparación de temas inicializada');
+        });
+    </script>
+</body>
+</html>

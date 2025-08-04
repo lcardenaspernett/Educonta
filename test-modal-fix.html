@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modal Fix - Eventos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status-indicator {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-card">
+            <h1>🧪 Test Modal Fix - Eventos</h1>
+            <p>Prueba para verificar que el modal de eventos funciona correctamente sin la cubierta gris bloqueante.</p>
+            
+            <div class="status-indicator status-info">
+                <strong>Estado:</strong> <span id="testStatus">Listo para probar</span>
+            </div>
+            
+            <div class="mb-4">
+                <button class="btn btn-primary" id="testModalBtn">
+                    <i class="fas fa-plus"></i> Abrir Modal de Evento (Test)
+                </button>
+                <button class="btn btn-secondary ms-2" id="cleanupBtn">
+                    <i class="fas fa-broom"></i> Limpiar Modales
+                </button>
+                <button class="btn btn-info ms-2" id="checkStateBtn">
+                    <i class="fas fa-search"></i> Verificar Estado
+                </button>
+            </div>
+            
+            <div id="debugInfo" class="mt-3">
+                <h5>Información de Debug:</h5>
+                <ul id="debugList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de prueba -->
+    <div class="modal fade" id="testEventModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Test - Nuevo Evento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="testEventForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="testEventName" class="form-label">Nombre del Evento *</label>
+                                    <input type="text" class="form-control" id="testEventName" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="testEventType" class="form-label">Tipo de Evento *</label>
+                                    <select class="form-select" id="testEventType" required>
+                                        <option value="">Seleccionar tipo</option>
+                                        <option value="raffle">🎟️ Rifa</option>
+                                        <option value="bingo">🎱 Bingo</option>
+                                        <option value="graduation">🎓 Derecho a Grado</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="testEventDescription" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="testEventDescription" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveTestEvent">
+                        <i class="fas fa-save me-2"></i>Guardar Evento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class ModalTester {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.updateDebugInfo();
+            }
+
+            setupEventListeners() {
+                document.getElementById('testModalBtn').addEventListener('click', () => {
+                    this.showTestModal();
+                });
+
+                document.getElementById('cleanupBtn').addEventListener('click', () => {
+                    this.cleanupModals();
+                });
+
+                document.getElementById('checkStateBtn').addEventListener('click', () => {
+                    this.updateDebugInfo();
+                });
+
+                document.getElementById('saveTestEvent').addEventListener('click', () => {
+                    this.saveAndCloseModal();
+                });
+
+                // Event listener para cuando se cierra el modal
+                const modal = document.getElementById('testEventModal');
+                modal.addEventListener('hidden.bs.modal', () => {
+                    this.cleanupModalBackdrop();
+                    this.updateStatus('Modal cerrado correctamente', 'success');
+                    this.updateDebugInfo();
+                });
+            }
+
+            showTestModal() {
+                const modalElement = document.getElementById('testEventModal');
+                
+                // Limpiar modal existente
+                const existingModal = bootstrap.Modal.getInstance(modalElement);
+                if (existingModal) {
+                    existingModal.dispose();
+                }
+
+                // Limpiar backdrop residual
+                this.cleanupModalBackdrop();
+
+                // Crear nuevo modal
+                const modal = new bootstrap.Modal(modalElement, {
+                    backdrop: true, // Permitir cerrar haciendo clic fuera
+                    keyboard: true,
+                    focus: true
+                });
+                
+                modal.show();
+                this.updateStatus('Modal abierto - Debería poder interactuar con el fondo', 'info');
+                this.updateDebugInfo();
+            }
+
+            saveAndCloseModal() {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('testEventModal'));
+                if (modal) {
+                    modal.hide();
+                    this.updateStatus('Guardando y cerrando modal...', 'info');
+                }
+            }
+
+            cleanupModals() {
+                const modalElement = document.getElementById('testEventModal');
+                const existingModal = bootstrap.Modal.getInstance(modalElement);
+                if (existingModal) {
+                    existingModal.dispose();
+                }
+
+                this.cleanupModalBackdrop();
+                this.updateStatus('Limpieza manual completada', 'success');
+                this.updateDebugInfo();
+            }
+
+            cleanupModalBackdrop() {
+                // Limpiar backdrops residuales
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+                
+                // Restaurar el estado del body
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }
+
+            updateStatus(message, type) {
+                const statusElement = document.getElementById('testStatus');
+                const statusContainer = statusElement.parentElement;
+                
+                statusElement.textContent = message;
+                statusContainer.className = `status-indicator status-${type}`;
+            }
+
+            updateDebugInfo() {
+                const debugList = document.getElementById('debugList');
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                const modalOpen = document.body.classList.contains('modal-open');
+                const bodyOverflow = document.body.style.overflow;
+                const bodyPadding = document.body.style.paddingRight;
+                const modalInstance = bootstrap.Modal.getInstance(document.getElementById('testEventModal'));
+
+                debugList.innerHTML = `
+                    <li><strong>Backdrops encontrados:</strong> ${backdrops.length}</li>
+                    <li><strong>Body tiene clase 'modal-open':</strong> ${modalOpen ? 'Sí' : 'No'}</li>
+                    <li><strong>Body overflow:</strong> "${bodyOverflow || 'normal'}"</li>
+                    <li><strong>Body padding-right:</strong> "${bodyPadding || 'normal'}"</li>
+                    <li><strong>Instancia de modal activa:</strong> ${modalInstance ? 'Sí' : 'No'}</li>
+                    <li><strong>Timestamp:</strong> ${new Date().toLocaleTimeString()}</li>
+                `;
+            }
+        }
+
+        // Inicializar el tester cuando se carga la página
+        document.addEventListener('DOMContentLoaded', () => {
+            new ModalTester();
+        });
+    </script>
+</body>
+</html>

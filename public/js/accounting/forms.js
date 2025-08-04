@@ -381,11 +381,11 @@ class AccountingForms {
             creditAccountId: data.creditAccount
         };
         
-        // Usar DemoData si está disponible, sino usar el estado normal
+        // Usar null si está disponible, sino usar el estado normal
         let transaction;
-        if (window.DemoData) {
-            console.log('📊 Usando DemoData para crear transacción de ingreso...');
-            transaction = await window.DemoData.createTransaction(transactionData);
+        if (null) {
+            console.log('📊 Usando null para crear transacción de ingreso...');
+            transaction = await null.createTransaction(transactionData);
         } else {
             transaction = await this.state.createTransaction(transactionData);
         }
@@ -431,11 +431,11 @@ class AccountingForms {
             creditAccountId: data.creditAccount
         };
         
-        // Usar DemoData si está disponible, sino usar el estado normal
+        // Usar null si está disponible, sino usar el estado normal
         let transaction;
-        if (window.DemoData) {
-            console.log('📊 Usando DemoData para crear transacción de gasto...');
-            transaction = await window.DemoData.createTransaction(transactionData);
+        if (null) {
+            console.log('📊 Usando null para crear transacción de gasto...');
+            transaction = await null.createTransaction(transactionData);
         } else {
             transaction = await this.state.createTransaction(transactionData);
         }
@@ -481,11 +481,11 @@ class AccountingForms {
             creditAccountId: data.creditAccount
         };
         
-        // Crear la transacción usando DemoData si está disponible
+        // Crear la transacción usando null si está disponible
         let transaction;
-        if (window.DemoData) {
-            console.log('📊 Usando DemoData para crear transacción de factura...');
-            transaction = await window.DemoData.createTransaction(transactionData);
+        if (null) {
+            console.log('📊 Usando null para crear transacción de factura...');
+            transaction = await null.createTransaction(transactionData);
         } else {
             transaction = await this.state.createTransaction(transactionData);
         }

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Cache</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+        }
+        button:hover { background-color: #0056b3; }
+        #results {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test API Cache - Estudiantes</h1>
+    
+    <div class="test-section info">
+        <h3>Prueba de Cache de API</h3>
+        <p>Esta prueba verificará si los datos se están cacheando incorrectamente.</p>
+        <button onclick="loadStudents()">Cargar Estudiantes</button>
+        <button onclick="loadStudentsWithTimestamp()">Cargar con Timestamp</button>
+        <button onclick="clearResults()">Limpiar Resultados</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        const resultsDiv = document.getElementById('results');
+        const institutionId = 'cmdt7n66m00003t1jy17ay313';
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            resultsDiv.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function clearResults() {
+            resultsDiv.textContent = '';
+        }
+
+        async function loadStudents() {
+            log('Cargando estudiantes desde API...');
+            
+            try {
+                const response = await fetch(`/api/students/${institutionId}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Respuesta exitosa: ${data.students.length} estudiantes`);
+                    log(`Timestamp del servidor: ${data.timestamp || 'No disponible'}`);
+                    log(`Total desde BD: ${data.totalFromDB || 'No disponible'}`);
+                    
+                    // Mostrar algunos estudiantes
+                    if (data.students.length > 0) {
+                        log('\n📋 Primeros 5 estudiantes:');
+                        data.students.slice(0, 5).forEach((student, index) => {
+                            log(`${index + 1}. ${student.firstName} ${student.lastName} (${student.document})`);
+                        });
+                    }
+                    
+                    // Buscar el estudiante que sabemos que fue actualizado
+                    const updatedStudent = data.students.find(s => s.document === '1124045173');
+                    if (updatedStudent) {
+                        log(`\n🔍 Estudiante actualizado encontrado: ${updatedStudent.firstName} ${updatedStudent.lastName}`);
+                    } else {
+                        log('\n⚠️ No se encontró el estudiante que sabemos que fue actualizado');
+                    }
+                    
+                } else {
+                    log(`❌ Error HTTP: ${response.status} - ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Error de conexión: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadStudentsWithTimestamp() {
+            log('Cargando estudiantes con timestamp para evitar cache...');
+            
+            try {
+                const timestamp = Date.now();
+                const response = await fetch(`/api/students/${institutionId}?t=${timestamp}`, {
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Respuesta con timestamp: ${data.students.length} estudiantes`);
+                    log(`Timestamp del servidor: ${data.timestamp || 'No disponible'}`);
+                    log(`Timestamp de la petición: ${new Date(timestamp).toISOString()}`);
+                    
+                    // Verificar headers de respuesta
+                    const cacheControl = response.headers.get('Cache-Control');
+                    log(`Cache-Control header: ${cacheControl || 'No presente'}`);
+                    
+                } else {
+                    log(`❌ Error HTTP: ${response.status} - ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Error de conexión: ${error.message}`, 'error');
+            }
+        }
+
+        // Cargar automáticamente al inicio
+        window.addEventListener('load', () => {
+            log('Página cargada, ejecutando prueba inicial...');
+            loadStudents();
+        });
+    </script>
+</body>
+</html>

@@ -16,7 +16,7 @@ const router = express.Router();
 router.get('/public', async (req, res) => {
   try {
     console.log('🌐 PUBLIC INSTITUTIONS - Solicitando instituciones públicas');
-    
+
     // Obtener instituciones activas (información básica para selección)
     const institutions = await req.prisma.institution.findMany({
       where: {
@@ -88,7 +88,7 @@ router.get('/health', async (req, res) => {
 router.get('/debug', async (req, res) => {
   try {
     console.log('🔍 DEBUG - Iniciando diagnóstico...');
-    
+
     const stats = {
       total: await req.prisma.institution.count(),
       active: await req.prisma.institution.count({ where: { isActive: true } }),
@@ -102,7 +102,7 @@ router.get('/debug', async (req, res) => {
     let updateResult = null;
     if (req.query.activate === 'true') {
       console.log('🔄 DEBUG - Activando instituciones...');
-      
+
       updateResult = await req.prisma.institution.updateMany({
         where: {
           OR: [
@@ -144,8 +144,8 @@ router.get('/debug', async (req, res) => {
 
     res.json({
       success: true,
-      message: updateResult ? 
-        `Diagnóstico completado y ${updateResult.count} instituciones activadas` : 
+      message: updateResult ?
+        `Diagnóstico completado y ${updateResult.count} instituciones activadas` :
         'Diagnóstico completado',
       stats: finalStats,
       sample,
@@ -168,7 +168,7 @@ router.get('/debug', async (req, res) => {
 router.post('/activate-all', async (req, res) => {
   try {
     console.log('🔄 ACTIVATE - Iniciando activación masiva...');
-    
+
     // Estadísticas antes
     const before = {
       total: await req.prisma.institution.count(),
@@ -225,7 +225,7 @@ router.post('/activate-all', async (req, res) => {
 router.get('/test-public', async (req, res) => {
   try {
     console.log('🧪 TEST - Probando instituciones sin filtro isActive...');
-    
+
     // Obtener TODAS las instituciones sin filtro de isActive
     const allInstitutions = await req.prisma.institution.findMany({
       select: {
@@ -259,27 +259,10 @@ router.get('/test-public', async (req, res) => {
 });
 
 // ===================================
-// IMPORTAR CONTROLADORES
-// ===================================
-
-const {
-  getInstitutions,
-  getInstitutionById,
-  createInstitution,
-  updateInstitution,
-  deleteInstitution,
-  getInstitutionStats,
-  getInstitutionOptions
-} = require('../controllers/institutionController');
-
-// ===================================
 // MIDDLEWARE DE AUTENTICACIÓN PARA RUTAS PROTEGIDAS
 // ===================================
 
 const { authenticate } = require('../middleware/auth');
-
-// Aplicar autenticación a todas las rutas siguientes
-router.use(authenticate);
 
 // ===================================
 // MIDDLEWARE DE PERMISOS - SOLO SUPER_ADMIN
@@ -498,6 +481,9 @@ const {
   getInstitutionStats,
   getInstitutionOptions
 } = require('../controllers/institutionController');
+
+// Aplicar autenticación a todas las rutas siguientes
+router.use(authenticate);
 
 // ===================================
 // RUTAS PROTEGIDAS (requieren autenticación)

@@ -96,6 +96,39 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
 }
 
+/* MEJORAS PARA TEMA OSCURO */
+[data-theme="dark"] body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] img {
+  opacity: 0.9;
+  filter: brightness(0.9) contrast(1.1);
+}
+
+[data-theme="dark"] .user-avatar img,
+[data-theme="dark"] .profile-image {
+  background-color: var(--bg-tertiary);
+  border: 2px solid var(--border);
+}
+
+[data-theme="dark"] .empty-state,
+[data-theme="dark"] .loading-state {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .table-container {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .pagination-container {
+  background-color: var(--card-bg);
+  border-top: 1px solid var(--border);
+}
+
 /* RESET Y BASE */
 * {
   margin: 0;
@@ -915,6 +948,11 @@ body {
   overflow: hidden;
 }
 
+.pagination-container {
+  background: var(--card-bg);
+  border-top: 1px solid var(--border);
+}
+
 .movements-list {
   min-height: 400px;
 }
@@ -926,6 +964,7 @@ body {
   padding: var(--spacing-lg);
   border-bottom: 1px solid var(--border);
   transition: var(--transition);
+  position: relative;
 }
 
 .movement-item:last-child {
@@ -934,6 +973,26 @@ body {
 
 .movement-item:hover {
   background: var(--hover-bg);
+  transform: translateX(4px);
+}
+
+.movement-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: transparent;
+  transition: var(--transition);
+}
+
+.movement-item.income::before {
+  background: var(--success);
+}
+
+.movement-item.expense::before {
+  background: var(--error);
 }
 
 .movement-icon {
@@ -2764,14 +2823,12 @@ select option {
 .nav-submenu {
   display: none;
   flex-direction: column;
-  margin-top: 0.5rem;
-  margin-left: 2.5rem;
+  margin: 0.5rem 0 0 0;
   padding: 0.5rem 0;
-  padding-left: 1rem;
-  border-left: 2px solid var(--border-light);
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 0 6px 6px 0;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  border-left: 2px solid rgba(59, 130, 246, 0.3);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .nav-item:hover .nav-submenu,
@@ -2783,28 +2840,28 @@ select option {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 0.75rem;
-  color: var(--text-secondary);
+  padding: 0.6rem 2rem;
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   font-size: 0.85rem;
   font-weight: 400;
-  border-radius: 4px;
-  margin: 0.125rem 0;
+  border-radius: 0;
+  margin: 0;
   transition: all 0.2s ease;
   background: transparent;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .nav-submenu a:hover {
-  background: var(--hover-bg);
-  color: var(--text-primary);
-  transform: translateX(3px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-inverse);
+  padding-left: 2.25rem;
 }
 
 .nav-submenu a:active {
-  background: var(--bg-active);
-  color: var(--text-primary);
-  transform: translateX(1px);
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--text-inverse);
 }
 
 /* Mejorar la interacción del nav-item con submenú */
@@ -5219,5 +5276,167 @@ PARA MODAL DE EDICIÓN DE FACTURAS */
   .edit-invoice .form-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+}
+/*
+ ===================================
+   INITIAL BALANCE SETUP STYLES
+   =================================== */
+
+.initial-balance-setup {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.setup-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.setup-header h3 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+}
+
+.setup-header p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.distribution-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.distribution-section h4 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.account-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.distribution-input,
+.percent-input {
+  min-width: 120px;
+}
+
+.distribution-summary {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-weight: 500;
+}
+
+.summary-item:not(:last-child) {
+  border-bottom: 1px solid var(--border-light);
+}
+
+.summary-item span:last-child {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.current-status {
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.current-status h4 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.status-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.status-card {
+  padding: 1rem;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  text-align: center;
+  transition: var(--transition);
+}
+
+.status-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.status-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.status-value {
+  font-size: var(--font-size-xl);
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .account-distribution {
+    gap: 1.5rem;
+  }
+  
+  .input-group {
+    flex-wrap: wrap;
+  }
+  
+  .distribution-input,
+  .percent-input {
+    min-width: 100px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .status-cards {
+    grid-template-columns: 1fr;
   }
 }

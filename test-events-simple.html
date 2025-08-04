@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Eventos Simple</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="public/css/events-enterprise.css">
+</head>
+<body>
+    <div class="container py-4">
+        <h1>🧪 Test Simple - Eventos</h1>
+        
+        <!-- Test del botón Nuevo Evento -->
+        <div class="mb-4">
+            <button class="btn btn-primary" id="testNewEventBtn">
+                <i class="fas fa-plus"></i> Nuevo Evento (Test)
+            </button>
+        </div>
+        
+        <!-- Test de estadísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);">
+                    <div class="card-body text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-2 opacity-90">Total Eventos</h6>
+                                <h2 class="mb-1 fw-bold" id="totalEvents">5</h2>
+                                <small class="opacity-75">
+                                    <i class="fas fa-circle text-success me-1" style="font-size: 8px;"></i>
+                                    Activos: <span id="activeEvents" class="fw-semibold">2</span>
+                                </small>
+                            </div>
+                            <div class="align-self-center">
+                                <div class="bg-white bg-opacity-20 rounded-circle p-3">
+                                    <i class="fas fa-calendar-alt fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Test de contenedor de eventos -->
+        <div class="row" id="eventsContainer">
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card event-card-enterprise h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <span class="event-type-icon">🎟️</span>
+                            <span class="badge-enterprise badge-success">Activo</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="event-title">Evento de Prueba</h5>
+                        <p class="event-description">Descripción del evento de prueba</p>
+                        
+                        <div class="event-dates">
+                            <small>
+                                <i class="fas fa-calendar me-1"></i> 
+                                01/12/2024 - 24/12/2024
+                            </small>
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress">
+                                <div class="progress-bar" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="event-amounts">
+                            <div>
+                                <span class="amount-raised">$2,500,000</span>
+                                <span class="amount-target">/ $5,000,000</span>
+                            </div>
+                            <div class="participants-count">
+                                <i class="fas fa-users"></i>
+                                <span>150</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="action-buttons">
+                            <button class="btn btn-enterprise btn-outline">
+                                <i class="fas fa-eye me-1"></i> Ver
+                            </button>
+                            <button class="btn btn-enterprise btn-success">
+                                <i class="fas fa-plus me-1"></i> Pago
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('testNewEventBtn').addEventListener('click', function() {
+            alert('¡Botón funcionando correctamente!');
+        });
+        
+        console.log('Test simple cargado correctamente');
+    </script>
+</body>
+</html>
