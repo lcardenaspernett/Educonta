@@ -31,6 +31,24 @@ async function simpleRenderFix() {
     console.log('🔄 Regenerando cliente Prisma...');
     await execAsync('npx prisma generate');
     
+    // Ejecutar seed para crear datos iniciales
+    console.log('🌱 Ejecutando seed para crear datos iniciales...');
+    try {
+      await execAsync('npx prisma db seed');
+      console.log('✅ Seed ejecutado exitosamente');
+    } catch (seedError) {
+      console.log('⚠️ Error ejecutando seed (continuando):', seedError.message);
+    }
+    
+    // Crear institución Villas San Pablo específicamente
+    console.log('🏫 Creando institución Villas San Pablo...');
+    try {
+      await execAsync('node scripts/create-villas-san-pablo-production.js');
+      console.log('✅ Villas San Pablo creada exitosamente');
+    } catch (villaError) {
+      console.log('⚠️ Error creando Villas San Pablo (continuando):', villaError.message);
+    }
+    
     console.log('🎉 Fix completado exitosamente!');
     
   } catch (error) {
