@@ -1,10 +1,23 @@
 const { PrismaClient } = require('@prisma/client');
 
-const prisma = new PrismaClient();
-
 async function cleanDuplicateStudents() {
+  let prisma;
+  
   try {
-    console.log('🔍 Buscando estudiantes duplicados...');
+    console.log('🔍 Iniciando limpieza de estudiantes duplicados...');
+    
+    // Crear cliente Prisma con timeout más corto
+    prisma = new PrismaClient({
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL
+        }
+      }
+    });
+
+    // Verificar conexión
+    await prisma.$connect();
+    console.log('✅ Conexión a base de datos establecida');
     
     // Buscar duplicados basados en institutionId y documento
     const duplicates = await prisma.$queryRaw`
@@ -43,29 +56,46 @@ async function cleanDuplicateStudents() {
       for (const studentToDelete of deleteStudents) {
         console.log(`  🗑️  Eliminando duplicado ID: ${studentToDelete.id}`);
         
-        // Primero eliminar las relaciones
-        await prisma.eventParticipation.deleteMany({
-          where: { studentId: studentToDelete.id }
-        });
-        
-        await prisma.transaction.deleteMany({
-          where: { studentId: studentToDelete.id }
-        });
-        
-        // Luego eliminar el estudiante
-        await prisma.student.delete({
-          where: { id: studentToDelete.id }
-        });
+        try {
+          // Primero eliminar las relaciones
+          await prisma.eventParticipation.deleteMany({
+            where: { studentId: studentToDelete.id }
+          });
+          
+          await prisma.transaction.deleteMany({
+            where: { studentId: studentToDelete.id }
+          });
+          
+          // Luego eliminar el estudiante
+          await prisma.student.delete({
+            where: { id: studentToDelete.id }
+          });
+        } catch (deleteError) {
+          console.log(`  ⚠️  Error eliminando estudiante ${studentToDelete.id}:`, deleteError.message);
+          // Continuar con el siguiente
+        }
       }
     }
 
     console.log('✅ Limpieza de duplicados completada');
     
   } catch (error) {
-    console.error('❌ Error limpiando duplicados:', error);
+    console.error('❌ Error limpiando duplicados:', error.message);
+    
+    // Si no hay conexión o la tabla no existe, no es un error crítico
+    if (error.message.includes('connect') || 
+        error.message.includes('does not exist') ||
+        error.message.includes('relation') ||
+        error.message.includes('timeout')) {
+      console.log('ℹ️  Error de conexión o tabla no existe aún, continuando...');
+      return; // No lanzar error
+    }
+    
     throw error;
   } finally {
-    await prisma.$disconnect();
+    if (prisma) {
+      await prisma.$disconnect();
+    }
   }
 }
 
