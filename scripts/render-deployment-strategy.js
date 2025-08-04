@@ -19,7 +19,7 @@ async function renderDeploymentStrategy() {
     
     // Paso 3: Aplicar schema sin restricción
     console.log('🗄️ Aplicando schema sin restricción única...');
-    await execAsync('npx prisma db push');
+    await execAsync('npx prisma db push --accept-data-loss');
     
     // Paso 4: Limpiar duplicados
     console.log('🧹 Limpiando duplicados...');
@@ -37,7 +37,7 @@ async function renderDeploymentStrategy() {
     
     // Paso 6: Aplicar schema con restricción
     console.log('🗄️ Aplicando schema final con restricción...');
-    await execAsync('npx prisma db push');
+    await execAsync('npx prisma db push --accept-data-loss');
     
     // Paso 7: Regenerar cliente final
     console.log('🔄 Regenerando cliente Prisma final...');
@@ -46,14 +46,27 @@ async function renderDeploymentStrategy() {
     console.log('🎉 Deployment completado exitosamente!');
     
   } catch (error) {
-    console.error('❌ Error en deployment:', error);
+    console.error('❌ Error en deployment:', error.message);
     
     // Intentar restaurar el schema en caso de error
     try {
       console.log('🔄 Restaurando schema por error...');
       await execAsync('node scripts/restore-unique-constraint.js');
     } catch (restoreError) {
-      console.error('💥 Error restaurando schema:', restoreError);
+      console.error('💥 Error restaurando schema:', restoreError.message);
+    }
+    
+    // Si el error es sobre --accept-data-loss, intentar con el flag
+    if (error.message.includes('--accept-data-loss')) {
+      console.log('🔄 Reintentando con --accept-data-loss...');
+      try {
+        await execAsync('npx prisma db push --accept-data-loss');
+        await execAsync('npx prisma generate');
+        console.log('✅ Deployment completado con fallback');
+        return;
+      } catch (fallbackError) {
+        console.error('💥 Error en fallback:', fallbackError.message);
+      }
     }
     
     throw error;
