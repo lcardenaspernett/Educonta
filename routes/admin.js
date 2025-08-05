@@ -6,6 +6,7 @@ const express = require('express');
 const router = express.Router();
 const { resetAllCredentialsProduction } = require('../scripts/reset-all-credentials-production');
 const { emergencyCredentialsFix } = require('../scripts/emergency-credentials-fix');
+const { forceUpdateCredentials } = require('../scripts/force-update-credentials');
 
 /**
  * POST /api/admin/reset-credentials
@@ -95,6 +96,36 @@ router.get('/current-users', async (req, res) => {
     
   } catch (error) {
     console.error('❌ Error obteniendo usuarios:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/admin/force-update
+ * Forzar actualización de credenciales
+ */
+router.post('/force-update', async (req, res) => {
+  try {
+    console.log('🚨 ADMIN: Forzar actualización de credenciales solicitado');
+    
+    await forceUpdateCredentials();
+    
+    res.json({
+      success: true,
+      message: 'Actualización forzada de credenciales exitosa',
+      credentials: {
+        auxiliar: { email: 'auxiliar@villasanpablo.edu.co', password: 'Auxiliar123!' },
+        contabilidad: { email: 'contabilidad@villasanpablo.edu.co', password: 'ContaVSP2024!' },
+        rector: { email: 'rector@villasanpablo.edu.co', password: 'Rector123!' },
+        admin: { email: 'admin@educonta.com', password: 'Admin123!' }
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Error en actualización forzada:', error);
     res.status(500).json({
       success: false,
       error: error.message

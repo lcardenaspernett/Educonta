@@ -139,6 +139,7 @@ router.post('/login', loginValidation, async (req, res) => {
     res.json({
       success: true,
       message: 'Login exitoso',
+      token: accessToken, // Frontend espera 'token'
       user: {
         id: user.id,
         email: user.email,
