@@ -9,6 +9,7 @@ const { emergencyCredentialsFix } = require('../scripts/emergency-credentials-fi
 const { forceUpdateCredentials } = require('../scripts/force-update-credentials');
 const { loadVillasStudentsProduction } = require('../scripts/load-villas-students-production');
 const { diagnoseStudentsProblem } = require('../scripts/diagnose-students-problem');
+const { loadRealStudentsVillas } = require('../scripts/load-real-students-villas');
 
 /**
  * POST /api/admin/reset-credentials
@@ -191,6 +192,31 @@ router.get('/diagnose-students', async (req, res) => {
     
   } catch (error) {
     console.error('❌ Error en diagnóstico de estudiantes:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/admin/load-real-students
+ * Cargar estudiantes reales de Villas San Pablo
+ */
+router.post('/load-real-students', async (req, res) => {
+  try {
+    console.log('👥 ADMIN: Carga de estudiantes REALES Villas San Pablo solicitada');
+    
+    await loadRealStudentsVillas();
+    
+    res.json({
+      success: true,
+      message: 'Estudiantes REALES de Villas San Pablo cargados exitosamente',
+      note: 'Estudiantes generados reemplazados por datos reales'
+    });
+    
+  } catch (error) {
+    console.error('❌ Error cargando estudiantes reales:', error);
     res.status(500).json({
       success: false,
       error: error.message
