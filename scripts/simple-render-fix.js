@@ -50,6 +50,15 @@ async function simpleRenderFix() {
       console.log('⚠️ Error creando Villas San Pablo (continuando):', villaError.message);
     }
     
+    // Corregir dominio de emails
+    console.log('📧 Corrigiendo dominio de emails...');
+    try {
+      await execAsync('node scripts/fix-email-domain-production.js');
+      console.log('✅ Dominio de emails corregido');
+    } catch (emailError) {
+      console.log('⚠️ Error corrigiendo emails (continuando):', emailError.message);
+    }
+    
     console.log('🎉 Fix completado exitosamente!');
     
   } catch (error) {

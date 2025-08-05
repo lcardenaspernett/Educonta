@@ -30,7 +30,7 @@ async function createVillasSanPablo() {
         nit: '900123456-7',
         address: 'Carrera 45 # 67-89, Barrio Villas San Pablo',
         phone: '(5) 987-6543',
-        email: 'info@villassanpablo.edu.co',
+        email: 'info@villasanpablo.edu.co',
         city: 'Barranquilla',
         department: 'Atlántico',
         country: 'Colombia',
@@ -44,7 +44,7 @@ async function createVillasSanPablo() {
     // Crear usuario rector
     const rector = await prisma.user.create({
       data: {
-        email: 'rector@villassanpablo.edu.co',
+        email: 'rector@villasanpablo.edu.co',
         password: 'VillasSP2024!',
         firstName: 'Director',
         lastName: 'Villas San Pablo',
@@ -59,7 +59,7 @@ async function createVillasSanPablo() {
     // Crear usuario auxiliar contable
     const accountant = await prisma.user.create({
       data: {
-        email: 'contabilidad@villassanpablo.edu.co',
+        email: 'contabilidad@villasanpablo.edu.co',
         password: 'ContaVSP2024!',
         firstName: 'Auxiliar',
         lastName: 'Contable VSP',

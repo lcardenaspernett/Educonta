@@ -50,7 +50,7 @@ async function fixSeedAndCredentials() {
           nit: '900123456-1',
           address: 'Calle Principal #123-45',
           phone: '(1) 234-5678',
-          email: 'info@villassanpablo.edu.co',
+          email: 'info@villasanpablo.edu.co',
           city: 'Bogotá',
           department: 'Cundinamarca',
           country: 'Colombia',
@@ -66,7 +66,7 @@ async function fixSeedAndCredentials() {
       
       await prisma.user.create({
         data: {
-          email: 'rector@villassanpablo.edu.co',
+          email: 'rector@villasanpablo.edu.co',
           password: rectorPassword,
           name: 'Rector Principal',
           role: 'RECTOR',
@@ -82,7 +82,7 @@ async function fixSeedAndCredentials() {
       
       await prisma.user.create({
         data: {
-          email: 'auxiliar@villassanpablo.edu.co',
+          email: 'auxiliar@villasanpablo.edu.co',
           password: auxiliarPassword,
           name: 'Auxiliar Contable',
           role: 'AUXILIAR_CONTABLE',
@@ -171,10 +171,10 @@ async function fixSeedAndCredentials() {
     console.log('📧 Super Admin: admin@educonta.com');
     console.log('🔑 Password: Admin123!');
     console.log('');
-    console.log('📧 Rector: rector@villassanpablo.edu.co');
+    console.log('📧 Rector: rector@villasanpablo.edu.co');
     console.log('🔑 Password: Rector123!');
     console.log('');
-    console.log('📧 Auxiliar: auxiliar@villassanpablo.edu.co');
+    console.log('📧 Auxiliar: auxiliar@villasanpablo.edu.co');
     console.log('🔑 Password: Auxiliar123!');
     console.log('================================');
 
