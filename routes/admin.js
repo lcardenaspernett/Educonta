@@ -8,6 +8,7 @@ const { resetAllCredentialsProduction } = require('../scripts/reset-all-credenti
 const { emergencyCredentialsFix } = require('../scripts/emergency-credentials-fix');
 const { forceUpdateCredentials } = require('../scripts/force-update-credentials');
 const { loadVillasStudentsProduction } = require('../scripts/load-villas-students-production');
+const { diagnoseStudentsProblem } = require('../scripts/diagnose-students-problem');
 
 /**
  * POST /api/admin/reset-credentials
@@ -152,6 +153,44 @@ router.post('/load-students', async (req, res) => {
     
   } catch (error) {
     console.error('❌ Error cargando estudiantes:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/admin/diagnose-students
+ * Diagnóstico específico de estudiantes
+ */
+router.get('/diagnose-students', async (req, res) => {
+  try {
+    console.log('🔍 ADMIN: Diagnóstico de estudiantes solicitado');
+    
+    // Capturar la salida del diagnóstico
+    const originalLog = console.log;
+    let output = '';
+    
+    console.log = (...args) => {
+      const message = args.join(' ');
+      output += message + '\n';
+      originalLog(...args);
+    };
+    
+    await diagnoseStudentsProblem();
+    
+    // Restaurar console.log
+    console.log = originalLog;
+    
+    res.json({
+      success: true,
+      diagnosis: output,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Error en diagnóstico de estudiantes:', error);
     res.status(500).json({
       success: false,
       error: error.message
