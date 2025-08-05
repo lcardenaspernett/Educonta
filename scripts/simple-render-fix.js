@@ -31,13 +31,14 @@ async function simpleRenderFix() {
     console.log('🔄 Regenerando cliente Prisma...');
     await execAsync('npx prisma generate');
     
-    // Ejecutar seed para crear datos iniciales
-    console.log('🌱 Ejecutando seed para crear datos iniciales...');
+    // Corregir seed y credenciales
+    console.log('🔑 Corrigiendo seed y credenciales...');
     try {
-      await execAsync('npx prisma db seed');
-      console.log('✅ Seed ejecutado exitosamente');
+      const { fixSeedAndCredentials } = require('./fix-seed-credentials');
+      await fixSeedAndCredentials();
+      console.log('✅ Seed y credenciales corregidos');
     } catch (seedError) {
-      console.log('⚠️ Error ejecutando seed (continuando):', seedError.message);
+      console.log('⚠️ Error corrigiendo credenciales (continuando):', seedError.message);
     }
     
     // Crear institución Villas San Pablo específicamente

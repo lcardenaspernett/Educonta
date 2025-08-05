@@ -440,13 +440,10 @@ async function createSampleStudents(institutionId) {
   const createdStudents = [];
 
   for (const studentData of studentsData) {
-    // Verificar si el estudiante ya existe por código o documento
+    // Verificar si el estudiante ya existe por documento
     const existingStudent = await prisma.student.findFirst({
       where: {
-        OR: [
-          { studentCode: studentData.studentCode },
-          { documentNumber: studentData.documentNumber }
-        ],
+        documento: studentData.documentNumber,
         institutionId
       }
     });
@@ -454,16 +451,27 @@ async function createSampleStudents(institutionId) {
     if (!existingStudent) {
       const student = await prisma.student.create({
         data: {
-          ...studentData,
-          institutionId,
-          isActive: true,
-          enrollmentDate: new Date()
+          documento: studentData.documentNumber,
+          nombre: studentData.firstName,
+          apellido: studentData.lastName,
+          email: studentData.parentEmail,
+          telefono: studentData.parentPhone,
+          grado: studentData.grade,
+          curso: studentData.section,
+          genero: studentData.firstName === 'Ana' || studentData.firstName === 'Sofia' || studentData.firstName === 'María' ? 'F' : 'M',
+          fechaNacimiento: studentData.birthDate,
+          direccion: studentData.address,
+          acudienteNombre: studentData.parentName,
+          acudienteTelefono: studentData.parentPhone,
+          acudienteEmail: studentData.parentEmail,
+          estado: 'activo',
+          institutionId
         }
       });
       createdStudents.push(student);
-      console.log('✅ Estudiante creado:', student.studentCode, '-', student.firstName, student.lastName);
+      console.log('✅ Estudiante creado:', student.documento, '-', student.nombre, student.apellido);
     } else {
-      console.log('ℹ️  Estudiante ya existe:', existingStudent.studentCode, '-', existingStudent.firstName, existingStudent.lastName);
+      console.log('ℹ️  Estudiante ya existe:', existingStudent.documento, '-', existingStudent.nombre, existingStudent.apellido);
       createdStudents.push(existingStudent);
     }
   }
