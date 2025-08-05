@@ -494,6 +494,81 @@ class ApprovalStatusManager {
             console.log(`${type.toUpperCase()}: ${message}`);
         }
     }
+
+    /**
+     * Configurar sección de facturas con estados
+     */
+    setupInvoicesSection() {
+        console.log('📋 Configurando sección de facturas con estados');
+        
+        // Interceptar la renderización de facturas para agregar estados
+        this.enhanceInvoicesList();
+        
+        // Configurar filtros por estado
+        this.setupInvoiceStatusFilters();
+    }
+
+    enhanceInvoicesList() {
+        // Mejorar la lista de facturas con indicadores de estado
+        const invoicesContainer = document.getElementById('invoices-container');
+        if (invoicesContainer) {
+            // Observer para detectar cambios en la lista de facturas
+            const observer = new MutationObserver(() => {
+                this.addStatusIndicatorsToInvoices();
+            });
+            
+            observer.observe(invoicesContainer, {
+                childList: true,
+                subtree: true
+            });
+        }
+    }
+
+    setupInvoiceStatusFilters() {
+        // Agregar filtros por estado de factura
+        const filtersContainer = document.querySelector('.filters-container');
+        if (filtersContainer) {
+            const statusFilter = document.createElement('select');
+            statusFilter.className = 'form-select';
+            statusFilter.innerHTML = `
+                <option value="">Todos los estados</option>
+                <option value="DRAFT">Borrador</option>
+                <option value="PENDING">Pendiente</option>
+                <option value="APPROVED">Aprobada</option>
+                <option value="REJECTED">Rechazada</option>
+                <option value="PAID">Pagada</option>
+            `;
+            
+            statusFilter.addEventListener('change', (e) => {
+                this.filterInvoicesByStatus(e.target.value);
+            });
+            
+            filtersContainer.appendChild(statusFilter);
+        }
+    }
+
+    addStatusIndicatorsToInvoices() {
+        const invoiceCards = document.querySelectorAll('[data-invoice-id]');
+        invoiceCards.forEach(card => {
+            if (!card.querySelector('.status-indicator')) {
+                const statusIndicator = document.createElement('div');
+                statusIndicator.className = 'status-indicator';
+                statusIndicator.innerHTML = this.getStatusBadge('PENDING');
+                card.appendChild(statusIndicator);
+            }
+        });
+    }
+
+    filterInvoicesByStatus(status) {
+        const invoiceCards = document.querySelectorAll('[data-invoice-id]');
+        invoiceCards.forEach(card => {
+            if (!status || card.dataset.status === status) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
 }
 
 // Inicializar cuando el DOM esté listo

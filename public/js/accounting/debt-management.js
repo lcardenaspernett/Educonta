@@ -1324,6 +1324,93 @@ Gracias por su atención.
 
         document.head.appendChild(styles);
     }
+
+    /**
+     * Crear dashboard de deudas
+     */
+    createDebtDashboard() {
+        console.log('💰 Creando dashboard de deudas');
+        
+        // Verificar si ya existe el dashboard
+        if (document.getElementById('debt-dashboard')) {
+            console.log('💰 Dashboard de deudas ya existe');
+            return;
+        }
+
+        // Crear contenedor del dashboard
+        const dashboardContainer = document.createElement('div');
+        dashboardContainer.id = 'debt-dashboard';
+        dashboardContainer.className = 'debt-dashboard hidden';
+        dashboardContainer.innerHTML = `
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        <i class="fas fa-money-bill-wave mr-2"></i>
+                        Gestión de Deudas y Abonos
+                    </h2>
+                    <button class="btn btn-primary" onclick="window.debtManagement.showNewDebtModal()">
+                        <i class="fas fa-plus mr-2"></i>Nueva Deuda
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-red-100 dark:bg-red-800 rounded-lg">
+                                <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-red-600 dark:text-red-400">Total Deudas</p>
+                                <p class="text-lg font-semibold text-red-700 dark:text-red-300" id="total-debts">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-green-100 dark:bg-green-800 rounded-lg">
+                                <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-green-600 dark:text-green-400">Total Abonos</p>
+                                <p class="text-lg font-semibold text-green-700 dark:text-green-300" id="total-payments">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
+                                <i class="fas fa-balance-scale text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm text-blue-600 dark:text-blue-400">Saldo Pendiente</p>
+                                <p class="text-lg font-semibold text-blue-700 dark:text-blue-300" id="pending-balance">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="debts-list-container">
+                    <!-- Lista de deudas se carga aquí -->
+                </div>
+            </div>
+        `;
+
+        // Agregar al contenedor principal
+        const mainContent = document.querySelector('.main-content') || document.body;
+        mainContent.appendChild(dashboardContainer);
+        
+        console.log('✅ Dashboard de deudas creado');
+    }
+
+    showNewDebtModal() {
+        console.log('💰 Mostrando modal de nueva deuda');
+        // Implementar modal de nueva deuda
+        if (window.showModal) {
+            window.showModal('new-debt-modal');
+        }
+    }
 }
 
 // Inicializar cuando el DOM esté listo

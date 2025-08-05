@@ -3123,4 +3123,199 @@ function generatePeriods(startDate, endDate, type) {
   return periods;
 }
 
+/**
+ * GET /api/accounting/recent-transactions
+ * Transacciones recientes
+ */
+router.get('/recent-transactions', authenticate, checkPermission('accounting', 'read'), async (req, res) => {
+  try {
+    const institutionId = req.user?.institutionId || 'cmd3z16yp0002w6heeiym4ex6';
+    const limit = parseInt(req.query.limit) || 10;
+    
+    const transactions = await prisma.transaction.findMany({
+      where: { institutionId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      include: {
+        account: {
+          select: { name: true, code: true }
+        }
+      }
+    });
+    
+    res.json({
+      success: true,
+      data: transactions,
+      message: 'Recent transactions loaded successfully'
+    });
+  } catch (error) {
+    console.error('Error getting recent transactions:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/accounting/current-status
+ * Estado actual del sistema contable
+ */
+router.get('/current-status', authenticate, checkPermission('accounting', 'read'), async (req, res) => {
+  try {
+    const institutionId = req.user?.institutionId || 'cmd3z16yp0002w6heeiym4ex6';
+    
+    // Obtener conteos básicos
+    const [accountsCount, transactionsCount, studentsCount] = await Promise.all([
+      prisma.account.count({ where: { institutionId } }),
+      prisma.transaction.count({ where: { institutionId } }),
+      prisma.student.count({ where: { institutionId } })
+    ]);
+    
+    // Verificar si hay configuración inicial
+    const hasInitialSetup = accountsCount > 0;
+    
+    res.json({
+      success: true,
+      data: {
+        hasInitialSetup,
+        accountsCount,
+        transactionsCount,
+        studentsCount,
+        institutionId
+      },
+      message: 'Current status loaded successfully'
+    });
+  } catch (error) {
+    console.error('Error getting current status:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/accounting/transactions
+ * Lista de transacciones con filtros
+ */
+router.get('/transactions', authenticate, checkPermission('accounting', 'read'), async (req, res) => {
+  try {
+    const institutionId = req.user?.institutionId || 'cmd3z16yp0002w6heeiym4ex6';
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+    
+    const where = { institutionId };
+    
+    // Filtros opcionales
+    if (req.query.accountId) {
+      where.accountId = req.query.accountId;
+    }
+    
+    if (req.query.type) {
+      where.type = req.query.type;
+    }
+    
+    if (req.query.startDate && req.query.endDate) {
+      where.date = {
+        gte: new Date(req.query.startDate),
+        lte: new Date(req.query.endDate)
+      };
+    }
+    
+    const [transactions, total] = await Promise.all([
+      prisma.transaction.findMany({
+        where,
+        orderBy: { date: 'desc' },
+        skip,
+        take: limit,
+        include: {
+          account: {
+            select: { name: true, code: true, accountType: true }
+          }
+        }
+      }),
+      prisma.transaction.count({ where })
+    ]);
+    
+    res.json({
+      success: true,
+      data: transactions,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      },
+      message: 'Transactions loaded successfully'
+    });
+  } catch (error) {
+    console.error('Error getting transactions:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/accounting/transactions
+ * Crear nueva transacción
+ */
+router.post('/transactions', authenticate, checkPermission('accounting', 'write'), async (req, res) => {
+  try {
+    const institutionId = req.user?.institutionId || 'cmd3z16yp0002w6heeiym4ex6';
+    const { accountId, type, amount, description, date } = req.body;
+    
+    // Validaciones básicas
+    if (!accountId || !type || !amount) {
+      return res.status(400).json({
+        success: false,
+        error: 'accountId, type y amount son requeridos'
+      });
+    }
+    
+    // Verificar que la cuenta existe y pertenece a la institución
+    const account = await prisma.account.findFirst({
+      where: { id: accountId, institutionId }
+    });
+    
+    if (!account) {
+      return res.status(404).json({
+        success: false,
+        error: 'Cuenta no encontrada'
+      });
+    }
+    
+    const transaction = await prisma.transaction.create({
+      data: {
+        accountId,
+        type,
+        amount: parseFloat(amount),
+        description: description || '',
+        date: date ? new Date(date) : new Date(),
+        institutionId
+      },
+      include: {
+        account: {
+          select: { name: true, code: true }
+        }
+      }
+    });
+    
+    res.status(201).json({
+      success: true,
+      data: transaction,
+      message: 'Transaction created successfully'
+    });
+  } catch (error) {
+    console.error('Error creating transaction:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
