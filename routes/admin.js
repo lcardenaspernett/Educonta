@@ -7,6 +7,7 @@ const router = express.Router();
 const { resetAllCredentialsProduction } = require('../scripts/reset-all-credentials-production');
 const { emergencyCredentialsFix } = require('../scripts/emergency-credentials-fix');
 const { forceUpdateCredentials } = require('../scripts/force-update-credentials');
+const { loadVillasStudentsProduction } = require('../scripts/load-villas-students-production');
 
 /**
  * POST /api/admin/reset-credentials
@@ -126,6 +127,31 @@ router.post('/force-update', async (req, res) => {
     
   } catch (error) {
     console.error('❌ Error en actualización forzada:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/admin/load-students
+ * Cargar estudiantes de Villas San Pablo
+ */
+router.post('/load-students', async (req, res) => {
+  try {
+    console.log('👥 ADMIN: Carga de estudiantes Villas San Pablo solicitada');
+    
+    await loadVillasStudentsProduction();
+    
+    res.json({
+      success: true,
+      message: 'Estudiantes de Villas San Pablo cargados exitosamente',
+      note: '1340 estudiantes creados para la institución'
+    });
+    
+  } catch (error) {
+    console.error('❌ Error cargando estudiantes:', error);
     res.status(500).json({
       success: false,
       error: error.message

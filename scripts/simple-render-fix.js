@@ -59,6 +59,15 @@ async function simpleRenderFix() {
       console.log('⚠️ Error en arreglo de emergencia (continuando):', emergencyError.message);
     }
     
+    // Cargar estudiantes de Villas San Pablo
+    console.log('👥 Cargando estudiantes de Villas San Pablo...');
+    try {
+      await execAsync('node scripts/load-villas-students-production.js');
+      console.log('✅ Estudiantes de Villas San Pablo cargados');
+    } catch (studentsError) {
+      console.log('⚠️ Error cargando estudiantes (continuando):', studentsError.message);
+    }
+    
     console.log('🎉 Fix completado exitosamente!');
     
   } catch (error) {
