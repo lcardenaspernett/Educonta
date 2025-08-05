@@ -14,10 +14,10 @@ class DebtManagement {
 
     init() {
         console.log('💰 Inicializando sistema de gestión de deudas y abonos');
-        // this.setupDebtSection(); // Eliminado: ya no agrega botón al header
+        // Solo inicializar componentes básicos, NO crear dashboard automáticamente
         this.createDebtCard();
         this.generateSampleDebts();
-        this.createDebtDashboard();
+        // this.createDebtDashboard(); // REMOVIDO: No crear automáticamente
         this.setupSidebarDebtButton();
     }
 
@@ -1413,11 +1413,14 @@ Gracias por su atención.
     }
 }
 
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
+// NO inicializar automáticamente - solo cuando se necesite
+// Se inicializará manualmente desde la página de deudas
+
+// Función para inicializar manualmente
+window.initDebtManagement = function() {
+    if (!window.debtManagement) {
         window.debtManagement = new DebtManagement();
-    }, 3000);
-});
+    }
+};
 
 console.log('💰 Sistema de gestión de deudas y abonos cargado');

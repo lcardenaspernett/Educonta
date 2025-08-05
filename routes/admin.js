@@ -10,6 +10,7 @@ const { forceUpdateCredentials } = require('../scripts/force-update-credentials'
 const { loadVillasStudentsProduction } = require('../scripts/load-villas-students-production');
 const { diagnoseStudentsProblem } = require('../scripts/diagnose-students-problem');
 const { loadRealStudentsVillas } = require('../scripts/load-real-students-villas');
+const { diagnoseFrontendStudents } = require('../scripts/diagnose-frontend-students');
 
 /**
  * POST /api/admin/reset-credentials
@@ -217,6 +218,44 @@ router.post('/load-real-students', async (req, res) => {
     
   } catch (error) {
     console.error('❌ Error cargando estudiantes reales:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/admin/diagnose-frontend
+ * Diagnóstico específico del frontend de estudiantes
+ */
+router.get('/diagnose-frontend', async (req, res) => {
+  try {
+    console.log('🔍 ADMIN: Diagnóstico de frontend de estudiantes solicitado');
+    
+    // Capturar la salida del diagnóstico
+    const originalLog = console.log;
+    let output = '';
+    
+    console.log = (...args) => {
+      const message = args.join(' ');
+      output += message + '\n';
+      originalLog(...args);
+    };
+    
+    await diagnoseFrontendStudents();
+    
+    // Restaurar console.log
+    console.log = originalLog;
+    
+    res.json({
+      success: true,
+      diagnosis: output,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Error en diagnóstico de frontend:', error);
     res.status(500).json({
       success: false,
       error: error.message
