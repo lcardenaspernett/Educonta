@@ -26,7 +26,8 @@ async function fixSeedAndCredentials() {
         data: {
           email: 'admin@educonta.com',
           password: hashedPassword,
-          name: 'Super Administrador',
+          firstName: 'Super',
+          lastName: 'Administrador',
           role: 'SUPER_ADMIN',
           isActive: true
         }
@@ -68,7 +69,8 @@ async function fixSeedAndCredentials() {
         data: {
           email: 'rector@villasanpablo.edu.co',
           password: rectorPassword,
-          name: 'Rector Principal',
+          firstName: 'Rector',
+          lastName: 'Principal',
           role: 'RECTOR',
           isActive: true,
           institutionId: institution.id
@@ -84,8 +86,9 @@ async function fixSeedAndCredentials() {
         data: {
           email: 'auxiliar@villasanpablo.edu.co',
           password: auxiliarPassword,
-          name: 'Auxiliar Contable',
-          role: 'AUXILIAR_CONTABLE',
+          firstName: 'Auxiliar',
+          lastName: 'Contable',
+          role: 'AUXILIARY_ACCOUNTANT',
           isActive: true,
           institutionId: institution.id
         }
