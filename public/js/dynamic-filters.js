@@ -67,7 +67,7 @@ class DynamicFilters {
 
     async loadFiltersFromAPI() {
         try {
-            const institutionId = localStorage.getItem('institutionId') || 'cmdt7n66m00003t1jy17ay313';
+            const institutionId = localStorage.getItem('institutionId') || 'cmdwp24c40000n2vbfnuhrnbj';
             const response = await fetch(`/api/students/${institutionId}/filters`);
             
             if (response.ok) {

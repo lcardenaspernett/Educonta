@@ -32,7 +32,7 @@ class StudentsManagementPage {
             
             // Obtener institutionId
             const urlParams = new URLSearchParams(window.location.search);
-            const institutionId = urlParams.get('institutionId') || localStorage.getItem('institutionId') || 'cmdt7n66m00003t1jy17ay313';
+            const institutionId = urlParams.get('institutionId') || localStorage.getItem('institutionId') || 'cmdwp24c40000n2vbfnuhrnbj';
             
             console.log('🏫 Usando institutionId:', institutionId);
             
@@ -125,7 +125,7 @@ class StudentsManagementPage {
         try {
             console.log('➕ Creando estudiante:', studentData);
             
-            const institutionId = localStorage.getItem('institutionId') || 'cmdt7n66m00003t1jy17ay313';
+            const institutionId = localStorage.getItem('institutionId') || 'cmdwp24c40000n2vbfnuhrnbj';
             
             const response = await fetch(`/api/students/${institutionId}`, {
                 method: 'POST',

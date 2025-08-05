@@ -244,8 +244,12 @@
 
         // Funciones globales para la página
         function searchStudents() {
-            if (studentsPage) {
-                studentsPage.searchStudents();
+            if (window.studentsPageManager && window.studentsPageManager.searchStudents) {
+                window.studentsPageManager.searchStudents();
+            } else if (window.studentsPage && window.studentsPage.searchStudents) {
+                window.studentsPage.searchStudents();
+            } else {
+                console.log('⚠️ Sistema de búsqueda no disponible');
             }
         }
 
