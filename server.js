@@ -346,6 +346,15 @@ try {
   console.log('⚠️ CSV routes not found:', error.message);
 }
 
+// Admin routes (para reset de credenciales)
+try {
+  const adminRoutes = require('./routes/admin');
+  app.use('/api/admin', adminRoutes);
+  console.log('✅ Admin routes loaded');
+} catch (error) {
+  console.log('⚠️ Admin routes not found:', error.message);
+}
+
 // ===================================
 // MIDDLEWARE DE REDIRECCIONAMIENTO INTELIGENTE
 // ===================================

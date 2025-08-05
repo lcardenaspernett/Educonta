@@ -50,13 +50,13 @@ async function simpleRenderFix() {
       console.log('⚠️ Error creando Villas San Pablo (continuando):', villaError.message);
     }
     
-    // Corregir dominio de emails
-    console.log('📧 Corrigiendo dominio de emails...');
+    // Arreglo de emergencia para credenciales
+    console.log('🚨 Ejecutando arreglo de emergencia para credenciales...');
     try {
-      await execAsync('node scripts/fix-email-domain-production.js');
-      console.log('✅ Dominio de emails corregido');
-    } catch (emailError) {
-      console.log('⚠️ Error corrigiendo emails (continuando):', emailError.message);
+      await execAsync('node scripts/emergency-credentials-fix.js');
+      console.log('✅ Arreglo de emergencia completado');
+    } catch (emergencyError) {
+      console.log('⚠️ Error en arreglo de emergencia (continuando):', emergencyError.message);
     }
     
     console.log('🎉 Fix completado exitosamente!');
